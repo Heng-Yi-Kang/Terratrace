@@ -43,3 +43,5 @@ coverage/
 .turbo/
 
 .claude/
+
+.github/
