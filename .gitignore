@@ -45,3 +45,6 @@ coverage/
 .claude/
 
 .github/
+
+.agents/
+skills-lock.json
