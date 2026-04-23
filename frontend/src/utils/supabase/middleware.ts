@@ -1,17 +1,25 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+import { getSupabaseEnv, supabaseConnectionState } from "@/utils/supabase/state";
 
 export const createClient = (request: NextRequest) => {
+  if (!supabaseConnectionState.configured) {
+    return NextResponse.next({
+      request: {
+        headers: request.headers,
+      },
+    });
+  }
+
+  const { url, key } = getSupabaseEnv();
+
   let supabaseResponse = NextResponse.next({
     request: {
       headers: request.headers,
     },
   });
 
-  createServerClient(supabaseUrl!, supabaseKey!, {
+  createServerClient(url!, key!, {
     cookies: {
       getAll() {
         return request.cookies.getAll();
