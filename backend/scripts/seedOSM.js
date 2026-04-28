@@ -1,12 +1,18 @@
 // scripts/seedOsm.js
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+
+const { createApi } = require('unsplash-js')
 const { createClient } = require('@supabase/supabase-js');
 const axios = require('axios');
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+const api = createApi({
+    accessKey: process.env.NEXT_UNSPLASH_ACCESS_KEY,
+})
 
 // mock eco certs
 const ECO_CERTIFICATIONS = [
@@ -21,17 +27,20 @@ const ECO_CERTIFICATIONS = [
     'Green Star',
 ];
 
-const CATEGORY_LOREMFLICKR_TAGS = {
-    Accommodation: 'hotel',
-    Dining: 'vegetables',
-    Transport: 'electric-bus,public-transport',
+const CATEGORY_UNSPLASH_QUERIES = {
+    Accommodation: 'eco hotel',
+    Dining: 'vegan food',
+    Transport: 'electric bus public transport'
 };
 
-function getRandomPlaceholderImage(category, rowSeed) {
-    const tags = CATEGORY_LOREMFLICKR_TAGS[category] || 'sustainable-city,green-lifestyle';
-    // const query = CATEGORY_UNSPLASH_QUERIES[category] || 'sustainable-city,green-lifestyle';
-    // return `https://source.unsplash.com/featured/1200x800?${encodeURIComponent(query)}&sig=${rowSeed}`;
-    return `https://loremflickr.com/1200/800/${tags}?lock=${encodeURIComponent(rowSeed)}`;
+async function getRandomPlaceholderImage(category) {
+    const query = CATEGORY_UNSPLASH_QUERIES[category] || 'sustainable city';
+    try {
+        const result = await api.photos.getRandom({ query, orientation: 'landscape' });
+        if (result.type === 'success') return result.response.urls.regular;
+    } catch (e) { }
+
+    return 'https://loremflickr.com/1200/800/sustainable-city';
 }
 
 const TOURISM_CATEGORY_MAP = {
@@ -89,12 +98,69 @@ async function seedDatabase() {
     try {
         // 1. Fetch Data from Overpass API
         // Add a 100-second timeout (100000ms) to Axios
-        const response = await axios.post(
+        // const response = await axios.post(
+        //     'https://overpass-api.de/api/interpreter',
+        //     `data=${encodeURIComponent(OVERPASS_QUERY)}`,
+        //     { timeout: 200000 }
+        // );
+        // const elements = response.data.elements;
+
+        // if (!elements || elements.length === 0) {
+        //     console.log('No locations found matching the query.');
+        //     return;
+        // }
+
+        // console.log(`Found ${elements.length} locations. Formatting data...`);
+        const OVERPASS_ENDPOINTS = [
             'https://overpass-api.de/api/interpreter',
-            `data=${encodeURIComponent(OVERPASS_QUERY)}`,
-            { timeout: 100000 }
-        );
-        const elements = response.data.elements;
+            'https://lz4.overpass-api.de/api/interpreter',
+            'https://overpass.kumi.systems/api/interpreter',
+        ];
+
+        async function fetchOverpassData(query) {
+            let lastError = null;
+
+            for (const endpoint of OVERPASS_ENDPOINTS) {
+                for (let attempt = 1; attempt <= 3; attempt += 1) {
+                    try {
+                        console.log('Overpass request:', { endpoint, attempt });
+
+                        const response = await axios.post(
+                            endpoint,
+                            `data=${encodeURIComponent(query)}`,
+                            {
+                                timeout: 180000,
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                    'User-Agent': 'TerratraceSeeder/1.0',
+                                },
+                            }
+                        );
+
+                        if (!response?.data || !Array.isArray(response.data.elements)) {
+                            throw new Error('Overpass response missing elements array');
+                        }
+
+                        return response.data.elements;
+                    } catch (error) {
+                        lastError = error;
+                        const waitMs = 1500 * attempt;
+                        console.error('Overpass failed:', {
+                            endpoint,
+                            attempt,
+                            message: error?.message,
+                            code: error?.code,
+                            status: error?.response?.status,
+                        });
+                        await new Promise((resolve) => setTimeout(resolve, waitMs));
+                    }
+                }
+            }
+
+            throw lastError || new Error('All Overpass endpoints failed');
+        }
+
+        const elements = await fetchOverpassData(OVERPASS_QUERY);
 
         if (!elements || elements.length === 0) {
             console.log('No locations found matching the query.');
@@ -104,54 +170,56 @@ async function seedDatabase() {
         console.log(`Found ${elements.length} locations. Formatting data...`);
 
         // 2. Format Data to match your Supabase schema
-        const formattedLocations = elements.map((el) => {
-            const tags = el.tags || {};
+        const formattedLocations = (
+            await Promise.all(
+                elements.map(async (el) => {
+                    const tags = el.tags || {};
 
-            // Determine coordinates depending on if it's a node (point) or way (area)
-            const lat = el.lat || el.center?.lat;
-            const long = el.lon || el.center?.lon;
+                    // Determine coordinates depending on if it's a node (point) or way (area)
+                    const lat = el.lat || el.center?.lat;
+                    const long = el.lon || el.center?.lon;
 
-            const tourismType = tags.tourism || null;
-            const amenityType = tags.amenity || null;
-            const highwayType = tags.highway || null;
-            const pubtransType = tags.public_transport || null;
+                    const tourismType = tags.tourism || null;
+                    const amenityType = tags.amenity || null;
+                    const highwayType = tags.highway || null;
+                    const pubtransType = tags.public_transport || null;
 
-            let category = "Other"
-            if (tourismType && TOURISM_CATEGORY_MAP[tourismType]) {
-                category = TOURISM_CATEGORY_MAP[tourismType];
-            } else if (amenityType && AMENITY_CATEGORY_MAP[amenityType]) {
-                category = AMENITY_CATEGORY_MAP[amenityType];
-            } else if (highwayType && HIGHWAY_CATEGORY_MAP[highwayType]) {
-                category = HIGHWAY_CATEGORY_MAP[highwayType];
-            } else if (pubtransType && PUBLIC_TRANSPORT_CATEGORY_MAP[pubtransType]) {
-                category = PUBLIC_TRANSPORT_CATEGORY_MAP[pubtransType];
-            }
+                    let category = "Other"
+                    if (tourismType && TOURISM_CATEGORY_MAP[tourismType]) {
+                        category = TOURISM_CATEGORY_MAP[tourismType];
+                    } else if (amenityType && AMENITY_CATEGORY_MAP[amenityType]) {
+                        category = AMENITY_CATEGORY_MAP[amenityType];
+                    } else if (highwayType && HIGHWAY_CATEGORY_MAP[highwayType]) {
+                        category = HIGHWAY_CATEGORY_MAP[highwayType];
+                    } else if (pubtransType && PUBLIC_TRANSPORT_CATEGORY_MAP[pubtransType]) {
+                        category = PUBLIC_TRANSPORT_CATEGORY_MAP[pubtransType];
+                    }
 
-            // Extract eco-certifications from OSM tags
-            const certs = [];
-            if (category != "Transport") {
-                if (tags.eco) certs.push(`eco: ${tags.eco}`);
-                if (tags.sustainable) certs.push(`sustainable: ${tags.sustainable}`);
+                    // Extract eco-certifications from OSM tags
+                    const certs = [];
+                    if (category != "Transport") {
+                        if (tags.eco) certs.push(`eco: ${tags.eco}`);
+                        if (tags.sustainable) certs.push(`sustainable: ${tags.sustainable}`);
 
-                // Add mock eco certifications - randomly select 1-3 certifications
-                const numMockCerts = Math.floor(Math.random() * 3) + 1; // 1-3 certs
-                const shuffledCerts = ECO_CERTIFICATIONS.sort(() => 0.5 - Math.random());
-                const mockCerts = shuffledCerts.slice(0, numMockCerts);
-                certs.push(...mockCerts);
-            }
+                        // Add mock eco certifications - randomly select 1-3 certifications
+                        const numMockCerts = Math.floor(Math.random() * 3) + 1; // 1-3 certs
+                        const shuffledCerts = ECO_CERTIFICATIONS.sort(() => 0.5 - Math.random());
+                        const mockCerts = shuffledCerts.slice(0, numMockCerts);
+                        certs.push(...mockCerts);
+                    }
 
-            return {
-                // id: will be auto-generated by Supabase if your column is set to gen_random_uuid()
-                name: tags['name:en'] || tags.name || 'Unnamed Location',
-                category: category,
-                city: 'Kuala Lumpur',
-                lat: lat,
-                long: long,
-                eco_certs: certs, // maps to jsonb
-                image_url: getRandomPlaceholderImage(category, `${el.type}-${el.id}`),
-                ex_booking_url: tags.website || null
-            };
-        }).filter(loc => loc.lat && loc.long); // Ensure we have valid coordinates
+                    return {
+                        // id: will be auto-generated by Supabase if your column is set to gen_random_uuid()
+                        name: tags['name:en'] || tags.name || 'Unnamed Location',
+                        category: category,
+                        city: 'Kuala Lumpur',
+                        lat: lat,
+                        long: long,
+                        eco_certs: certs, // maps to jsonb
+                        image_url: await getRandomPlaceholderImage(category),
+                        ex_booking_url: tags.website || null
+                    };
+                }))).filter(loc => loc.lat && loc.long); // Ensure we have valid coordinates
 
         // 3. Insert into Supabase
         console.log('Inserting into Supabase locations table...');
@@ -167,7 +235,20 @@ async function seedDatabase() {
         }
 
     } catch (error) {
-        console.error('An error occurred during seeding:', error.message);
+        if (axios.isAxiosError(error)) {
+            console.error('Axios message:', error.message);
+            console.error('Axios code:', error.code);
+            console.error('Axios status:', error.response?.status);
+            console.error('Axios response:', error.response?.data);
+            console.error('Axios config URL:', error.config?.url);
+        } else if (error instanceof Error) {
+            console.error('Error name:', error.name);
+            console.error('Error message:', error.message);
+            console.error('Error stack:', error.stack);
+        } else {
+            console.error('Unknown error object:', error);
+        }
+        process.exitCode = 1;
     }
 }
 

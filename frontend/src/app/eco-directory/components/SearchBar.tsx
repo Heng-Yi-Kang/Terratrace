@@ -91,19 +91,19 @@ export default function SearchBar({
 
                 <input
                     id="eco-directory-search"
-                    type="search"
+                    type="text"
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
                     placeholder={placeholder}
                     autoComplete="off"
-                    className="w-full bg-transparent font-heading text-lg text-[#164E63] placeholder:text-[#164E63]/55 outline-none"
+                    className="flex-1 min-w-0 bg-transparent font-heading text-lg text-[#164E63] placeholder:text-[#164E63]/55 outline-none"
                 />
 
                 {query.length > 0 && (
                     <button
                         type="button"
                         onClick={handleClear}
-                        className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-[#164E63]/70 transition-colors duration-200 motion-reduce:transition-none hover:bg-[#ECFEFF] hover:text-[#164E63] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22D3EE]"
+                        className="inline-flex h-12 w-12 cursor-pointer items-center justify-center rounded-full text-[#164E63]/70 transition-colors duration-200 motion-reduce:transition-none hover:bg-[#ECFEFF] hover:text-[#164E63] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22D3EE]"
                         aria-label="Clear search"
                     >
                         <ClearIcon />
@@ -112,7 +112,7 @@ export default function SearchBar({
 
                 <button
                     type="submit"
-                    className="inline-flex cursor-pointer items-center justify-center rounded-full bg-secondary px-5 py-3 text-base font-bold font-heading text-white transition-colors duration-200 motion-reduce:transition-none hover:bg-[#16A34A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22D3EE]"
+                    className="flex-shrink-0 inline-flex cursor-pointer items-center justify-center rounded-full bg-secondary px-5 py-3 text-base font-bold font-heading text-white transition-all duration-300 motion-reduce:transition-none hover:bg-[#5de990] hover:scale-110 hover:shadow-lg active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22D3EE] pointer-events-auto"
                 >
                     Search
                 </button>

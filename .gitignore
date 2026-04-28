@@ -47,4 +47,5 @@ coverage/
 .github/
 
 .agents/
+.guides/
 skills-lock.json

@@ -1,39 +1,82 @@
-import SearchBar from "./components/SearchBar"
+import EcoDirectoryClient from "./components/EcoDirectoryClient";
+import type { Place } from "./components/PlaceCard"
+import { createClient, supabaseConnectionState } from "@/utils/supabase/server"
+import { cookies } from "next/headers";
 
-const Hero = () => (
-    <section className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
-        <div className="absolute top-20 left-10 w-64 h-64 bg-secondary/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-cyan-secondary/20 rounded-full blur-3xl"></div>
+// const mockPlaces: Place[] = [{
+//     id: "1",
+//     name: "Green Leaf Bistro",
+//     category: "Dining",
+//     city: "Singapore",
+//     lat: 1.29027,
+//     long: 103.851959,
+//     ecoCerts: ["Green Key", "Plastic-Free"],
+//     bookingUrl: "https://example.com/green-leaf",
+//     imageUrl: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&q=80",
+// }, {
+//     id: "2",
+//     name: "Eco Stay Harbor",
+//     category: "Accomodation",
+//     city: "Bali",
+//     lat: -8.409518,
+//     long: 115.188919,
+//     ecoCerts: ["EarthCheck"],
+//     bookingUrl: "https://example.com/eco-stay",
+//     imageUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200&q=80",
+// }, {
+//     id: "3",
+//     name: "Cycle City Tours",
+//     category: "Transport",
+//     city: "Amsterdam",
+//     lat: 52.3676,
+//     long: 4.9041,
+//     ecoCerts: ["B Corp"],
+//     bookingUrl: "https://example.com/cycle-city",
+//     imageUrl: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1200&q=80",
+// },]
 
-        <div className="w-full max-w-4xl mx-auto">
-            <h1 className="font-heading font-bold text-3xl md:text-4xl lg:text-5xl text-center text-text">Let's find our</h1>
-            <h1 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl text-center text-primary mt-2 mb-10">Next Destination.</h1>
-            <SearchBar />
-        </div>
+export default async function EcoDirectoryPage() {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
 
-    </section>
-)
-
-const CatalogSection = () => (
-    <section className="py-20 px-4 bg-white/50">
-        <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
-                <h2 className="font-heading font-bold text-3xl md:text-4xl text-text mb-4">
-                    All Eco Destinations
-                </h2>
-                <p className="text-text/70 max-w-2xl mx-auto">
-                    Tourism contributes 8% of global carbon emissions. Every choice we make impacts our planet.
+    if (!supabase) {
+        return (
+            <main className="min-h-screen px-4 py-10">
+                <p className="rounded-lg border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm text-yellow-900">
+                    Supabase is not configured. Missing env vars:{" "}
+                    {supabaseConnectionState.missingEnvVars.join(", ")}
                 </p>
-            </div>
-        </div>
-    </section>
-)
+            </main>
+        )
+    }
 
-export default function EcoDirectoryPage() {
-    return (
-        <main className="min-h-screen">
-            <Hero />
-            <CatalogSection />
-        </main>
+    const { data, error } = await supabase.from("locations").select(
+        "id,name,category,city,lat,long,eco_certs,image_url,ex_booking_url"
     )
-}
+
+    if (error) {
+        return (
+            <main className="min-h-screen px-4 py-10">
+                <p className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-900">
+                    Failed to load eco destinations: {error.message}
+                </p>
+            </main>
+        )
+    }
+
+    const places: Place[] = (data ?? []).map((row) => ({
+                id: String(row.id),
+                name: row.name ?? "Unnamed",
+                category: row.category,
+                city: row.city ?? undefined,
+                lat: row.lat,
+                long: row.long,
+                ecoCerts: Array.isArray(row.eco_certs) ? row.eco_certs : [],
+                bookingUrl: row.ex_booking_url ?? undefined,
+                imageUrl: row.image_url ?? undefined,
+            }))
+
+        return (
+            <EcoDirectoryClient places={places} />
+        )
+    }
