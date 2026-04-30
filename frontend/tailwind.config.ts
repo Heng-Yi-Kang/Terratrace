@@ -22,6 +22,7 @@ const config: Config = {
       fontFamily: {
         heading: ['Poppins', 'sans-serif'],
         body: ['Open Sans', 'sans-serif'],
+        sans: ['Plus Jakarta Sans', 'sans-serif'],
       },
       borderRadius: {
         'organic': '24px',
