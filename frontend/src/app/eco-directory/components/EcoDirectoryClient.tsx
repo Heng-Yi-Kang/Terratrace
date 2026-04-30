@@ -4,7 +4,6 @@ import SearchBar from "./SearchBar"
 import PlaceCard, { type Place } from "./PlaceCard"
 import CountCard from "./CountCard"
 import { SVGProps } from "react"
-import { start } from "repl"
 
 type Props = { places: Place[] }
 

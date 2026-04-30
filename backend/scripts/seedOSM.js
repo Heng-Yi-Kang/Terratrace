@@ -6,12 +6,23 @@ const { createApi } = require('unsplash-js')
 const { createClient } = require('@supabase/supabase-js');
 const axios = require('axios');
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+function getRequiredEnv(name) {
+    const value = process.env[name];
+    if (typeof value !== 'string' || value.trim() === '') {
+        console.error(`Missing required environment variable: ${name}`);
+        process.exit(1);
+    }
+    return value;
+}
+
+const supabaseUrl = getRequiredEnv('NEXT_PUBLIC_SUPABASE_URL');
+const supabaseKey = getRequiredEnv('SUPABASE_SERVICE_ROLE_KEY');
+const unsplashAccessKey = getRequiredEnv('NEXT_UNSPLASH_ACCESS_KEY');
+
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const api = createApi({
-    accessKey: process.env.NEXT_UNSPLASH_ACCESS_KEY,
+    accessKey: unsplashAccessKey,
 })
 
 // mock eco certs

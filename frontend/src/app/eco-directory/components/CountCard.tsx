@@ -7,7 +7,7 @@ type Props = {
     name: string
 }
 
-export default function CountCard({ className, Icon, count, name }: Props) {
+export default function CountCard({ className = "", Icon, count, name }: Props) {
     return (
         <div className={`shadow-lg w-full p-6 bg-white/50 rounded-xl ${className}`}>
             <div className="flex justify-between items-center">
