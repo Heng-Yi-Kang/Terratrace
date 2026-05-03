@@ -2,65 +2,35 @@ import { Router, Request, Response } from 'express'
 
 const router = Router()
 
-type OpenWeatherItem = {
-  dt: number
-  dt_txt: string
-  main: {
-    temp: number
-    temp_min: number
-    temp_max: number
-    humidity: number
-  }
-  weather: Array<{
-    description: string
-    icon: string
-    main: string
-  }>
-  pop?: number
-  wind: {
-    speed: number
-  }
+const wmoToOpenWeatherIcon = (code: number, isDay: boolean = true): string => {
+  const d = isDay ? 'd' : 'n'
+  if (code === 0) return `01${d}`
+  if (code === 1) return `02${d}`
+  if (code === 2) return `03${d}`
+  if (code === 3) return `04${d}`
+  if ([45, 48].includes(code)) return `50${d}`
+  if ([51, 53, 55, 56, 57].includes(code)) return `09${d}`
+  if ([61, 63, 65, 66, 67].includes(code)) return `10${d}`
+  if ([71, 73, 75, 77].includes(code)) return `13${d}`
+  if ([80, 81, 82].includes(code)) return `09${d}`
+  if ([85, 86].includes(code)) return `13${d}`
+  if ([95, 96, 99].includes(code)) return `11${d}`
+  return `01${d}`
 }
 
-type OpenWeatherForecastResponse = {
-  cod: string
-  message: number
-  cnt: number
-  list: OpenWeatherItem[]
-  city: {
-    name: string
-    country: string
-    timezone: number
-  }
-}
-
-const pickDailySnapshots = (items: OpenWeatherItem[]): OpenWeatherItem[] => {
-  const byDate = new Map<string, OpenWeatherItem[]>()
-
-  for (const item of items) {
-    const dateKey = item.dt_txt.split(' ')[0]
-    const current = byDate.get(dateKey) || []
-    current.push(item)
-    byDate.set(dateKey, current)
-  }
-
-  const selected: OpenWeatherItem[] = []
-  for (const dayItems of byDate.values()) {
-    let best = dayItems[0]
-    let bestDistance = Math.abs(new Date(best.dt_txt).getHours() - 12)
-
-    for (const item of dayItems) {
-      const distance = Math.abs(new Date(item.dt_txt).getHours() - 12)
-      if (distance < bestDistance) {
-        best = item
-        bestDistance = distance
-      }
-    }
-
-    selected.push(best)
-  }
-
-  return selected.slice(0, 5)
+const wmoToDescription = (code: number): string => {
+  if (code === 0) return 'Clear sky'
+  if (code === 1) return 'Mainly clear'
+  if (code === 2) return 'Partly cloudy'
+  if (code === 3) return 'Overcast'
+  if (code === 45 || code === 48) return 'Fog'
+  if (code >= 51 && code <= 57) return 'Drizzle'
+  if (code >= 61 && code <= 67) return 'Rain'
+  if (code >= 71 && code <= 77) return 'Snow'
+  if (code >= 80 && code <= 82) return 'Rain showers'
+  if (code >= 85 && code <= 86) return 'Snow showers'
+  if (code >= 95) return 'Thunderstorm'
+  return 'Unknown'
 }
 
 router.get('/forecast', async (req: Request, res: Response) => {
@@ -70,62 +40,73 @@ router.get('/forecast', async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'City is required.' })
   }
 
-  const apiKey = process.env.OPENWEATHER_API_KEY
-  if (!apiKey) {
-    return res.status(500).json({ error: 'OpenWeather API key is not configured.' })
-  }
-
-  const units = process.env.OPENWEATHER_UNITS || 'metric'
-  const lang = process.env.OPENWEATHER_LANG || 'en'
-
   const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), 10000)
+  const timeout = setTimeout(() => controller.abort(), 15000)
 
   try {
-    const params = new URLSearchParams({
-      q: city,
-      appid: apiKey,
-      units,
-      lang,
-    })
+    // 1. Geocoding via Open-Meteo
+    const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`, { signal: controller.signal })
+    const geoData = await geoRes.json()
+    
+    if (!geoRes.ok || !geoData.results || geoData.results.length === 0) {
+      return res.status(404).json({ error: 'City not found.' })
+    }
 
-    const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?${params.toString()}`, {
-      signal: controller.signal,
-    })
+    const { latitude, longitude, name, country, timezone } = geoData.results[0]
+    
+    // 2. Ensemble Forecast (14 days using GFS model)
+    const url = `https://ensemble-api.open-meteo.com/v1/ensemble?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max&timezone=auto&models=gfs_seamless&forecast_days=14`
+    
+    const weatherRes = await fetch(url, { signal: controller.signal })
+    const weatherData = await weatherRes.json()
 
-    const data = (await response.json()) as OpenWeatherForecastResponse & { message?: string }
+    if (!weatherRes.ok) {
+      return res.status(weatherRes.status).json({ error: 'Unable to fetch weather data from Open-Meteo.' })
+    }
 
-    if (!response.ok) {
-      return res.status(response.status).json({
-        error: data.message || 'Unable to fetch weather data.',
+    const daily = weatherData.daily
+    const forecast = []
+    
+    for (let i = 0; i < daily.time.length; i++) {
+      const wmoCode = daily.weather_code[i]
+      
+      // Calculate probability from ensemble members
+      let rainMembers = 0
+      let validMembers = 0
+      for (let m = 1; m <= 30; m++) {
+        const memberKey = `precipitation_sum_member${m.toString().padStart(2, '0')}`
+        if (daily[memberKey] && daily[memberKey][i] !== undefined) {
+          validMembers++
+          if (daily[memberKey][i] > 0.1) rainMembers++
+        }
+      }
+      const precipitation = validMembers > 0 ? Math.round((rainMembers / validMembers) * 100) : 0
+
+      forecast.push({
+        date: daily.time[i],
+        temperature: Math.round((daily.temperature_2m_max[i] + daily.temperature_2m_min[i]) / 2),
+        minTemperature: Math.round(daily.temperature_2m_min[i]),
+        maxTemperature: Math.round(daily.temperature_2m_max[i]),
+        humidity: 60, // Ensemble model doesn't supply daily mean humidity directly
+        precipitation, 
+        description: wmoToDescription(wmoCode),
+        summary: wmoToDescription(wmoCode),
+        icon: wmoToOpenWeatherIcon(wmoCode),
+        windSpeed: Math.round((daily.wind_speed_10m_max[i] * 1000) / 3600) // Convert km/h to m/s
       })
     }
 
-    const dailyForecast = pickDailySnapshots(data.list).map((item) => ({
-      date: item.dt_txt.split(' ')[0],
-      temperature: Math.round(item.main.temp),
-      minTemperature: Math.round(item.main.temp_min),
-      maxTemperature: Math.round(item.main.temp_max),
-      humidity: item.main.humidity,
-      precipitation: Math.round((item.pop || 0) * 100),
-      description: item.weather[0]?.description || 'N/A',
-      summary: item.weather[0]?.main || 'N/A',
-      icon: item.weather[0]?.icon || '',
-      windSpeed: item.wind.speed,
-    }))
-
     return res.status(200).json({
-      city: data.city.name,
-      country: data.city.country,
-      timezone: data.city.timezone,
-      units,
-      forecast: dailyForecast,
+      city: name,
+      country: country,
+      timezone: timezone || 'UTC',
+      units: 'metric',
+      forecast
     })
   } catch (error) {
     if ((error as Error).name === 'AbortError') {
       return res.status(504).json({ error: 'Weather provider timeout. Please try again.' })
     }
-
     return res.status(500).json({ error: 'Unable to fetch weather data.' })
   } finally {
     clearTimeout(timeout)

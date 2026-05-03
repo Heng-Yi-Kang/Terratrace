@@ -127,7 +127,7 @@ export default function WeatherForecastSection() {
                 <p className="text-sm text-text/60">Showing forecast for: {searchedCity}</p>
               </div>
 
-              <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-7 gap-4">
                 {result.forecast.map((item) => (
                   <article
                     key={item.date}
