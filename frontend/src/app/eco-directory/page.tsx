@@ -20,7 +20,7 @@ export default async function EcoDirectoryPage() {
     }
 
     const { data, error } = await supabase.from("locations").select(
-        "id,name,category,city,lat,long,eco_certs,image_url,ex_booking_url"
+        "id,name,category,city,lat,long,eco_certs,image_url,ex_booking_url,public_id"
     )
 
     if (error) {
@@ -33,24 +33,18 @@ export default async function EcoDirectoryPage() {
         )
     }
 
-    const places = (data ?? []).map((row) => ({
-        id: String(row.id),
-        name: row.name ?? "Unnamed",
-        category: row.category,
-        city: row.city ?? undefined,
-        lat: row.lat,
-        long: row.long,
-        ecoCerts: Array.isArray(row.eco_certs) ? row.eco_certs : [],
-        bookingUrl: row.ex_booking_url ?? undefined,
-        imageUrl: row.image_url ?? undefined,
-    }));
-
-    // Prefetch into cache so client can read from it
-    await queryClient.prefetchQuery({
-        queryKey: ['locations'],
-        queryFn: () => Promise.resolve(places),
-        staleTime: 5 * 60 * 1000,
-    });
+    const places: Place[] = (data ?? []).map((row) => ({
+                id: String(row.id),
+                name: row.name ?? "Unnamed",
+                category: row.category,
+                city: row.city ?? undefined,
+                lat: row.lat,
+                long: row.long,
+                ecoCerts: Array.isArray(row.eco_certs) ? row.eco_certs : [],
+                bookingUrl: row.ex_booking_url ?? undefined,
+                imageUrl: row.image_url ?? undefined,
+                publicId: row.public_id,
+            }))
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>

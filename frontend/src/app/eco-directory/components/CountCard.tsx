@@ -15,7 +15,7 @@ export default function CountCard({ className = "", Icon, count, name }: Props) 
                     <Icon className="w-8 h-8" />
                 </div>
                 <div className="text-right">
-                    <span className="font-heading font-bold text-4xl">{count}</span>
+                    <h1 className="font-heading font-bold text-4xl">{count}</h1>
                     <span className="block font-heading font-bold text-secondary text-sm">{name}</span>
                 </div>
             </div>
