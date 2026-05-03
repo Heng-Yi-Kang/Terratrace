@@ -9,6 +9,7 @@ type ForecastItem = {
   minTemperature: number
   maxTemperature: number
   humidity: number
+  precipitation: number
   description: string
   summary: string
   icon: string
@@ -162,6 +163,10 @@ export default function WeatherForecastSection() {
                       <div className="flex items-center justify-between gap-3">
                         <dt>Humidity</dt>
                         <dd>{item.humidity}%</dd>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <dt>Precipitation</dt>
+                        <dd>{item.precipitation}%</dd>
                       </div>
                       <div className="flex items-center justify-between gap-3">
                         <dt>Wind</dt>

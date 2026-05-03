@@ -16,6 +16,7 @@ type OpenWeatherItem = {
     icon: string
     main: string
   }>
+  pop?: number
   wind: {
     speed: number
   }
@@ -106,6 +107,7 @@ router.get('/forecast', async (req: Request, res: Response) => {
       minTemperature: Math.round(item.main.temp_min),
       maxTemperature: Math.round(item.main.temp_max),
       humidity: item.main.humidity,
+      precipitation: Math.round((item.pop || 0) * 100),
       description: item.weather[0]?.description || 'N/A',
       summary: item.weather[0]?.main || 'N/A',
       icon: item.weather[0]?.icon || '',
