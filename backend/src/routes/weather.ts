@@ -46,7 +46,7 @@ router.get('/forecast', async (req: Request, res: Response) => {
   try {
     // 1. Geocoding via Open-Meteo
     const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`, { signal: controller.signal })
-    const geoData = await geoRes.json()
+    const geoData: any = await geoRes.json()
     
     if (!geoRes.ok || !geoData.results || geoData.results.length === 0) {
       return res.status(404).json({ error: 'City not found.' })
@@ -58,7 +58,7 @@ router.get('/forecast', async (req: Request, res: Response) => {
     const url = `https://ensemble-api.open-meteo.com/v1/ensemble?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max&timezone=auto&models=gfs_seamless&forecast_days=14`
     
     const weatherRes = await fetch(url, { signal: controller.signal })
-    const weatherData = await weatherRes.json()
+    const weatherData: any = await weatherRes.json()
 
     if (!weatherRes.ok) {
       return res.status(weatherRes.status).json({ error: 'Unable to fetch weather data from Open-Meteo.' })
