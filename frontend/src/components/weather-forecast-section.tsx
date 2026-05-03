@@ -85,7 +85,7 @@ export default function WeatherForecastSection() {
         <div className="text-center mb-12">
           <h2 className="font-heading font-bold text-3xl md:text-4xl text-text mb-4">Weather Forecast</h2>
           <p className="text-text/70 max-w-2xl mx-auto">
-            Check 5-day weather insights before you finalize your eco-friendly itinerary.
+            Check 35-day weather insights before you finalize your eco-friendly itinerary.
           </p>
         </div>
 
