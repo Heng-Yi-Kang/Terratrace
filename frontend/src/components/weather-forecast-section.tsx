@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { FormEvent, useMemo, useState } from 'react'
+import { FormEvent, useEffect, useMemo, useState } from 'react'
 
 type ForecastItem = {
   date: string
@@ -39,12 +39,39 @@ const toUnitLabel = (units: string): string => {
 
 export default function WeatherForecastSection() {
   const [city, setCity] = useState('Kuala Lumpur')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [dateLimits, setDateLimits] = useState({ min: '', max: '' })
   const [searchedCity, setSearchedCity] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [result, setResult] = useState<WeatherResponse | null>(null)
 
+  useEffect(() => {
+    const today = new Date()
+    const maxDate = new Date()
+    maxDate.setDate(today.getDate() + 33)
+    
+    const fmt = (d: Date) => {
+      const year = d.getFullYear()
+      const month = String(d.getMonth() + 1).padStart(2, '0')
+      const day = String(d.getDate()).padStart(2, '0')
+      return `${year}-${month}-${day}`
+    }
+    
+    setDateLimits({ min: fmt(today), max: fmt(maxDate) })
+  }, [])
+
   const unitLabel = useMemo(() => toUnitLabel(result?.units || 'metric'), [result?.units])
+
+  const filteredForecast = useMemo(() => {
+    if (!result) return []
+    return result.forecast.filter(item => {
+      if (startDate && item.date < startDate) return false
+      if (endDate && item.date > endDate) return false
+      return true
+    })
+  }, [result, startDate, endDate])
 
   const fetchWeather = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -90,26 +117,56 @@ export default function WeatherForecastSection() {
         </div>
 
         <div className="bg-white/80 backdrop-blur-sm rounded-organic-lg p-6 md:p-8 shadow-organic">
-          <form onSubmit={fetchWeather} className="flex flex-col md:flex-row gap-4 md:items-end">
-            <div className="flex-1">
-              <label htmlFor="city" className="block text-sm font-medium text-text mb-2">
-                City or town
-              </label>
-              <input
-                id="city"
-                value={city}
-                onChange={(event) => setCity(event.target.value)}
-                placeholder="e.g., Singapore"
-                className="w-full px-4 py-3 rounded-xl border border-text/20 text-text bg-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-colors duration-200"
-              />
+          <form onSubmit={fetchWeather} className="flex flex-col gap-4">
+            <div className="flex flex-col md:flex-row gap-4 md:items-end">
+              <div className="flex-1">
+                <label htmlFor="city" className="block text-sm font-medium text-text mb-2">
+                  City or town
+                </label>
+                <input
+                  id="city"
+                  value={city}
+                  onChange={(event) => setCity(event.target.value)}
+                  placeholder="e.g., Singapore"
+                  className="w-full px-4 py-3 rounded-xl border border-text/20 text-text bg-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-colors duration-200"
+                />
+              </div>
+              <div className="flex-1">
+                <label htmlFor="startDate" className="block text-sm font-medium text-text mb-2">
+                  Start Date
+                </label>
+                <input
+                  type="date"
+                  id="startDate"
+                  value={startDate}
+                  min={dateLimits.min}
+                  max={dateLimits.max}
+                  onChange={(event) => setStartDate(event.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-text/20 text-text bg-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-colors duration-200"
+                />
+              </div>
+              <div className="flex-1">
+                <label htmlFor="endDate" className="block text-sm font-medium text-text mb-2">
+                  End Date
+                </label>
+                <input
+                  type="date"
+                  id="endDate"
+                  value={endDate}
+                  min={startDate || dateLimits.min}
+                  max={dateLimits.max}
+                  onChange={(event) => setEndDate(event.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-text/20 text-text bg-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-colors duration-200"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-secondary disabled:opacity-70 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer"
+              >
+                {loading ? 'Checking...' : 'Get Forecast'}
+              </button>
             </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-secondary disabled:opacity-70 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer"
-            >
-              {loading ? 'Checking weather...' : 'Get Forecast'}
-            </button>
           </form>
 
           {error && (
@@ -128,7 +185,7 @@ export default function WeatherForecastSection() {
               </div>
 
               <div className="grid sm:grid-cols-2 lg:grid-cols-7 gap-4">
-                {result.forecast.map((item) => (
+                {filteredForecast.map((item) => (
                   <article
                     key={item.date}
                     className="bg-background rounded-2xl p-4 shadow-organic border border-white/70"
