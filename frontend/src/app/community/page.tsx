@@ -41,6 +41,18 @@ const PencilIcon = ({ className = 'w-4 h-4' }: { className?: string }) => (
   </svg>
 );
 
+const ThumbsUpIcon = ({ className = 'w-4 h-4' }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M6.633 10.5c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 012.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 00.322-1.672V3a.75.75 0 01.75-.75A2.25 2.25 0 0116.5 4.5c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 01-2.649 7.521c-.388.482-.987.729-1.605.729H13.48c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 00-1.423-.23H5.904M14.25 9h2.25M5.904 18.75c.083.205.173.405.27.602.197.4-.078.898-.523.898h-.908c-.889 0-1.713-.518-1.972-1.368a12 12 0 01-.521-3.507c0-1.553.295-3.036.831-4.398C3.387 10.203 4.167 9.75 5 9.75h1.053c.472 0 .745.556.5.96a8.958 8.958 0 00-1.302 4.665c0 1.194.232 2.333.654 3.375z" />
+  </svg>
+);
+
+const CheckBadgeIcon = ({ className = 'w-4 h-4' }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+  </svg>
+);
+
 // ─── Page Header ──────────────────────────────────────────────────────────────
 
 const PageHeader = () => (
@@ -92,6 +104,31 @@ const PageHeader = () => (
       }}>
         Rate places for their green practices, share what you witnessed, and earn badges as you hit low-carbon milestones together with travelers worldwide.
       </p>
+
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+        gap: '16px', marginTop: '40px', maxWidth: '720px',
+      }}>
+        {[
+          { value: '48,213', label: 'Eco-reviews submitted' },
+          { value: '2,847', label: 'Active challenges' },
+          { value: '186K', label: 'Badges earned' },
+          { value: '92%', label: 'Verified ratings' },
+        ].map(s => (
+          <div key={s.label} style={{
+            background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)',
+            border: '1px solid rgba(255,255,255,0.15)',
+            borderRadius: '12px', padding: '16px 18px',
+          }}>
+            <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '22px', color: 'white' }}>
+              {s.value}
+            </div>
+            <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '12px', color: 'rgba(255,255,255,0.65)', marginTop: '2px' }}>
+              {s.label}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   </header>
 );
@@ -142,47 +179,56 @@ type Review = {
   category: string;
   rating: number;
   reviewer: string;
+  reviewerInitials: string;
   date: string;
   title: string;
   body: string;
+  practices: string[];
+  helpful: number;
+  verified: boolean;
+  color: string;
 };
 
 const reviews: Review[] = [
   {
     id: 1,
-    location: 'Selva Verde Lodge',
-    city: 'Sarapiquí', country: 'Costa Rica',
+    location: 'Selva Verde Lodge', city: 'Sarapiquí', country: 'Costa Rica',
     category: 'Eco-Lodge', rating: 5,
-    reviewer: 'Priya Sharma', date: '3 days ago',
+    reviewer: 'Priya Sharma', reviewerInitials: 'PS', date: '3 days ago',
     title: 'Genuinely sustainable, not just greenwashed',
     body: 'Solar panels powering everything, on-site composting, rainwater harvesting visible across the property. Staff are mostly locals and they actively run reforestation programs guests can join.',
+    practices: ['Solar Energy', 'Local Hiring', 'Reforestation', 'Zero Waste'],
+    helpful: 142, verified: true, color: '#FBBF24',
   },
   {
     id: 2,
-    location: 'Kyoto Bamboo Inn',
-    city: 'Arashiyama', country: 'Japan',
+    location: 'Kyoto Bamboo Inn', city: 'Arashiyama', country: 'Japan',
     category: 'Boutique Hotel', rating: 4,
-    reviewer: 'Marcus Weber', date: '1 week ago',
+    reviewer: 'Marcus Weber', reviewerInitials: 'MW', date: '1 week ago',
     title: 'Strong on materials, weaker on energy',
     body: 'Beautiful traditional construction with sustainable bamboo and reclaimed wood. Locally-sourced food was excellent. Half-star deduction — energy mix is still mostly grid, no visible renewables.',
+    practices: ['Local Food', 'Sustainable Materials', 'Water Conservation'],
+    helpful: 89, verified: true, color: '#059669',
   },
   {
     id: 3,
-    location: 'Atlas Mountain Trek Co.',
-    city: 'Imlil', country: 'Morocco',
+    location: 'Atlas Mountain Trek Co.', city: 'Imlil', country: 'Morocco',
     category: 'Tour Operator', rating: 5,
-    reviewer: 'Emma Rodriguez', date: '2 weeks ago',
+    reviewer: 'Emma Rodriguez', reviewerInitials: 'ER', date: '2 weeks ago',
     title: 'Pack-in pack-out is non-negotiable for them',
     body: 'Guides actively educate every group on Leave No Trace. They contract directly with Berber families and a large share of fees goes back into village schools. Refreshing to see structural impact.',
+    practices: ['Leave No Trace', 'Community Investment', 'Fair Wages'],
+    helpful: 203, verified: true, color: '#10B981',
   },
   {
     id: 4,
-    location: 'Floating Reed Restaurant',
-    city: 'Puno', country: 'Peru',
+    location: 'Floating Reed Restaurant', city: 'Puno', country: 'Peru',
     category: 'Restaurant', rating: 4,
-    reviewer: 'James Okafor', date: '3 weeks ago',
+    reviewer: 'James Okafor', reviewerInitials: 'JO', date: '3 weeks ago',
     title: 'Hyper-local sourcing done right',
     body: 'Everything on the menu was caught or grown within a few kilometers of Lake Titicaca. Owned and run by a Uros family. The only reason it isn\u2019t five stars is the single-use plastic for takeaway.',
+    practices: ['Hyper-Local Food', 'Indigenous-Owned', 'Cultural Heritage'],
+    helpful: 67, verified: false, color: '#FBBF24',
   },
 ];
 
@@ -192,50 +238,129 @@ const StarRating = ({ rating }: { rating: number }) => (
   </div>
 );
 
-const ReviewCard = ({ review }: { review: Review }) => (
-  <article style={{
-    background: 'white', borderRadius: '16px', padding: '28px',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.07)',
-    border: '1px solid rgba(5,150,105,0.08)',
-  }}>
-    <div style={{
-      display: 'flex', justifyContent: 'space-between',
-      alignItems: 'flex-start', gap: '16px', marginBottom: '16px',
-    }}>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '17px', color: '#064E3B', marginBottom: '6px' }}>
-          {review.location}
-        </h3>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#064E3B', opacity: 0.6 }}>
-          <MapPinIcon className="w-3 h-3" />
-          <span style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '13px' }}>
-            {review.city}, {review.country} · {review.category}
+const ReviewCard = ({ review }: { review: Review }) => {
+  const [hovered, setHovered] = useState(false);
+  const [helpful, setHelpful] = useState(review.helpful);
+  const [marked, setMarked] = useState(false);
+
+  return (
+    <article
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        background: 'white', borderRadius: '16px', padding: '28px',
+        boxShadow: hovered ? '0 10px 15px rgba(0,0,0,0.1)' : '0 4px 6px rgba(0,0,0,0.07)',
+        transform: hovered ? 'translateY(-2px)' : 'translateY(0)',
+        transition: 'box-shadow 200ms ease, transform 200ms ease',
+        border: '1px solid rgba(5,150,105,0.08)',
+      }}
+    >
+      <div style={{
+        display: 'flex', justifyContent: 'space-between',
+        alignItems: 'flex-start', gap: '16px', marginBottom: '16px',
+      }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
+            <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '17px', color: '#064E3B' }}>
+              {review.location}
+            </h3>
+            <span style={{
+              fontFamily: 'Open Sans, sans-serif', fontSize: '11px', fontWeight: 600,
+              background: `${review.color}1a`, color: review.color,
+              padding: '3px 10px', borderRadius: '100px',
+            }}>
+              {review.category}
+            </span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#064E3B', opacity: 0.6 }}>
+            <MapPinIcon className="w-3 h-3" />
+            <span style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '13px' }}>
+              {review.city}, {review.country}
+            </span>
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+          <StarRating rating={review.rating} />
+          <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', fontWeight: 600, color: '#064E3B' }}>
+            {review.rating}.0 / 5
           </span>
         </div>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-        <StarRating rating={review.rating} />
-        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', fontWeight: 600, color: '#064E3B' }}>
-          {review.rating}.0 / 5
-        </span>
+
+      <h4 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '15px', color: '#064E3B', marginBottom: '8px' }}>
+        {review.title}
+      </h4>
+      <p style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '14px', color: '#064E3B', opacity: 0.75, lineHeight: 1.65, marginBottom: '20px' }}>
+        {review.body}
+      </p>
+
+      {/* Sustainable practice tags */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '20px' }}>
+        {review.practices.map(p => (
+          <span key={p} style={{
+            display: 'inline-flex', alignItems: 'center', gap: '4px',
+            fontFamily: 'Open Sans, sans-serif', fontSize: '11px', fontWeight: 600,
+            background: 'rgba(251,191,36,0.1)', color: '#FBBF24',
+            padding: '4px 10px', borderRadius: '100px',
+          }}>
+            <LeafIcon className="w-3 h-3" />
+            {p}
+          </span>
+        ))}
       </div>
-    </div>
 
-    <h4 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '15px', color: '#064E3B', marginBottom: '8px' }}>
-      {review.title}
-    </h4>
-    <p style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '14px', color: '#064E3B', opacity: 0.75, lineHeight: 1.65, marginBottom: '16px' }}>
-      {review.body}
-    </p>
+      {/* Footer: reviewer + helpful */}
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        paddingTop: '16px', borderTop: '1px solid rgba(5,150,105,0.08)', gap: '12px',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{
+            width: '36px', height: '36px',
+            background: `linear-gradient(135deg, ${review.color}33, ${review.color}66)`,
+            borderRadius: '50%',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '13px',
+            color: review.color,
+          }}>
+            {review.reviewerInitials}
+          </div>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '13px', color: '#064E3B' }}>
+                {review.reviewer}
+              </span>
+              {review.verified && (
+                <span style={{ color: '#059669' }} title="Verified traveler">
+                  <CheckBadgeIcon className="w-4 h-4" />
+                </span>
+              )}
+            </div>
+            <span style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '11px', color: '#064E3B', opacity: 0.55 }}>
+              {review.date}
+            </span>
+          </div>
+        </div>
 
-    <div style={{
-      paddingTop: '16px', borderTop: '1px solid rgba(5,150,105,0.08)',
-      fontFamily: 'Open Sans, sans-serif', fontSize: '13px', color: '#064E3B', opacity: 0.7,
-    }}>
-      <strong style={{ color: '#064E3B', opacity: 1 }}>{review.reviewer}</strong> · {review.date}
-    </div>
-  </article>
-);
+        <button
+          onClick={() => { setMarked(!marked); setHelpful(h => marked ? h - 1 : h + 1); }}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '6px',
+            background: marked ? 'rgba(5,150,105,0.1)' : 'transparent',
+            border: `1px solid ${marked ? '#059669' : 'rgba(5,150,105,0.2)'}`,
+            color: marked ? '#059669' : '#064E3B',
+            padding: '6px 12px', borderRadius: '100px',
+            fontFamily: 'Open Sans, sans-serif', fontWeight: 600, fontSize: '12px',
+            cursor: 'pointer', transition: 'all 200ms ease',
+          }}
+        >
+          <ThumbsUpIcon className="w-3 h-3" />
+          {helpful}
+        </button>
+      </div>
+    </article>
+  );
+};
 
 const ReviewsSection = () => {
   const [filter, setFilter] = useState('All');
