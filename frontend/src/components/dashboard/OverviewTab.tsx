@@ -1,6 +1,8 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import StatCard from './StatCard'
+import { getCurrentUser } from '@/utils/supabase/auth'
 
 const stats = [
   {
@@ -58,11 +60,23 @@ const recentActivity = [
 ]
 
 export default function OverviewTab() {
+  const [username, setUsername] = useState('')
+
+  useEffect(() => {
+    async function fetchUser() {
+      const { data } = await getCurrentUser()
+      if (data?.user) {
+        setUsername(data.user.user_metadata?.username || '')
+      }
+    }
+    fetchUser()
+  }, [])
+
   return (
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="font-sans font-bold text-3xl text-text">Welcome back, Eco Traveler</h1>
+        <h1 className="font-sans font-bold text-3xl text-text">Welcome back, {username || 'Eco Traveler'}</h1>
         <p className="font-sans text-text/60 mt-2">Here&apos;s your sustainability journey at a glance</p>
       </div>
 
