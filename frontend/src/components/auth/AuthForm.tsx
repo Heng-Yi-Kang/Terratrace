@@ -11,6 +11,7 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [username, setUsername] = useState('')
   const [role, setRole] = useState('user')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -36,7 +37,7 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
 
     setLoading(true)
     try {
-      await onSubmit(email, password, role)
+      await onSubmit(email, password, username, role)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -61,6 +62,23 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
             required
           />
         </div>
+
+        {mode === 'signup' && (
+          <div>
+            <label htmlFor="username" className="block text-sm font-medium text-text mb-2">
+              Username
+            </label>
+            <input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-text/20 bg-white/80 text-text placeholder-text/40 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-200"
+              placeholder="johndoe"
+              required
+            />
+          </div>
+        )}
 
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-text mb-2">

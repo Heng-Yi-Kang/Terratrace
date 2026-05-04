@@ -9,14 +9,14 @@ export async function signIn(email: string, password: string) {
   return supabase.auth.signInWithPassword({ email, password })
 }
 
-export async function signUp(email: string, password: string, role: UserRole = 'user') {
+export async function signUp(email: string, password: string, username?: string, role: UserRole = 'user') {
   const supabase = createClient()
   if (!supabase) return { error: { message: 'Supabase not configured' } }
   return supabase.auth.signUp({
     email,
     password,
     options: {
-      data: { role }
+      data: { role, username }
     }
   })
 }

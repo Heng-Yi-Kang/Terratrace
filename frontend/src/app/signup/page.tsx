@@ -8,8 +8,8 @@ import { UserRole } from '@/utils/supabase/auth'
 export default function SignupPage() {
   const router = useRouter()
 
-  const handleSignup = async (email: string, password: string, role?: string) => {
-    const { error } = await signUp(email, password, role as UserRole || 'user')
+  const handleSignup = async (email: string, password: string, username?: string, role?: string) => {
+    const { error } = await signUp(email, password, username, role as UserRole || 'user')
     if (error) {
       throw new Error(error.message)
     }
