@@ -53,6 +53,31 @@ const CheckBadgeIcon = ({ className = 'w-4 h-4' }: { className?: string }) => (
   </svg>
 );
 
+const FireIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 18a3.75 3.75 0 00.495-7.467 5.99 5.99 0 00-1.925 3.546 5.974 5.974 0 01-2.133-1A3.75 3.75 0 0012 18z" />
+  </svg>
+);
+
+const BoltIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+  </svg>
+);
+
+const GlobeIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9A9 9 0 0012 3a9 9 0 00-4.5 9c0 4.97 2.015 9 4.5 9zm0 0c2.485 0 4.5-4.03 4.5-9A9 9 0 008.716 4.747M12 3c-2.485 0-4.5 4.03-4.5 9" />
+  </svg>
+);
+
+const ArrowRightIcon = ({ className = 'w-4 h-4' }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+  </svg>
+);
+
 // ─── Page Header ──────────────────────────────────────────────────────────────
 
 const PageHeader = () => (
@@ -430,18 +455,223 @@ const ReviewsSection = () => {
   );
 };
 
-const EmptyState = ({ label }: { label: string }) => (
-  <div style={{
-    background: 'white', borderRadius: '16px',
-    padding: '80px 24px', textAlign: 'center',
-    border: '1px dashed rgba(5,150,105,0.2)',
-  }}>
-    <p style={{
-      fontFamily: 'Open Sans, sans-serif', fontSize: '14px',
-      color: '#064E3B', opacity: 0.5,
+// ─── Challenges ───────────────────────────────────────────────────────────────
+
+type Challenge = {
+  id: number;
+  title: string;
+  description: string;
+  reward: string;
+  points: number;
+  badge: string;
+  badgeColor: string;
+  badgeIcon: React.ReactNode;
+  category: 'Active' | 'Featured' | 'Streak';
+  progress: number;
+  total: number;
+  unit: string;
+  participants: number;
+  daysLeft: number;
+};
+
+const challenges: Challenge[] = [
+  {
+    id: 1,
+    title: 'Low Carbon Week',
+    description: 'Keep your daily travel emissions under 5kg CO\u2082 for 7 consecutive days.',
+    reward: 'Carbon Crusher Badge', points: 500,
+    badge: 'Carbon Crusher', badgeColor: '#FBBF24',
+    badgeIcon: <LeafIcon />,
+    category: 'Active',
+    progress: 5, total: 7, unit: 'days',
+    participants: 12483, daysLeft: 2,
+  },
+  {
+    id: 2,
+    title: 'Train Over Plane',
+    description: 'Choose rail travel over flights for 3 trips of 500km or less.',
+    reward: 'Rail Champion Badge', points: 750,
+    badge: 'Rail Champion', badgeColor: '#059669',
+    badgeIcon: <BoltIcon />,
+    category: 'Featured',
+    progress: 1, total: 3, unit: 'trips',
+    participants: 8201, daysLeft: 28,
+  },
+  {
+    id: 3,
+    title: 'Eco-Reviewer Streak',
+    description: 'Write 10 verified eco-reviews of certified-green stays this month.',
+    reward: 'Community Voice Badge', points: 400,
+    badge: 'Community Voice', badgeColor: '#10B981',
+    badgeIcon: <PencilIcon />,
+    category: 'Streak',
+    progress: 7, total: 10, unit: 'reviews',
+    participants: 4521, daysLeft: 12,
+  },
+  {
+    id: 4,
+    title: 'Plant a Forest',
+    description: 'Offset 1 ton of CO\u2082 by supporting verified reforestation partners.',
+    reward: 'Forest Guardian Badge', points: 1000,
+    badge: 'Forest Guardian', badgeColor: '#FBBF24',
+    badgeIcon: <GlobeIcon />,
+    category: 'Featured',
+    progress: 720, total: 1000, unit: 'kg',
+    participants: 2987, daysLeft: 60,
+  },
+];
+
+const ChallengeCard = ({ challenge }: { challenge: Challenge }) => {
+  const [hovered, setHovered] = useState(false);
+  const pct = (challenge.progress / challenge.total) * 100;
+  const catColors: Record<Challenge['category'], string> = {
+    Active: '#FBBF24',
+    Featured: '#059669',
+    Streak: '#F59E0B',
+  };
+
+  return (
+    <article
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        background: 'white', borderRadius: '16px', padding: '24px',
+        boxShadow: hovered ? '0 10px 15px rgba(0,0,0,0.1)' : '0 4px 6px rgba(0,0,0,0.07)',
+        transform: hovered ? 'translateY(-2px)' : 'translateY(0)',
+        transition: 'box-shadow 200ms ease, transform 200ms ease',
+        border: '1px solid rgba(5,150,105,0.08)',
+        position: 'relative', overflow: 'hidden',
+      }}
+    >
+      {/* Category strip */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, height: '4px',
+        background: catColors[challenge.category],
+      }} />
+
+      {/* Header */}
+      <div style={{
+        display: 'flex', justifyContent: 'space-between',
+        alignItems: 'flex-start', gap: '12px', marginBottom: '14px', marginTop: '6px',
+      }}>
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: '6px',
+          background: `${catColors[challenge.category]}1a`,
+          color: catColors[challenge.category],
+          padding: '4px 10px', borderRadius: '100px',
+          fontFamily: 'Open Sans, sans-serif', fontSize: '11px', fontWeight: 700,
+        }}>
+          {challenge.category === 'Streak' && <FireIcon className="w-3 h-3" />}
+          {challenge.category === 'Featured' && <StarIcon className="w-3 h-3" filled />}
+          {challenge.category === 'Active' && <BoltIcon className="w-3 h-3" />}
+          {challenge.category.toUpperCase()}
+        </div>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '4px',
+          fontFamily: 'Open Sans, sans-serif', fontSize: '12px', color: '#064E3B', opacity: 0.6,
+        }}>
+          ⏱ {challenge.daysLeft} days left
+        </div>
+      </div>
+
+      {/* Badge + title */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '12px' }}>
+        <div style={{
+          width: '56px', height: '56px', flexShrink: 0,
+          borderRadius: '14px',
+          background: `linear-gradient(135deg, ${challenge.badgeColor}, ${challenge.badgeColor}cc)`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: 'white',
+          boxShadow: `0 6px 16px ${challenge.badgeColor}55`,
+        }}>
+          {challenge.badgeIcon}
+        </div>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '17px', color: '#064E3B', marginBottom: '2px' }}>
+            {challenge.title}
+          </h3>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: '4px',
+            fontFamily: 'Open Sans, sans-serif', fontSize: '12px', fontWeight: 600,
+            color: '#F59E0B',
+          }}>
+            <BoltIcon className="w-3 h-3" />
+            +{challenge.points} pts · {challenge.badge}
+          </div>
+        </div>
+      </div>
+
+      <p style={{
+        fontFamily: 'Open Sans, sans-serif', fontSize: '13px',
+        color: '#064E3B', opacity: 0.7, lineHeight: 1.6, marginBottom: '20px',
+      }}>
+        {challenge.description}
+      </p>
+
+      {/* Progress bar */}
+      <div style={{ marginBottom: '16px' }}>
+        <div style={{
+          display: 'flex', justifyContent: 'space-between',
+          alignItems: 'center', marginBottom: '6px',
+        }}>
+          <span style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '12px', fontWeight: 600, color: '#064E3B' }}>
+            Progress
+          </span>
+          <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: 700, color: catColors[challenge.category] }}>
+            {challenge.progress} / {challenge.total} {challenge.unit}
+          </span>
+        </div>
+        <div style={{
+          height: '8px', background: 'rgba(5,150,105,0.1)',
+          borderRadius: '100px', overflow: 'hidden',
+        }}>
+          <div style={{
+            width: `${pct}%`, height: '100%',
+            background: `linear-gradient(90deg, ${catColors[challenge.category]}, ${catColors[challenge.category]}cc)`,
+            borderRadius: '100px',
+            transition: 'width 600ms ease',
+          }} />
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        paddingTop: '16px', borderTop: '1px solid rgba(5,150,105,0.08)',
+      }}>
+        <span style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '12px', color: '#064E3B', opacity: 0.6 }}>
+          {challenge.participants.toLocaleString()} joined
+        </span>
+        <button style={{
+          display: 'flex', alignItems: 'center', gap: '6px',
+          background: 'transparent', color: '#059669',
+          border: 'none', padding: '4px 0',
+          fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '13px',
+          cursor: 'pointer', transition: 'gap 200ms ease',
+        }}>
+          Continue
+          <ArrowRightIcon className="w-3 h-3" />
+        </button>
+      </div>
+    </article>
+  );
+};
+
+const ChallengesSection = () => (
+  <div>
+    <h3 style={{
+      fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '20px',
+      color: '#064E3B', marginBottom: '16px',
     }}>
-      {label} — coming next commit
-    </p>
+      Active Challenges
+    </h3>
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+      gap: '20px',
+    }}>
+      {challenges.map(c => <ChallengeCard key={c.id} challenge={c} />)}
+    </div>
   </div>
 );
 
@@ -456,7 +686,7 @@ export default function CommunityImpactPage() {
       <section style={{ padding: '48px 24px 96px' }}>
         <div style={{ maxWidth: '1152px', margin: '0 auto' }}>
           <TabSwitcher active={tab} onChange={setTab} />
-          {tab === 'reviews' ? <ReviewsSection /> : <EmptyState label="Challenges" />}
+          {tab === 'reviews' ? <ReviewsSection /> : <ChallengesSection />}
         </div>
       </section>
     </main>
