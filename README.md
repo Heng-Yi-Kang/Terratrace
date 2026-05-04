@@ -14,6 +14,7 @@ terratrace/
 │   ├── src/
 │   │   └── index.ts   # Server entry point
 │   └── ...
+├── .env               # Environment variables (create from .env.example)
 └── package.json       # Root package.json for workspace management
 ```
 
@@ -24,29 +25,48 @@ terratrace/
 
 ## Getting Started
 
-1. Install dependencies for all workspaces:
+1. Copy environment files and configure:
+   ```bash
+   cp .env.example .env
+   cp backend/.env.example backend/.env
+   ```
+
+2. Update `.env` with your Supabase credentials:
+   - `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL
+   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` - Your Supabase publishable key
+
+3. Install dependencies for all workspaces:
    ```bash
    npm install
    ```
 
-2. Start development servers:
+4. Start development servers:
    ```bash
    npm run dev
    ```
    This starts both the frontend (http://localhost:3000) and backend (http://localhost:3001).
 
-3. Or start them individually:
+5. Or start them individually:
    ```bash
    npm run dev:frontend   # Frontend only
    npm run dev:backend    # Backend only
    ```
+
+## Environment Variables
+
+Create `.env` files from the provided examples:
+
+| File | Required Variables |
+|------|-------------------|
+| `.env` (root) | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` |
+| `backend/.env` | `PORT`, `NODE_ENV`, `FRONTEND_URL` |
 
 ## Available Scripts
 
 | Command | Description |
 |---------|-------------|
 | `npm run dev` | Start both frontend and backend in development mode |
-| `npm run dev:frontend` | Start Next.js development server |
+| `npm run dev:frontend` | Start Next.js development server (loads .env) |
 | `npm run dev:backend` | Start Express.js server with hot reload |
 | `npm run build` | Build both frontend and backend |
 | `npm run start` | Start backend server in production mode |

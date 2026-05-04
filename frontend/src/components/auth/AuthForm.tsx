@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 interface AuthFormProps {
   mode: 'login' | 'signup'
-  onSubmit: (email: string, password: string, role?: string) => Promise<void>
+  onSubmit: (email: string, password: string, username?: string, role?: string) => Promise<void>
 }
 
 export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
