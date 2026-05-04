@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import AuthForm from '@/components/auth/AuthForm'
-import { signUp, getRedirectPath } from '@/utils/supabase/auth'
+import { signUp } from '@/utils/supabase/auth'
 import { UserRole } from '@/utils/supabase/auth'
 
 export default function SignupPage() {
@@ -13,8 +13,7 @@ export default function SignupPage() {
     if (error) {
       throw new Error(error.message)
     }
-    const redirectPath = await getRedirectPath()
-    router.push(redirectPath)
+    router.push('/')
     router.refresh()
   }
 
