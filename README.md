@@ -31,9 +31,21 @@ terratrace/
    cp backend/.env.example backend/.env
    ```
 
-2. Update `.env` with your Supabase credentials:
-   - `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL
-   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` - Your Supabase publishable key
+2. Configure Supabase credentials in **two places**:
+
+   **Root `.env`** — Used by npm scripts to pass env vars to the dev server:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_publishable_key
+   ```
+
+   **`frontend/.env.local`** — Used by Next.js for client-side code (AuthForm, Supabase client). Create this file with the same values:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_publishable_key
+   ```
+
+   Both files need the same credentials for auth to work correctly.
 
 3. Install dependencies for all workspaces:
    ```bash
@@ -54,11 +66,12 @@ terratrace/
 
 ## Environment Variables
 
-Create `.env` files from the provided examples:
+Create `.env` files from the provided examples. **Supabase credentials must be set in two locations** because Next.js client-side code reads from `frontend/.env.local` at compile time, while the dev server reads from the root `.env` at runtime.
 
 | File | Required Variables |
 |------|-------------------|
 | `.env` (root) | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` |
+| `frontend/.env.local` | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` |
 | `backend/.env` | `PORT`, `NODE_ENV`, `FRONTEND_URL` |
 
 ## Available Scripts

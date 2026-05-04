@@ -14,4 +14,6 @@ export const createClient = () => {
 	return browserClient;
 };
 
-export { supabaseConnectionState };
+export const supabase = createClient();
+
+export { createClient, supabaseConnectionState };
