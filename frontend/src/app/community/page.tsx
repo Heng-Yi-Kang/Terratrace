@@ -657,21 +657,205 @@ const ChallengeCard = ({ challenge }: { challenge: Challenge }) => {
   );
 };
 
-const ChallengesSection = () => (
-  <div>
-    <h3 style={{
-      fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '20px',
-      color: '#064E3B', marginBottom: '16px',
-    }}>
-      Active Challenges
-    </h3>
+const earnedBadges = [
+  { name: 'First Step', icon: <LeafIcon />, color: '#FBBF24', earned: true, date: 'Jan 2025' },
+  { name: 'Plastic-Free', icon: <BoltIcon />, color: '#059669', earned: true, date: 'Mar 2025' },
+  { name: 'Local Hero', icon: <MapPinIcon />, color: '#10B981', earned: true, date: 'Apr 2025' },
+  { name: 'Streak: 7', icon: <FireIcon />, color: '#F59E0B', earned: true, date: 'Apr 2025' },
+  { name: 'Carbon Crusher', icon: <LeafIcon />, color: '#FBBF24', earned: false, date: '' },
+  { name: 'Rail Champion', icon: <BoltIcon />, color: '#059669', earned: false, date: '' },
+];
+
+const BadgeShelf = () => (
+  <div style={{
+    background: 'white', borderRadius: '16px', padding: '28px',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.07)',
+    border: '1px solid rgba(5,150,105,0.08)',
+    marginBottom: '24px',
+  }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+      <div>
+        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '18px', color: '#064E3B', marginBottom: '2px' }}>
+          Your Badge Collection
+        </h3>
+        <p style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '13px', color: '#064E3B', opacity: 0.6 }}>
+          {earnedBadges.filter(b => b.earned).length} earned · {earnedBadges.filter(b => !b.earned).length} locked
+        </p>
+      </div>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: '8px',
+        background: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.05))',
+        padding: '8px 16px', borderRadius: '100px',
+        border: '1px solid rgba(245,158,11,0.3)',
+      }}>
+        <BoltIcon className="w-4 h-4" />
+        <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '14px', color: '#064E3B' }}>
+          2,340 points
+        </span>
+      </div>
+    </div>
+
     <div style={{
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-      gap: '20px',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))',
+      gap: '12px',
     }}>
-      {challenges.map(c => <ChallengeCard key={c.id} challenge={c} />)}
+      {earnedBadges.map(b => (
+        <div
+          key={b.name}
+          style={{
+            background: b.earned ? `linear-gradient(135deg, ${b.color}11, ${b.color}06)` : 'rgba(5,150,105,0.04)',
+            border: `1px solid ${b.earned ? b.color + '33' : 'rgba(5,150,105,0.08)'}`,
+            borderRadius: '12px', padding: '16px 12px',
+            textAlign: 'center',
+            opacity: b.earned ? 1 : 0.45,
+            transition: 'transform 200ms ease',
+            cursor: 'default',
+          }}
+          title={b.earned ? `Earned ${b.date}` : 'Not yet earned'}
+        >
+          <div style={{
+            width: '44px', height: '44px',
+            background: b.earned ? `linear-gradient(135deg, ${b.color}, ${b.color}cc)` : 'rgba(5,150,105,0.15)',
+            borderRadius: '12px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: b.earned ? 'white' : '#064E3B',
+            margin: '0 auto 8px',
+            boxShadow: b.earned ? `0 4px 12px ${b.color}55` : 'none',
+            filter: b.earned ? 'none' : 'grayscale(0.5)',
+          }}>
+            {b.icon}
+          </div>
+          <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '12px', color: '#064E3B' }}>
+            {b.name}
+          </div>
+          {b.earned && (
+            <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '10px', color: '#064E3B', opacity: 0.5, marginTop: '2px' }}>
+              {b.date}
+            </div>
+          )}
+        </div>
+      ))}
     </div>
+  </div>
+);
+
+const Leaderboard = () => {
+  const leaders = [
+    { rank: 1, name: 'Sofia Chen', points: 12480, badges: 24, you: false },
+    { rank: 2, name: 'David Park', points: 11203, badges: 21, you: false },
+    { rank: 3, name: 'Aisha Rahman', points: 9856, badges: 19, you: false },
+    { rank: 47, name: 'You', points: 2340, badges: 4, you: true },
+  ];
+
+  return (
+    <div style={{
+      background: 'white', borderRadius: '16px', padding: '28px',
+      boxShadow: '0 4px 6px rgba(0,0,0,0.07)',
+      border: '1px solid rgba(5,150,105,0.08)',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+        <TrophyIcon className="w-5 h-5" />
+        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '18px', color: '#064E3B' }}>
+          This Week&apos;s Leaderboard
+        </h3>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {leaders.map(l => {
+          const isPodium = l.rank <= 3;
+          const podiumColors = ['#F59E0B', '#94A3B8', '#D97706'];
+          return (
+            <div
+              key={l.rank}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '14px',
+                padding: '12px 14px', borderRadius: '10px',
+                background: l.you ? 'rgba(5,150,105,0.08)' : 'transparent',
+                border: l.you ? '1px solid rgba(5,150,105,0.2)' : '1px solid transparent',
+              }}
+            >
+              <div style={{
+                width: '32px', height: '32px', flexShrink: 0,
+                background: isPodium ? podiumColors[l.rank - 1] : 'rgba(5,150,105,0.1)',
+                color: isPodium ? 'white' : '#064E3B',
+                borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '13px',
+              }}>
+                {l.rank}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{
+                  fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '14px',
+                  color: l.you ? '#059669' : '#064E3B',
+                }}>
+                  {l.name}{l.you && ' (you)'}
+                </div>
+                <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '11px', color: '#064E3B', opacity: 0.55 }}>
+                  {l.badges} badges
+                </div>
+              </div>
+              <div style={{
+                fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '14px', color: '#064E3B',
+              }}>
+                {l.points.toLocaleString()}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <button style={{
+        width: '100%', marginTop: '16px',
+        background: 'transparent', color: '#059669',
+        border: '1px solid rgba(5,150,105,0.2)', padding: '10px',
+        borderRadius: '8px', cursor: 'pointer',
+        fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '13px',
+        transition: 'all 200ms ease',
+      }}>
+        View Full Leaderboard
+      </button>
+    </div>
+  );
+};
+
+const ChallengesSection = () => (
+  <div>
+    <BadgeShelf />
+
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'minmax(0, 2fr) minmax(280px, 1fr)',
+      gap: '24px',
+    }} className="challenges-grid">
+      <div>
+        <h3 style={{
+          fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '20px',
+          color: '#064E3B', marginBottom: '16px',
+        }}>
+          Active Challenges
+        </h3>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '20px',
+        }}>
+          {challenges.map(c => <ChallengeCard key={c.id} challenge={c} />)}
+        </div>
+      </div>
+
+      <div style={{ position: 'sticky', top: '24px', alignSelf: 'start' }} className="leaderboard-col">
+        <Leaderboard />
+      </div>
+    </div>
+
+    <style>{`
+      @media (max-width: 900px) {
+        .challenges-grid { grid-template-columns: 1fr !important; }
+        .leaderboard-col { position: static !important; }
+      }
+    `}</style>
   </div>
 );
 
