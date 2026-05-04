@@ -6,8 +6,9 @@ import OverviewTab from '@/components/dashboard/OverviewTab'
 import TripsTab from '@/components/dashboard/TripsTab'
 import CarbonTab from '@/components/dashboard/CarbonTab'
 import SavedTab from '@/components/dashboard/SavedTab'
+import ProfileTab from '@/components/dashboard/ProfileTab'
 
-type Tab = 'overview' | 'trips' | 'carbon' | 'saved'
+type Tab = 'overview' | 'trips' | 'carbon' | 'saved' | 'profile'
 
 export default function DashboardContent() {
   const [activeTab, setActiveTab] = useState<Tab>('overview')
@@ -23,6 +24,8 @@ export default function DashboardContent() {
         return <CarbonTab />
       case 'saved':
         return <SavedTab />
+      case 'profile':
+        return <ProfileTab />
       default:
         return <OverviewTab />
     }
