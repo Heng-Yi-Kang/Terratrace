@@ -58,10 +58,14 @@ const Navbar = () => (
           <a href="#testimonials" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">Stories</a>
           <a href="#cta" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">About</a>
         </div>
-        <button className="bg-primary text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-secondary transition-colors duration-200 cursor-pointer flex items-center gap-2">
-          Start Planning
-          <ArrowRightIcon />
-        </button>
+        <div className="flex items-center gap-4">
+          <a href="/login" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">
+            Log in
+          </a>
+          <a href="/signup" className="bg-primary text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-secondary transition-colors duration-200 cursor-pointer">
+            Sign Up
+          </a>
+        </div>
       </div>
     </div>
   </nav>

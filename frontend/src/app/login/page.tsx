@@ -1,0 +1,57 @@
+'use client'
+
+import { useRouter } from 'next/navigation'
+import AuthForm from '@/components/auth/AuthForm'
+import { signIn, getRedirectPath } from '@/utils/supabase/auth'
+
+export default function LoginPage() {
+  const router = useRouter()
+
+  const handleLogin = async (email: string, password: string) => {
+    const { error } = await signIn(email, password)
+    if (error) {
+      throw new Error(error.message)
+    }
+    const redirectPath = await getRedirectPath()
+    router.push(redirectPath)
+    router.refresh()
+  }
+
+  return (
+    <main className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 mb-6 shadow-organic">
+            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9A9 9 0 0012 3a9 9 0 00-4.5 9c0 4.97 2.015 9 4.5 9z" />
+              </svg>
+            </div>
+            <span className="text-sm font-medium text-text">Terratrace</span>
+          </div>
+          <h1 className="font-heading font-bold text-3xl text-text mb-2">Welcome Back</h1>
+          <p className="text-text/70">Log in to continue your eco-friendly journey</p>
+        </div>
+
+        <div className="bg-white/80 backdrop-blur-md rounded-organic-lg p-8 shadow-organic">
+          <AuthForm mode="login" onSubmit={handleLogin} />
+
+          <div className="mt-6 text-center">
+            <p className="text-text/70 text-sm">
+              Don&apos;t have an account?{' '}
+              <a href="/signup" className="text-primary font-medium hover:text-secondary transition-colors">
+                Sign up
+              </a>
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-8 text-center">
+          <a href="/" className="text-text/60 text-sm hover:text-primary transition-colors">
+            ← Back to home
+          </a>
+        </div>
+      </div>
+    </main>
+  )
+}
