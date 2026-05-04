@@ -48,21 +48,6 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
   return (
     <div className="w-full max-w-md">
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-text mb-2">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-text/20 bg-white/80 text-text placeholder-text/40 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-200"
-            placeholder="you@example.com"
-            required
-          />
-        </div>
-
         {mode === 'signup' && (
           <div>
             <label htmlFor="username" className="block text-sm font-medium text-text mb-2">
@@ -79,6 +64,21 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
             />
           </div>
         )}
+
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-text mb-2">
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-3 rounded-xl border border-text/20 bg-white/80 text-text placeholder-text/40 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-200"
+            placeholder="you@example.com"
+            required
+          />
+        </div>
 
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-text mb-2">
