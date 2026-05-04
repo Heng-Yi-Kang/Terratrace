@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { tokens } from './tokens';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -120,7 +121,7 @@ const PageHeader = () => (
         marginBottom: '16px', maxWidth: '720px',
       }}>
         Build the Movement,<br />
-        <span style={{ color: '#10B981' }}>One Trip at a Time.</span>
+        <span style={{ color: tokens.secondary }}>One Trip at a Time.</span>
       </h1>
       <p style={{
         fontFamily: 'Open Sans, sans-serif', fontSize: '17px',
@@ -182,8 +183,8 @@ const TabSwitcher = ({ active, onChange }: { active: Tab; onChange: (t: Tab) => 
           padding: '10px 20px', borderRadius: '10px',
           border: 'none', cursor: 'pointer',
           fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '14px',
-          background: active === t.id ? '#059669' : 'transparent',
-          color: active === t.id ? 'white' : '#064E3B',
+          background: active === t.id ? tokens.primary : 'transparent',
+          color: active === t.id ? 'white' : tokens.text,
           transition: 'all 200ms ease',
         }}
       >
@@ -223,7 +224,7 @@ const reviews: Review[] = [
     title: 'Genuinely sustainable, not just greenwashed',
     body: 'Solar panels powering everything, on-site composting, rainwater harvesting visible across the property. Staff are mostly locals and they actively run reforestation programs guests can join.',
     practices: ['Solar Energy', 'Local Hiring', 'Reforestation', 'Zero Waste'],
-    helpful: 142, verified: true, color: '#FBBF24',
+    helpful: 142, verified: true, color: tokens.cta,
   },
   {
     id: 2,
@@ -233,7 +234,7 @@ const reviews: Review[] = [
     title: 'Strong on materials, weaker on energy',
     body: 'Beautiful traditional construction with sustainable bamboo and reclaimed wood. Locally-sourced food was excellent. Half-star deduction — energy mix is still mostly grid, no visible renewables.',
     practices: ['Local Food', 'Sustainable Materials', 'Water Conservation'],
-    helpful: 89, verified: true, color: '#059669',
+    helpful: 89, verified: true, color: tokens.primary,
   },
   {
     id: 3,
@@ -243,7 +244,7 @@ const reviews: Review[] = [
     title: 'Pack-in pack-out is non-negotiable for them',
     body: 'Guides actively educate every group on Leave No Trace. They contract directly with Berber families and a large share of fees goes back into village schools. Refreshing to see structural impact.',
     practices: ['Leave No Trace', 'Community Investment', 'Fair Wages'],
-    helpful: 203, verified: true, color: '#10B981',
+    helpful: 203, verified: true, color: tokens.secondary,
   },
   {
     id: 4,
@@ -253,12 +254,12 @@ const reviews: Review[] = [
     title: 'Hyper-local sourcing done right',
     body: 'Everything on the menu was caught or grown within a few kilometers of Lake Titicaca. Owned and run by a Uros family. The only reason it isn\u2019t five stars is the single-use plastic for takeaway.',
     practices: ['Hyper-Local Food', 'Indigenous-Owned', 'Cultural Heritage'],
-    helpful: 67, verified: false, color: '#FBBF24',
+    helpful: 67, verified: false, color: tokens.cta,
   },
 ];
 
 const StarRating = ({ rating }: { rating: number }) => (
-  <div style={{ display: 'inline-flex', gap: '2px', color: '#F59E0B' }}>
+  <div style={{ display: 'inline-flex', gap: '2px', color: tokens.amber }}>
     {[1, 2, 3, 4, 5].map(i => <StarIcon key={i} filled={i <= rating} className="w-4 h-4" />)}
   </div>
 );
@@ -286,7 +287,7 @@ const ReviewCard = ({ review }: { review: Review }) => {
       }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
-            <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '17px', color: '#064E3B' }}>
+            <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '17px', color: tokens.text }}>
               {review.location}
             </h3>
             <span style={{
@@ -297,7 +298,7 @@ const ReviewCard = ({ review }: { review: Review }) => {
               {review.category}
             </span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#064E3B', opacity: 0.6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: tokens.text, opacity: 0.6 }}>
             <MapPinIcon className="w-3 h-3" />
             <span style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '13px' }}>
               {review.city}, {review.country}
@@ -306,16 +307,16 @@ const ReviewCard = ({ review }: { review: Review }) => {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
           <StarRating rating={review.rating} />
-          <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', fontWeight: 600, color: '#064E3B' }}>
+          <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', fontWeight: 600, color: tokens.text }}>
             {review.rating}.0 / 5
           </span>
         </div>
       </div>
 
-      <h4 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '15px', color: '#064E3B', marginBottom: '8px' }}>
+      <h4 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '15px', color: tokens.text, marginBottom: '8px' }}>
         {review.title}
       </h4>
-      <p style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '14px', color: '#064E3B', opacity: 0.75, lineHeight: 1.65, marginBottom: '20px' }}>
+      <p style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '14px', color: tokens.text, opacity: 0.75, lineHeight: 1.65, marginBottom: '20px' }}>
         {review.body}
       </p>
 
@@ -325,7 +326,7 @@ const ReviewCard = ({ review }: { review: Review }) => {
           <span key={p} style={{
             display: 'inline-flex', alignItems: 'center', gap: '4px',
             fontFamily: 'Open Sans, sans-serif', fontSize: '11px', fontWeight: 600,
-            background: 'rgba(251,191,36,0.1)', color: '#FBBF24',
+            background: 'rgba(251,191,36,0.1)', color: tokens.cta,
             padding: '4px 10px', borderRadius: '100px',
           }}>
             <LeafIcon className="w-3 h-3" />
@@ -352,16 +353,16 @@ const ReviewCard = ({ review }: { review: Review }) => {
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '13px', color: '#064E3B' }}>
+              <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '13px', color: tokens.text }}>
                 {review.reviewer}
               </span>
               {review.verified && (
-                <span style={{ color: '#059669' }} title="Verified traveler">
+                <span style={{ color: tokens.primary }} title="Verified traveler">
                   <CheckBadgeIcon className="w-4 h-4" />
                 </span>
               )}
             </div>
-            <span style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '11px', color: '#064E3B', opacity: 0.55 }}>
+            <span style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '11px', color: tokens.text, opacity: 0.55 }}>
               {review.date}
             </span>
           </div>
@@ -372,8 +373,8 @@ const ReviewCard = ({ review }: { review: Review }) => {
           style={{
             display: 'flex', alignItems: 'center', gap: '6px',
             background: marked ? 'rgba(5,150,105,0.1)' : 'transparent',
-            border: `1px solid ${marked ? '#059669' : 'rgba(5,150,105,0.2)'}`,
-            color: marked ? '#059669' : '#064E3B',
+            border: `1px solid ${marked ? tokens.primary : 'rgba(5,150,105,0.2)'}`,
+            color: marked ? tokens.primary : tokens.text,
             padding: '6px 12px', borderRadius: '100px',
             fontFamily: 'Open Sans, sans-serif', fontWeight: 600, fontSize: '12px',
             cursor: 'pointer', transition: 'all 200ms ease',
@@ -400,7 +401,7 @@ const ReviewsSection = () => {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           <FilterIcon className="w-4 h-4" />
-          <span style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '13px', color: '#064E3B', opacity: 0.6, marginRight: '4px' }}>
+          <span style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '13px', color: tokens.text, opacity: 0.6, marginRight: '4px' }}>
             Filter:
           </span>
           {filters.map(f => (
@@ -410,9 +411,9 @@ const ReviewsSection = () => {
               style={{
                 padding: '6px 14px', borderRadius: '100px',
                 border: '1px solid',
-                borderColor: filter === f ? '#059669' : 'rgba(5,150,105,0.15)',
-                background: filter === f ? '#059669' : 'white',
-                color: filter === f ? 'white' : '#064E3B',
+                borderColor: filter === f ? tokens.primary : 'rgba(5,150,105,0.15)',
+                background: filter === f ? tokens.primary : 'white',
+                color: filter === f ? 'white' : tokens.text,
                 fontFamily: 'Open Sans, sans-serif', fontSize: '12px', fontWeight: 600,
                 cursor: 'pointer', transition: 'all 200ms ease',
               }}
@@ -424,7 +425,7 @@ const ReviewsSection = () => {
 
         <button style={{
           display: 'flex', alignItems: 'center', gap: '8px',
-          background: '#FBBF24', color: 'white',
+          background: tokens.cta, color: 'white',
           padding: '10px 18px', borderRadius: '8px', border: 'none',
           fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '13px',
           cursor: 'pointer', boxShadow: '0 4px 12px rgba(251,191,36,0.35)',
@@ -446,7 +447,7 @@ const ReviewsSection = () => {
       {filtered.length === 0 && (
         <div style={{
           textAlign: 'center', padding: '60px 20px',
-          fontFamily: 'Open Sans, sans-serif', color: '#064E3B', opacity: 0.5,
+          fontFamily: 'Open Sans, sans-serif', color: tokens.text, opacity: 0.5,
         }}>
           No reviews in this category yet. Be the first to write one!
         </div>
@@ -480,7 +481,7 @@ const challenges: Challenge[] = [
     title: 'Low Carbon Week',
     description: 'Keep your daily travel emissions under 5kg CO\u2082 for 7 consecutive days.',
     reward: 'Carbon Crusher Badge', points: 500,
-    badge: 'Carbon Crusher', badgeColor: '#FBBF24',
+    badge: 'Carbon Crusher', badgeColor: tokens.cta,
     badgeIcon: <LeafIcon />,
     category: 'Active',
     progress: 5, total: 7, unit: 'days',
@@ -491,7 +492,7 @@ const challenges: Challenge[] = [
     title: 'Train Over Plane',
     description: 'Choose rail travel over flights for 3 trips of 500km or less.',
     reward: 'Rail Champion Badge', points: 750,
-    badge: 'Rail Champion', badgeColor: '#059669',
+    badge: 'Rail Champion', badgeColor: tokens.primary,
     badgeIcon: <BoltIcon />,
     category: 'Featured',
     progress: 1, total: 3, unit: 'trips',
@@ -502,7 +503,7 @@ const challenges: Challenge[] = [
     title: 'Eco-Reviewer Streak',
     description: 'Write 10 verified eco-reviews of certified-green stays this month.',
     reward: 'Community Voice Badge', points: 400,
-    badge: 'Community Voice', badgeColor: '#10B981',
+    badge: 'Community Voice', badgeColor: tokens.secondary,
     badgeIcon: <PencilIcon />,
     category: 'Streak',
     progress: 7, total: 10, unit: 'reviews',
@@ -513,7 +514,7 @@ const challenges: Challenge[] = [
     title: 'Plant a Forest',
     description: 'Offset 1 ton of CO\u2082 by supporting verified reforestation partners.',
     reward: 'Forest Guardian Badge', points: 1000,
-    badge: 'Forest Guardian', badgeColor: '#FBBF24',
+    badge: 'Forest Guardian', badgeColor: tokens.cta,
     badgeIcon: <GlobeIcon />,
     category: 'Featured',
     progress: 720, total: 1000, unit: 'kg',
@@ -525,9 +526,9 @@ const ChallengeCard = ({ challenge }: { challenge: Challenge }) => {
   const [hovered, setHovered] = useState(false);
   const pct = (challenge.progress / challenge.total) * 100;
   const catColors: Record<Challenge['category'], string> = {
-    Active: '#FBBF24',
-    Featured: '#059669',
-    Streak: '#F59E0B',
+    Active: tokens.cta,
+    Featured: tokens.primary,
+    Streak: tokens.streak,
   };
 
   return (
@@ -568,7 +569,7 @@ const ChallengeCard = ({ challenge }: { challenge: Challenge }) => {
         </div>
         <div style={{
           display: 'flex', alignItems: 'center', gap: '4px',
-          fontFamily: 'Open Sans, sans-serif', fontSize: '12px', color: '#064E3B', opacity: 0.6,
+          fontFamily: 'Open Sans, sans-serif', fontSize: '12px', color: tokens.text, opacity: 0.6,
         }}>
           ⏱ {challenge.daysLeft} days left
         </div>
@@ -587,13 +588,13 @@ const ChallengeCard = ({ challenge }: { challenge: Challenge }) => {
           {challenge.badgeIcon}
         </div>
         <div style={{ minWidth: 0, flex: 1 }}>
-          <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '17px', color: '#064E3B', marginBottom: '2px' }}>
+          <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '17px', color: tokens.text, marginBottom: '2px' }}>
             {challenge.title}
           </h3>
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: '4px',
             fontFamily: 'Open Sans, sans-serif', fontSize: '12px', fontWeight: 600,
-            color: '#F59E0B',
+            color: tokens.amber,
           }}>
             <BoltIcon className="w-3 h-3" />
             +{challenge.points} pts · {challenge.badge}
@@ -603,7 +604,7 @@ const ChallengeCard = ({ challenge }: { challenge: Challenge }) => {
 
       <p style={{
         fontFamily: 'Open Sans, sans-serif', fontSize: '13px',
-        color: '#064E3B', opacity: 0.7, lineHeight: 1.6, marginBottom: '20px',
+        color: tokens.text, opacity: 0.7, lineHeight: 1.6, marginBottom: '20px',
       }}>
         {challenge.description}
       </p>
@@ -614,7 +615,7 @@ const ChallengeCard = ({ challenge }: { challenge: Challenge }) => {
           display: 'flex', justifyContent: 'space-between',
           alignItems: 'center', marginBottom: '6px',
         }}>
-          <span style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '12px', fontWeight: 600, color: '#064E3B' }}>
+          <span style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '12px', fontWeight: 600, color: tokens.text }}>
             Progress
           </span>
           <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: 700, color: catColors[challenge.category] }}>
@@ -639,12 +640,12 @@ const ChallengeCard = ({ challenge }: { challenge: Challenge }) => {
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         paddingTop: '16px', borderTop: '1px solid rgba(5,150,105,0.08)',
       }}>
-        <span style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '12px', color: '#064E3B', opacity: 0.6 }}>
+        <span style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '12px', color: tokens.text, opacity: 0.6 }}>
           {challenge.participants.toLocaleString()} joined
         </span>
         <button style={{
           display: 'flex', alignItems: 'center', gap: '6px',
-          background: 'transparent', color: '#059669',
+          background: 'transparent', color: tokens.primary,
           border: 'none', padding: '4px 0',
           fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '13px',
           cursor: 'pointer', transition: 'gap 200ms ease',
@@ -658,12 +659,12 @@ const ChallengeCard = ({ challenge }: { challenge: Challenge }) => {
 };
 
 const earnedBadges = [
-  { name: 'First Step', icon: <LeafIcon />, color: '#FBBF24', earned: true, date: 'Jan 2025' },
-  { name: 'Plastic-Free', icon: <BoltIcon />, color: '#059669', earned: true, date: 'Mar 2025' },
-  { name: 'Local Hero', icon: <MapPinIcon />, color: '#10B981', earned: true, date: 'Apr 2025' },
-  { name: 'Streak: 7', icon: <FireIcon />, color: '#F59E0B', earned: true, date: 'Apr 2025' },
-  { name: 'Carbon Crusher', icon: <LeafIcon />, color: '#FBBF24', earned: false, date: '' },
-  { name: 'Rail Champion', icon: <BoltIcon />, color: '#059669', earned: false, date: '' },
+  { name: 'First Step', icon: <LeafIcon />, color: tokens.cta, earned: true, date: 'Jan 2025' },
+  { name: 'Plastic-Free', icon: <BoltIcon />, color: tokens.primary, earned: true, date: 'Mar 2025' },
+  { name: 'Local Hero', icon: <MapPinIcon />, color: tokens.secondary, earned: true, date: 'Apr 2025' },
+  { name: 'Streak: 7', icon: <FireIcon />, color: tokens.streak, earned: true, date: 'Apr 2025' },
+  { name: 'Carbon Crusher', icon: <LeafIcon />, color: tokens.cta, earned: false, date: '' },
+  { name: 'Rail Champion', icon: <BoltIcon />, color: tokens.primary, earned: false, date: '' },
 ];
 
 const BadgeShelf = () => (
@@ -675,10 +676,10 @@ const BadgeShelf = () => (
   }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
       <div>
-        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '18px', color: '#064E3B', marginBottom: '2px' }}>
+        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '18px', color: tokens.text, marginBottom: '2px' }}>
           Your Badge Collection
         </h3>
-        <p style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '13px', color: '#064E3B', opacity: 0.6 }}>
+        <p style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '13px', color: tokens.text, opacity: 0.6 }}>
           {earnedBadges.filter(b => b.earned).length} earned · {earnedBadges.filter(b => !b.earned).length} locked
         </p>
       </div>
@@ -689,7 +690,7 @@ const BadgeShelf = () => (
         border: '1px solid rgba(245,158,11,0.3)',
       }}>
         <BoltIcon className="w-4 h-4" />
-        <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '14px', color: '#064E3B' }}>
+        <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '14px', color: tokens.text }}>
           2,340 points
         </span>
       </div>
@@ -719,18 +720,18 @@ const BadgeShelf = () => (
             background: b.earned ? `linear-gradient(135deg, ${b.color}, ${b.color}cc)` : 'rgba(5,150,105,0.15)',
             borderRadius: '12px',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: b.earned ? 'white' : '#064E3B',
+            color: b.earned ? 'white' : tokens.text,
             margin: '0 auto 8px',
             boxShadow: b.earned ? `0 4px 12px ${b.color}55` : 'none',
             filter: b.earned ? 'none' : 'grayscale(0.5)',
           }}>
             {b.icon}
           </div>
-          <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '12px', color: '#064E3B' }}>
+          <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '12px', color: tokens.text }}>
             {b.name}
           </div>
           {b.earned && (
-            <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '10px', color: '#064E3B', opacity: 0.5, marginTop: '2px' }}>
+            <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '10px', color: tokens.text, opacity: 0.5, marginTop: '2px' }}>
               {b.date}
             </div>
           )}
@@ -756,7 +757,7 @@ const Leaderboard = () => {
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
         <TrophyIcon className="w-5 h-5" />
-        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '18px', color: '#064E3B' }}>
+        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '18px', color: tokens.text }}>
           This Week&apos;s Leaderboard
         </h3>
       </div>
@@ -764,7 +765,7 @@ const Leaderboard = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {leaders.map(l => {
           const isPodium = l.rank <= 3;
-          const podiumColors = ['#F59E0B', '#94A3B8', '#D97706'];
+          const podiumColors = [tokens.amber, '#94A3B8', '#D97706'];
           return (
             <div
               key={l.rank}
@@ -778,7 +779,7 @@ const Leaderboard = () => {
               <div style={{
                 width: '32px', height: '32px', flexShrink: 0,
                 background: isPodium ? podiumColors[l.rank - 1] : 'rgba(5,150,105,0.1)',
-                color: isPodium ? 'white' : '#064E3B',
+                color: isPodium ? 'white' : tokens.text,
                 borderRadius: '50%',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '13px',
@@ -788,16 +789,16 @@ const Leaderboard = () => {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{
                   fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '14px',
-                  color: l.you ? '#059669' : '#064E3B',
+                  color: l.you ? tokens.primary : tokens.text,
                 }}>
                   {l.name}{l.you && ' (you)'}
                 </div>
-                <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '11px', color: '#064E3B', opacity: 0.55 }}>
+                <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '11px', color: tokens.text, opacity: 0.55 }}>
                   {l.badges} badges
                 </div>
               </div>
               <div style={{
-                fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '14px', color: '#064E3B',
+                fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '14px', color: tokens.text,
               }}>
                 {l.points.toLocaleString()}
               </div>
@@ -808,7 +809,7 @@ const Leaderboard = () => {
 
       <button style={{
         width: '100%', marginTop: '16px',
-        background: 'transparent', color: '#059669',
+        background: 'transparent', color: tokens.primary,
         border: '1px solid rgba(5,150,105,0.2)', padding: '10px',
         borderRadius: '8px', cursor: 'pointer',
         fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '13px',
@@ -832,7 +833,7 @@ const ChallengesSection = () => (
       <div>
         <h3 style={{
           fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '20px',
-          color: '#064E3B', marginBottom: '16px',
+          color: tokens.text, marginBottom: '16px',
         }}>
           Active Challenges
         </h3>
@@ -865,7 +866,7 @@ export default function CommunityImpactPage() {
   const [tab, setTab] = useState<Tab>('reviews');
 
   return (
-    <main style={{ minHeight: '100vh', background: '#ECFDF5' }}>
+    <main style={{ minHeight: '100vh', background: tokens.background }}>
       <PageHeader />
       <section style={{ padding: '48px 24px 96px' }}>
         <div style={{ maxWidth: '1152px', margin: '0 auto' }}>
