@@ -87,7 +87,6 @@ const Navbar = () => (
         </Link>
         <div className="hidden md:flex items-center gap-8">
           <Link href="/#features" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">Features</Link>
-          <Link href="/smart-recommendation" className="text-primary transition-colors duration-200 cursor-pointer font-medium">Smart Recommendation</Link>
           <Link href="/#weather" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">Weather</Link>
           <Link href="/#testimonials" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">Stories</Link>
           <Link href="/#cta" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">About</Link>
