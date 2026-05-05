@@ -275,33 +275,54 @@ const budgetFitScore = (estimatedCost: number, budgetPerDay: number): number => 
   return clamp(1 - Math.max(0, estimatedCost - budgetPerDay) / Math.max(budgetPerDay, 1))
 }
 
-const extractBlocks = (html: string): string[] => {
-  const blocks: string[] = []
-  const blockRegex = /<div class="result__body">([\s\S]*?)<\/div>\s*<\/div>/g
-  let match = blockRegex.exec(html)
+const parseSearchResultsFromHtml = (html: string): Array<{ title: string; url: string; snippet: string }> => {
+  const results: Array<{ title: string; url: string; snippet: string }> = []
 
-  while (match && blocks.length < 24) {
-    blocks.push(match[1])
-    match = blockRegex.exec(html)
+  const primaryRegex = /<a[^>]*class="result__a"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g
+  let match = primaryRegex.exec(html)
+
+  while (match && results.length < 20) {
+    const rawUrl = htmlDecode(match[1])
+    const title = htmlDecode(stripTags(match[2]))
+
+    const windowStart = Math.max(0, match.index - 300)
+    const windowEnd = Math.min(html.length, match.index + 1200)
+    const nearby = html.slice(windowStart, windowEnd)
+
+    const snippetMatch = nearby.match(/<a[^>]*class="result__snippet"[^>]*>([\s\S]*?)<\/a>|<div[^>]*class="result__snippet"[^>]*>([\s\S]*?)<\/div>/)
+    const snippet = htmlDecode(stripTags(snippetMatch?.[1] || snippetMatch?.[2] || ''))
+    const decodedUrl = decodeDuckDuckGoUrl(rawUrl)
+
+    if (title && decodedUrl) {
+      results.push({ title, url: decodedUrl, snippet })
+    }
+
+    match = primaryRegex.exec(html)
   }
 
-  return blocks
-}
+  if (results.length > 0) {
+    return results
+  }
 
-const parseSearchBlock = (block: string): { title: string; url: string; snippet: string } | null => {
-  const linkMatch = block.match(/<a[^>]*class="result__a"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/)
-  if (!linkMatch) return null
+  // Fallback parser: generic links in case DuckDuckGo markup changes
+  const genericRegex = /<a[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g
+  let genericMatch = genericRegex.exec(html)
 
-  const rawUrl = htmlDecode(linkMatch[1])
-  const title = htmlDecode(stripTags(linkMatch[2]))
+  while (genericMatch && results.length < 20) {
+    const rawUrl = htmlDecode(genericMatch[1])
+    const title = htmlDecode(stripTags(genericMatch[2]))
 
-  const snippetMatch = block.match(/<a[^>]*class="result__snippet"[^>]*>([\s\S]*?)<\/a>|<div[^>]*class="result__snippet"[^>]*>([\s\S]*?)<\/div>/)
-  const snippet = htmlDecode(stripTags(snippetMatch?.[1] || snippetMatch?.[2] || ''))
+    const decodedUrl = decodeDuckDuckGoUrl(rawUrl)
+    const domain = domainFromUrl(decodedUrl)
 
-  const decodedUrl = decodeDuckDuckGoUrl(rawUrl)
-  if (!title || !decodedUrl) return null
+    if (title && decodedUrl && domain && !decodedUrl.includes('duckduckgo.com')) {
+      results.push({ title, url: decodedUrl, snippet: '' })
+    }
 
-  return { title, url: decodedUrl, snippet }
+    genericMatch = genericRegex.exec(html)
+  }
+
+  return results
 }
 
 const weatherCodeToCondition = (code: number): WeatherContext['condition'] => {
@@ -414,9 +435,7 @@ const fetchWebSearchResults = async (query: string): Promise<Array<{ title: stri
   }
 
   const html = await response.text()
-  const blocks = extractBlocks(html)
-
-  const parsed = blocks.map(parseSearchBlock).filter((item): item is { title: string; url: string; snippet: string } => !!item)
+  const parsed = parseSearchResultsFromHtml(html)
   return parsed.slice(0, 8)
 }
 
@@ -728,7 +747,97 @@ router.post('/smart', async (req: Request, res: Response) => {
   const shortlisted = await buildCandidates(input, weather)
 
   if (shortlisted.length === 0) {
-    return res.status(404).json({ error: 'No trusted eco candidates found for this query.', requestId })
+    console.warn('[smart-recommendation] shortlist-empty', {
+      requestId,
+      city: input.city,
+      interests: input.interests,
+      startDate: input.startDate,
+      endDate: input.endDate,
+    })
+
+    // Graceful deterministic fallback so users still get actionable output
+    const fallbackCandidates: SearchCandidate[] = [
+      {
+        id: 'fallback-1',
+        name: `${input.city} Community Eco Hotel`,
+        url: `https://www.google.com/search?q=${encodeURIComponent(`${input.city} eco certified hotel`)}`,
+        snippet: 'Fallback recommendation generated due to low-confidence web search results. Verify certification before booking.',
+        sourceDomain: 'google.com',
+        category: 'accommodation',
+        estimatedCost: Math.max(30, Math.round(input.budget / Math.max(1, dateSpan(input.startDate, input.endDate).length) * 0.5)),
+        isIndoorLikely: true,
+        ecoEvidenceScore: 0.55,
+        sourceTrustScore: 0.5,
+        scoreBreakdown: {
+          ecoCertScore: 0.55,
+          interestMatch: 0.5,
+          weatherFit: 0.8,
+          budgetFit: 0.6,
+          total: 0.615,
+        },
+      },
+      {
+        id: 'fallback-2',
+        name: `${input.city} Local Sustainable Food Market`,
+        url: `https://www.google.com/search?q=${encodeURIComponent(`${input.city} sustainable restaurant local market`)}`,
+        snippet: 'Fallback recommendation generated due to low-confidence web search results. Verify sustainability claims locally.',
+        sourceDomain: 'google.com',
+        category: 'restaurant',
+        estimatedCost: Math.max(15, Math.round(input.budget / Math.max(1, dateSpan(input.startDate, input.endDate).length) * 0.22)),
+        isIndoorLikely: true,
+        ecoEvidenceScore: 0.52,
+        sourceTrustScore: 0.5,
+        scoreBreakdown: {
+          ecoCertScore: 0.52,
+          interestMatch: 0.55,
+          weatherFit: 0.85,
+          budgetFit: 0.7,
+          total: 0.635,
+        },
+      },
+      {
+        id: 'fallback-3',
+        name: `${input.city} Low-impact Local Activity`,
+        url: `https://www.google.com/search?q=${encodeURIComponent(`${input.city} eco friendly activity local community`)}`,
+        snippet: 'Fallback recommendation generated due to low-confidence web search results. Prefer operators with transparent eco policies.',
+        sourceDomain: 'google.com',
+        category: 'activity',
+        estimatedCost: Math.max(18, Math.round(input.budget / Math.max(1, dateSpan(input.startDate, input.endDate).length) * 0.28)),
+        isIndoorLikely: false,
+        ecoEvidenceScore: 0.5,
+        sourceTrustScore: 0.5,
+        scoreBreakdown: {
+          ecoCertScore: 0.5,
+          interestMatch: 0.6,
+          weatherFit: 0.7,
+          budgetFit: 0.7,
+          total: 0.61,
+        },
+      },
+    ]
+
+    const fallbackPlan = await fallbackProvider.generate({
+      input,
+      weather,
+      shortlisted: fallbackCandidates,
+    })
+
+    const payload: SmartRecommendationResponse = {
+      requestId,
+      provider: 'deterministic-fallback',
+      cacheHit: false,
+      weather,
+      scoringWeights,
+      shortlistedCandidates: fallbackCandidates,
+      plan: fallbackPlan,
+    }
+
+    cache.set(cacheKey, {
+      expiresAt: Date.now() + cacheTTLms,
+      value: payload,
+    })
+
+    return res.status(200).json(payload)
   }
 
   console.info('[smart-recommendation] request', {
