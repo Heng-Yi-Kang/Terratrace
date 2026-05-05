@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getCurrentUser } from '@/utils/supabase/auth'
+import { getCurrentUser, signOut, deleteAccount } from '@/utils/supabase/auth'
 import { supabase } from '@/utils/supabase/client'
 
 export default function ProfileTab() {
@@ -20,6 +20,12 @@ export default function ProfileTab() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [isChangingPassword, setIsChangingPassword] = useState(false)
   const [passwordMessage, setPasswordMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+
+  // Delete account state
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteMessage, setDeleteMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   useEffect(() => {
     async function fetchUser() {
@@ -124,6 +130,35 @@ export default function ProfileTab() {
     setConfirmPassword('')
     setShowPasswordForm(false)
     setPasswordMessage(null)
+  }
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== 'DELETE') return
+
+    setIsDeleting(true)
+    setDeleteMessage(null)
+
+    const { error } = await deleteAccount()
+
+    if (error) {
+      setDeleteMessage({ type: 'error', text: error.message })
+      setIsDeleting(false)
+    } else {
+      await signOut()
+      window.location.href = '/?deleted=true'
+    }
+  }
+
+  const openDeleteModal = () => {
+    setDeleteConfirmText('')
+    setDeleteMessage(null)
+    setShowDeleteModal(true)
+  }
+
+  const closeDeleteModal = () => {
+    setDeleteConfirmText('')
+    setDeleteMessage(null)
+    setShowDeleteModal(false)
   }
 
   return (
@@ -315,7 +350,98 @@ export default function ProfileTab() {
             )}
           </div>
         </div>
+
+        {/* Delete Account Section */}
+        <div className="border-t border-text/10 pt-6 mt-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-sans font-semibold text-lg text-red-600">Delete Account</h3>
+              <p className="font-sans text-sm text-text/60 mt-1">Permanently delete your account and all associated data</p>
+            </div>
+            <button
+              onClick={openDeleteModal}
+              className="px-4 py-2 bg-red-600 text-white rounded-xl font-sans font-medium hover:bg-red-700 transition-colors duration-200 cursor-pointer"
+            >
+              Delete Account
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-organic p-6 max-w-md w-full mx-4 shadow-organic-lg">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-sans font-bold text-xl text-text">Delete Account</h3>
+                <p className="font-sans text-sm text-text/60">This action cannot be undone</p>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <p className="font-sans text-text mb-4">
+                You are about to permanently delete your account. This will remove:
+              </p>
+              <ul className="list-disc list-inside font-sans text-sm text-text/70 space-y-1 mb-4">
+                <li>Your profile information</li>
+                <li>All your saved destinations</li>
+                <li>Trip history and carbon footprint data</li>
+              </ul>
+              <p className="font-sans text-sm text-text/70">
+                Account: <span className="font-medium text-text">{email}</span>
+              </p>
+            </div>
+
+            {deleteMessage && (
+              <div
+                className={`mb-4 p-3 rounded-xl ${
+                  deleteMessage.type === 'success'
+                    ? 'bg-green-50 text-green-700 border border-green-200'
+                    : 'bg-red-50 text-red-700 border border-red-200'
+                }`}
+              >
+                <p className="font-sans text-sm">{deleteMessage.text}</p>
+              </div>
+            )}
+
+            <div className="mb-6">
+              <label className="block font-sans font-medium text-text mb-2">
+                Type <span className="font-bold text-red-600">DELETE</span> to confirm
+              </label>
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-text/20 font-sans text-text focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all duration-200"
+                placeholder="DELETE"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleteConfirmText !== 'DELETE' || isDeleting}
+                className="flex-1 px-6 py-3 bg-red-600 text-white rounded-xl font-sans font-medium hover:bg-red-700 transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Account'}
+              </button>
+              <button
+                onClick={closeDeleteModal}
+                disabled={isDeleting}
+                className="px-6 py-3 bg-text/10 text-text rounded-xl font-sans font-medium hover:bg-text/20 transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

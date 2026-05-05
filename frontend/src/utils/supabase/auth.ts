@@ -39,6 +39,33 @@ export async function getSession() {
   return supabase.auth.getSession()
 }
 
+export async function deleteAccount() {
+  const supabase = createClient()
+  if (!supabase) return { error: { message: 'Supabase not configured' } }
+
+  // Get the current session to get the access token
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) {
+    return { error: { message: 'Not authenticated' } }
+  }
+
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+
+  const response = await fetch(`${apiUrl}/api/user/account`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${session.access_token}`
+    }
+  })
+
+  if (!response.ok) {
+    const data = await response.json()
+    return { error: { message: data.error || 'Failed to delete account' } }
+  }
+
+  return { success: true }
+}
+
 export async function getRedirectPath(): Promise<string> {
   const supabase = createClient()
   if (!supabase) return '/login'
