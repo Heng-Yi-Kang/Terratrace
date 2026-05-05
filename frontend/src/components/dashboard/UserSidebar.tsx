@@ -84,7 +84,7 @@ export default function UserSidebar() {
           </div>
           <div>
             <h1 className="font-sans font-bold text-xl tracking-tight">Terratrace</h1>
-            <p className="text-white/70 text-sm">Eco Travel Dashboard</p>
+            <p className="text-white/80 text-sm">Eco Travel Dashboard</p>
           </div>
         </div>
       </div>
@@ -96,8 +96,8 @@ export default function UserSidebar() {
             <span className="font-sans font-bold text-lg text-[#22C55E]">{getInitial()}</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-sans font-semibold text-sm truncate">{username || 'Eco Traveler'}</p>
-            <p className="text-white/60 text-xs truncate">{userEmail}</p>
+            <p className="font-sans font-semibold text-sm truncate text-white">{username || 'Eco Traveler'}</p>
+            <p className="text-white/80 text-xs truncate">{userEmail}</p>
           </div>
           <div className="flex items-center gap-1 bg-[#22C55E]/20 px-2 py-1 rounded-full">
             <Award className="w-3 h-3 text-[#22C55E]" />
@@ -110,11 +110,11 @@ export default function UserSidebar() {
       <div className="mx-4 mt-3 flex gap-2">
         <div className="flex-1 bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center">
           <p className="font-mono text-lg font-bold text-[#22C55E]">0</p>
-          <p className="text-white/60 text-xs">Carbon Saved (kg)</p>
+          <p className="text-white/90 text-xs font-medium">Carbon Saved (kg)</p>
         </div>
         <div className="flex-1 bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center">
           <p className="font-mono text-lg font-bold text-white">0</p>
-          <p className="text-white/60 text-xs">Trips</p>
+          <p className="text-white/90 text-xs font-medium">Trips</p>
         </div>
       </div>
 
@@ -136,7 +136,7 @@ export default function UserSidebar() {
                   }`}
                 >
                   <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-white/80'}`} />
-                  <span className={`font-sans font-medium ${isActive ? 'text-white' : 'text-white/70'}`}>
+                  <span className={`font-sans font-medium text-sm ${isActive ? 'text-white' : 'text-white/90'}`}>
                     {item.label}
                   </span>
                 </button>
