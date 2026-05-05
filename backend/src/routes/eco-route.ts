@@ -40,7 +40,7 @@ type RouteResponse = {
 }
 
 const nominatimBase = 'https://nominatim.openstreetmap.org'
-const osrmBase = 'https://router.project-osrm.org'
+const openRouteServiceBase = 'https://api.openrouteservice.org'
 
 const emissionFactorKgPerKm: Record<Mode, number> = {
   walking: 0,
@@ -48,10 +48,10 @@ const emissionFactorKgPerKm: Record<Mode, number> = {
   driving: 0.21,
 }
 
-const averageSpeedKmh: Record<Mode, number> = {
-  walking: 4.8,
-  cycling: 15,
-  driving: 32,
+const openRouteProfileByMode: Record<Mode, string> = {
+  walking: 'foot-walking',
+  cycling: 'cycling-regular',
+  driving: 'driving-car',
 }
 
 const fetchJson = async <T>(url: string, headers?: Record<string, string>): Promise<T> => {
@@ -60,6 +60,23 @@ const fetchJson = async <T>(url: string, headers?: Record<string, string>): Prom
       'User-Agent': 'Terratrace-EcoRoute/1.0 (educational project)',
       ...(headers || {}),
     },
+  })
+
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status}`)
+  }
+
+  return (await response.json()) as T
+}
+
+const postJson = async <T>(url: string, body: unknown, headers?: Record<string, string>): Promise<T> => {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...headers,
+    },
+    body: JSON.stringify(body),
   })
 
   if (!response.ok) {
@@ -99,29 +116,56 @@ const geocode = async (query: string): Promise<PlaceSuggestion[]> => {
 }
 
 const fetchModeRoute = async (mode: Mode, start: Coordinate, destination: Coordinate): Promise<ModeResult> => {
-  const profile = mode === 'walking' ? 'foot' : mode === 'cycling' ? 'bike' : 'driving'
+  const openRouteApiKey = process.env.OPENROUTESERVICE_API_KEY
+  if (!openRouteApiKey) {
+    throw new Error('Missing OPENROUTESERVICE_API_KEY')
+  }
 
-  const payload = await fetchJson<{
+  const profile = openRouteProfileByMode[mode]
+
+  const payload = await postJson<{
     routes?: Array<{
-      distance: number
-      duration: number
-      geometry: {
-        coordinates: Array<[number, number]>
+      summary?: {
+        distance: number
+        duration: number
+      }
+      geometry?: {
+        coordinates?: Array<[number, number]>
+      }
+    }>
+    features?: Array<{
+      geometry?: {
+        coordinates?: Array<[number, number]>
+      }
+      properties?: {
+        summary?: {
+          distance: number
+          duration: number
+        }
       }
     }>
   }>(
-    `${osrmBase}/route/v1/${profile}/${start.lon},${start.lat};${destination.lon},${destination.lat}?overview=full&geometries=geojson`,
+    `${openRouteServiceBase}/v2/directions/${profile}/geojson`,
+    {
+      coordinates: [
+        [start.lon, start.lat],
+        [destination.lon, destination.lat],
+      ],
+    },
+    {
+      Authorization: openRouteApiKey,
+    },
   )
 
-  const route = payload.routes?.[0]
-  if (!route) {
+  const routeSummary = payload.routes?.[0]?.summary || payload.features?.[0]?.properties?.summary
+  const routeCoordinates = payload.routes?.[0]?.geometry?.coordinates || payload.features?.[0]?.geometry?.coordinates || []
+
+  if (!routeSummary) {
     throw new Error(`No ${mode} route found`)
   }
 
-  const distanceKm = route.distance / 1000
-  const durationFromProviderMinutes = route.duration / 60
-  const estimatedDurationMinutes = (distanceKm / averageSpeedKmh[mode]) * 60
-  const durationMinutes = Math.max(durationFromProviderMinutes, estimatedDurationMinutes)
+  const distanceKm = routeSummary.distance / 1000
+  const durationMinutes = routeSummary.duration / 60
   const estimatedCo2Kg = distanceKm * emissionFactorKgPerKm[mode]
 
   return {
@@ -129,7 +173,7 @@ const fetchModeRoute = async (mode: Mode, start: Coordinate, destination: Coordi
     distanceKm: round(distanceKm),
     durationMinutes: round(durationMinutes),
     estimatedCo2Kg: round(estimatedCo2Kg, 3),
-    coordinates: route.geometry.coordinates,
+    coordinates: routeCoordinates,
   }
 }
 
@@ -195,7 +239,7 @@ router.post('/plan', async (req: Request, res: Response) => {
       notes: [
         'Walking and cycling are assumed near-zero direct emissions.',
         'Driving CO2 estimate uses an average 0.21 kg/km factor.',
-        'Duration uses profile speed baselines to avoid identical times from public demo routing profiles.',
+        'ETA values are fetched from OpenRouteService routing profiles.',
       ],
     }
 
