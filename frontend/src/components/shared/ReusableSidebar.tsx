@@ -51,7 +51,7 @@ export default function ReusableSidebar<T extends string>({ navItems, logoSubtit
   }
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-64 text-white flex flex-col z-50" style={{ backgroundColor: '#0891B2' }}>
+    <aside className="fixed left-0 top-0 h-full w-64 text-white flex flex-col z-50 bg-cyan-600">
       {/* Logo */}
       <div className="p-6 border-b border-white/20">
         <h1 className="font-sans font-bold text-xl tracking-tight">Terratrace</h1>
@@ -59,7 +59,7 @@ export default function ReusableSidebar<T extends string>({ navItems, logoSubtit
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 py-6 px-3">
+      <nav className="flex-1 min-h-0 py-6 px-3">
         <ul className="space-y-1">
           {navItems.map((item) => (
             <li key={item.id}>
@@ -82,7 +82,7 @@ export default function ReusableSidebar<T extends string>({ navItems, logoSubtit
       </nav>
 
       {/* User Profile / Sign Out */}
-      <div className="p-4 border-t border-white/20">
+      <div className="p-4 border-t border-white/20 mt-auto">
         <div className="flex items-center gap-3 px-3 py-3">
           <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
             <span className="font-sans font-semibold text-white">{getInitial()}</span>
