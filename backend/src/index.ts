@@ -2,6 +2,7 @@ import express, { Application, Request, Response, NextFunction } from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import weatherRoutes from './routes/weather'
+import smartRecommendationRoutes from './routes/smart-recommendation'
 
 // Load environment variables
 dotenv.config()
@@ -24,6 +25,7 @@ app.get('/api', (_req: Request, res: Response) => {
   res.json({ message: 'Welcome to Terratrace API' })
 })
 app.use('/api/weather', weatherRoutes)
+app.use('/api/recommendations', smartRecommendationRoutes)
 
 // 404 handler
 app.use((_req: Request, res: Response) => {
