@@ -1,4 +1,5 @@
-import Link from 'next/link'
+<import Link from 'next/link'
+import WeatherForecastSection from '@/components/weather-forecast-section'
 
 // Heroicons SVG Icons
 const LeafIcon = () => (
@@ -57,6 +58,7 @@ const Navbar = () => (
         </a>
         <div className="hidden md:flex items-center gap-8">
           <a href="#features" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">Features</a>
+          <a href="#weather" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">Weather</a>
           <a href="#testimonials" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">Stories</a>
           <a href="#cta" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">About</a>
         </div>
@@ -410,6 +412,7 @@ export default function Home() {
       <HeroSection />
       <ProblemSection />
       <FeaturesSection />
+      <WeatherForecastSection />
       <TestimonialsSection />
       <CTASection />
       <Footer />
