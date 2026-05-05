@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { FormEvent, useMemo, useState } from 'react'
 
 type Interest = 'nature' | 'culture' | 'food' | 'adventure' | 'wellness' | 'history' | 'shopping'
@@ -61,6 +62,44 @@ const interestsCatalog: Interest[] = [
   'history',
   'shopping',
 ]
+
+const LeafIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9A9 9 0 0012 3a9 9 0 00-4.5 9c0 4.97 2.015 9 4.5 9z" />
+  </svg>
+)
+
+const ArrowRightIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+  </svg>
+)
+
+const Navbar = () => (
+  <nav className="fixed top-4 left-4 right-4 z-50">
+    <div className="max-w-6xl mx-auto bg-white/80 backdrop-blur-md rounded-organic shadow-organic">
+      <div className="flex items-center justify-between px-6 py-4">
+        <Link href="/" className="flex items-center gap-2 cursor-pointer group">
+          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
+            <LeafIcon />
+          </div>
+          <span className="font-heading font-semibold text-xl text-text">Terratrace</span>
+        </Link>
+        <div className="hidden md:flex items-center gap-8">
+          <Link href="/#features" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">Features</Link>
+          <Link href="/smart-recommendation" className="text-primary transition-colors duration-200 cursor-pointer font-medium">Smart Recommendation</Link>
+          <Link href="/#weather" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">Weather</Link>
+          <Link href="/#testimonials" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">Stories</Link>
+          <Link href="/#cta" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">About</Link>
+        </div>
+        <Link href="/smart-recommendation" className="bg-primary text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-secondary transition-colors duration-200 cursor-pointer flex items-center gap-2">
+          Start Planning
+          <ArrowRightIcon />
+        </Link>
+      </div>
+    </div>
+  </nav>
+)
 
 export default function SmartRecommendationSection() {
   const [city, setCity] = useState('Kuala Lumpur')
@@ -142,7 +181,9 @@ export default function SmartRecommendationSection() {
   }
 
   return (
-    <section className="py-20 px-4">
+    <>
+      <Navbar />
+      <section className="py-20 px-4 pt-32">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-10">
           <h1 className="font-heading font-bold text-3xl md:text-4xl text-text mb-3">Smart Recommendation</h1>
@@ -294,5 +335,6 @@ export default function SmartRecommendationSection() {
         </div>
       </div>
     </section>
+    </>
   )
 }
