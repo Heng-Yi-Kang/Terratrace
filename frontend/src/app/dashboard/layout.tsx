@@ -5,9 +5,10 @@ import Sidebar from '@/components/dashboard/Sidebar'
 import OverviewTab from '@/components/dashboard/OverviewTab'
 import TripsTab from '@/components/dashboard/TripsTab'
 import CarbonTab from '@/components/dashboard/CarbonTab'
+import ProfileTab from '@/components/dashboard/ProfileTab'
 import SavedTab from '@/components/dashboard/SavedTab'
 
-type Tab = 'overview' | 'trips' | 'carbon' | 'saved'
+type Tab = 'overview' | 'trips' | 'carbon' | 'saved' | 'profile'
 
 export default function DashboardLayout({
   children,
@@ -26,6 +27,8 @@ export default function DashboardLayout({
         return <CarbonTab />
       case 'saved':
         return <SavedTab />
+      case 'profile':
+        return <ProfileTab />
       default:
         return <OverviewTab />
     }
