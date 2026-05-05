@@ -48,6 +48,12 @@ const emissionFactorKgPerKm: Record<Mode, number> = {
   driving: 0.21,
 }
 
+const averageSpeedKmh: Record<Mode, number> = {
+  walking: 4.8,
+  cycling: 15,
+  driving: 32,
+}
+
 const fetchJson = async <T>(url: string, headers?: Record<string, string>): Promise<T> => {
   const response = await fetch(url, {
     headers: {
@@ -113,7 +119,9 @@ const fetchModeRoute = async (mode: Mode, start: Coordinate, destination: Coordi
   }
 
   const distanceKm = route.distance / 1000
-  const durationMinutes = route.duration / 60
+  const durationFromProviderMinutes = route.duration / 60
+  const estimatedDurationMinutes = (distanceKm / averageSpeedKmh[mode]) * 60
+  const durationMinutes = Math.max(durationFromProviderMinutes, estimatedDurationMinutes)
   const estimatedCo2Kg = distanceKm * emissionFactorKgPerKm[mode]
 
   return {
@@ -187,6 +195,7 @@ router.post('/plan', async (req: Request, res: Response) => {
       notes: [
         'Walking and cycling are assumed near-zero direct emissions.',
         'Driving CO2 estimate uses an average 0.21 kg/km factor.',
+        'Duration uses profile speed baselines to avoid identical times from public demo routing profiles.',
       ],
     }
 
