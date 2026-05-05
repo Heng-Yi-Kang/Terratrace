@@ -95,9 +95,9 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   return (
     <aside className="fixed left-0 top-0 h-full w-64 bg-cyan-primary text-white flex flex-col z-50">
       {/* Logo */}
-      <div className="p-6 border-b border-cyan-primary/30">
+      <div className="p-6 border-b border-white/20">
         <h1 className="font-sans font-bold text-xl tracking-tight">Terratrace</h1>
-        <p className="text-cyan-secondary text-sm mt-1">Eco Travel Dashboard</p>
+        <p className="text-white/70 text-sm mt-1">Eco Travel Dashboard</p>
       </div>
 
       {/* Navigation */}
@@ -109,11 +109,11 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
                 onClick={() => onTabChange(item.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 cursor-pointer ${
                   activeTab === item.id
-                    ? 'bg-white/20 border-l-4 border-cta'
+                    ? 'bg-white/20 border-l-4 border-white'
                     : 'hover:bg-white/10 border-l-4 border-transparent'
                 }`}
               >
-                <span className={activeTab === item.id ? 'text-cta' : 'text-white/80'}>{item.icon}</span>
+                <span className={activeTab === item.id ? 'text-white' : 'text-white/80'}>{item.icon}</span>
                 <span className={`font-sans font-medium ${activeTab === item.id ? 'text-white' : 'text-white/70'}`}>
                   {item.label}
                 </span>
@@ -124,10 +124,10 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       </nav>
 
       {/* User Profile / Sign Out */}
-      <div className="p-4 border-t border-cyan-primary/30">
+      <div className="p-4 border-t border-white/20">
         <div className="flex items-center gap-3 px-3 py-3">
-          <div className="w-10 h-10 rounded-full bg-cta flex items-center justify-center">
-            <span className="font-sans font-semibold text-cyan-primary">{getInitial()}</span>
+          <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+            <span className="font-sans font-semibold text-white">{getInitial()}</span>
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-sans font-medium text-sm text-white truncate">{username || 'User'}</p>
@@ -137,7 +137,7 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
         <button
           onClick={handleSignOut}
           disabled={isSigningOut}
-          className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white/90 hover:text-white transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
