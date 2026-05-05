@@ -24,9 +24,9 @@ const CarMultiplier = {
 };
 
 const HotelMultiplier = {
-  budget: 10,
-  standard: 16.8,
-  luxury: 26,
+  budget: 15,
+  standard: 30,
+  luxury: 65,
 };
 
 const RailMultiplier = {
