@@ -58,9 +58,7 @@ const Navbar = () => (
         </a>
         <div className="hidden md:flex items-center gap-8">
           <a href="#features" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">Features</a>
-          <a href="/smart-recommendation" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">Smart Recommendation</a>
           <a href="#weather" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">Weather</a>
-          <a href="#eco-route" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">Eco Route</a>
           <a href="#testimonials" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">Stories</a>
           <a href="#cta" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">About</a>
         </div>
@@ -219,6 +217,10 @@ const FeaturesSection = () => (
           <p className="text-text/70 leading-relaxed">
             Smart routing that prioritizes low-impact travel. Find trains over flights, local experiences over tourist traps.
           </p>
+          <a href="#eco-route" className="inline-flex mt-5 items-center gap-2 text-primary font-semibold hover:text-secondary transition-colors duration-200 cursor-pointer">
+            Open Eco Route Planner
+            <ArrowRightIcon />
+          </a>
         </div>
 
         <div className="bg-white/80 backdrop-blur-sm rounded-organic-lg p-8 shadow-organic hover:shadow-organic-lg transition-shadow duration-200 cursor-pointer group">
