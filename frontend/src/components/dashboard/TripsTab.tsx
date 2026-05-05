@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const mockTrips = [
   {
@@ -43,11 +43,42 @@ type EcoScoreFilter = 'all' | 'high' | 'medium'
 export default function TripsTab() {
   const [statusFilter, setStatusFilter] = useState<TripStatus>('all')
   const [ecoFilter, setEcoFilter] = useState<EcoScoreFilter>('all')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [dateLimits, setDateLimits] = useState({ min: '', max: '' })
+
+  useEffect(() => {
+    const today = new Date()
+    const maxDate = new Date()
+    maxDate.setDate(today.getDate() + 33)
+
+    const fmt = (d: Date) => {
+      const year = d.getFullYear()
+      const month = String(d.getMonth() + 1).padStart(2, '0')
+      const day = String(d.getDate()).padStart(2, '0')
+      return `${year}-${month}-${day}`
+    }
+
+    setDateLimits({ min: fmt(today), max: fmt(maxDate) })
+  }, [])
 
   const filteredTrips = mockTrips.filter((trip) => {
     if (statusFilter !== 'all' && trip.status !== statusFilter) return false
     if (ecoFilter === 'high' && trip.ecoScore < 90) return false
     if (ecoFilter === 'medium' && (trip.ecoScore >= 90 || trip.ecoScore < 70)) return false
+    // Parse trip dates (e.g., "May 15 - May 22, 2026") for date filtering
+    if (startDate || endDate) {
+      const tripDates = trip.dates.replace(', 2026', '').split(' - ')
+      const parseTripDate = (d: string) => {
+        const months: Record<string, number> = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 }
+        const parts = d.trim().split(' ')
+        return new Date(2026, months[parts[0]], parseInt(parts[1]))
+      }
+      const tripStart = parseTripDate(tripDates[0])
+      const tripEnd = parseTripDate(tripDates[1] || tripDates[0])
+      if (startDate && tripEnd < new Date(startDate)) return false
+      if (endDate && tripStart > new Date(endDate)) return false
+    }
     return true
   })
 
@@ -65,6 +96,46 @@ export default function TripsTab() {
           </svg>
           Plan New Trip
         </button>
+      </div>
+
+      {/* Date Range Filter */}
+      <div className="flex flex-wrap gap-4 items-end">
+        <div>
+          <label htmlFor="tripStartDate" className="block text-sm font-medium text-text mb-2">
+            From
+          </label>
+          <input
+            type="date"
+            id="tripStartDate"
+            value={startDate}
+            min={dateLimits.min}
+            max={dateLimits.max}
+            onChange={(event) => setStartDate(event.target.value)}
+            className="px-4 py-2 rounded-xl border border-text/20 text-text bg-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-colors duration-200"
+          />
+        </div>
+        <div>
+          <label htmlFor="tripEndDate" className="block text-sm font-medium text-text mb-2">
+            To
+          </label>
+          <input
+            type="date"
+            id="tripEndDate"
+            value={endDate}
+            min={startDate || dateLimits.min}
+            max={dateLimits.max}
+            onChange={(event) => setEndDate(event.target.value)}
+            className="px-4 py-2 rounded-xl border border-text/20 text-text bg-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-colors duration-200"
+          />
+        </div>
+        {(startDate || endDate) && (
+          <button
+            onClick={() => { setStartDate(''); setEndDate('') }}
+            className="px-4 py-2 text-sm text-text/60 hover:text-text transition-colors duration-200 cursor-pointer"
+          >
+            Clear dates
+          </button>
+        )}
       </div>
 
       {/* Filters */}
