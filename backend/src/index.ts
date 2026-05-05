@@ -1,7 +1,7 @@
 import express, { Application, Request, Response, NextFunction } from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
-<import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js'
 import weatherRoutes from './routes/weather'
 
 // Load environment variables
