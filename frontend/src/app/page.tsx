@@ -57,14 +57,15 @@ const Navbar = () => (
         </a>
         <div className="hidden md:flex items-center gap-8">
           <a href="#features" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">Features</a>
+          <a href="/smart-recommendation" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">Smart Recommendation</a>
           <a href="#weather" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">Weather</a>
           <a href="#testimonials" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">Stories</a>
           <a href="#cta" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">About</a>
         </div>
-        <button className="bg-primary text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-secondary transition-colors duration-200 cursor-pointer flex items-center gap-2">
-          Start Planning
-          <ArrowRightIcon />
-        </button>
+          <a href="/smart-recommendation" className="bg-primary text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-secondary transition-colors duration-200 cursor-pointer flex items-center gap-2">
+            Start Planning
+            <ArrowRightIcon />
+          </a>
       </div>
     </div>
   </nav>
@@ -229,6 +230,10 @@ const FeaturesSection = () => (
           <p className="text-text/70 leading-relaxed">
             Curated eco-certified hotels, restaurants, and activities. Support local communities while protecting nature.
           </p>
+          <a href="/smart-recommendation" className="inline-flex mt-5 items-center gap-2 text-primary font-semibold hover:text-secondary transition-colors duration-200 cursor-pointer">
+            Try Smart Recommendation
+            <ArrowRightIcon />
+          </a>
         </div>
       </div>
     </div>
