@@ -13,6 +13,11 @@
   --color-cyan-primary: #0891B2;
   --color-cyan-secondary: #22D3EE;
 
+  --sidebar-width: 18rem;
+  --sidebar-primary: #0891B2;
+  --sidebar-text: #ffffff;
+  --sidebar-success: #22C55E;
+
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 16px;

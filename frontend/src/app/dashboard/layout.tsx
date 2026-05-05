@@ -1,70 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import ReusableSidebar from '@/components/shared/ReusableSidebar'
-
-const navItems = [
-  {
-    id: 'overview',
-    label: 'Overview',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-      </svg>
-    ),
-  },
-  {
-    id: 'trips',
-    label: 'My Trips',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
-  },
-  {
-    id: 'carbon',
-    label: 'Carbon Footprint',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
-  },
-  {
-    id: 'saved',
-    label: 'Saved Places',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-      </svg>
-    ),
-  },
-  {
-    id: 'profile',
-    label: 'Profile',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-      </svg>
-    ),
-  },
-]
-
-type DashboardTab = 'overview' | 'trips' | 'carbon' | 'saved' | 'profile'
-
-function getActiveTab(pathname: string): DashboardTab {
-  const match = pathname.match(/\/dashboard\/(\w+)/)
-  if (match && match[1]) {
-    const tab = match[1] as DashboardTab
-    if (['overview', 'trips', 'carbon', 'saved', 'profile'].includes(tab)) {
-      return tab
-    }
-  }
-  return 'overview'
-}
+import { Menu, X } from 'lucide-react'
+import UserSidebar from '@/components/dashboard/UserSidebar'
 
 export default function DashboardLayout({
   children,
@@ -73,36 +12,21 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const activeTab = getActiveTab(pathname)
-
-  const handleTabChange = (tab: DashboardTab) => {
-    window.location.href = `/dashboard/${tab}`
-  }
 
   return (
     <div className="min-h-screen bg-background">
       {/* Mobile Menu Button */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
+        aria-label="Toggle navigation menu"
         className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-cyan-primary text-white rounded-xl cursor-pointer"
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          {sidebarOpen ? (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          ) : (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          )}
-        </svg>
+        {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
       </button>
 
       {/* Sidebar */}
       <div className={`fixed inset-0 z-40 lg:relative lg:inset-auto lg:z-auto transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 transition-transform duration-300`}>
-        <ReusableSidebar<DashboardTab>
-          navItems={navItems}
-          logoSubtitle="Eco Travel Dashboard"
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-        />
+        <UserSidebar />
       </div>
 
       {/* Overlay */}
@@ -113,7 +37,7 @@ export default function DashboardLayout({
         />
       )}
 
-      <main className="lg:ml-64 p-4 sm:p-8 pt-16 lg:pt-8">
+      <main className="lg:ml-72 p-4 sm:p-8 pt-16 lg:pt-8">
         <div className="max-w-6xl mx-auto">
           {children}
         </div>
