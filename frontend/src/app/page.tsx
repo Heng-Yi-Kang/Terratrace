@@ -1,4 +1,4 @@
-<import Link from 'next/link'
+import Link from 'next/link'
 import WeatherForecastSection from '@/components/weather-forecast-section'
 
 // Heroicons SVG Icons
