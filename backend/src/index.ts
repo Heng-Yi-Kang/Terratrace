@@ -3,6 +3,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import weatherRoutes from './routes/weather'
 import smartRecommendationRoutes from './routes/smart-recommendation'
+import ecoRouteRoutes from './routes/eco-route'
 
 // Load environment variables
 dotenv.config()
@@ -26,6 +27,7 @@ app.get('/api', (_req: Request, res: Response) => {
 })
 app.use('/api/weather', weatherRoutes)
 app.use('/api/recommendations', smartRecommendationRoutes)
+app.use('/api/eco-route', ecoRouteRoutes)
 
 // 404 handler
 app.use((_req: Request, res: Response) => {
