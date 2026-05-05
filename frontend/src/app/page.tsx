@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 // Heroicons SVG Icons
 const LeafIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -59,12 +61,12 @@ const Navbar = () => (
           <a href="#cta" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">About</a>
         </div>
         <div className="flex items-center gap-4">
-          <a href="/login" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">
+          <Link href="/login" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">
             Log in
-          </a>
-          <a href="/signup" className="bg-primary text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-secondary transition-colors duration-200 cursor-pointer">
+          </Link>
+          <Link href="/signup" className="bg-primary text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-secondary transition-colors duration-200 cursor-pointer">
             Sign Up
-          </a>
+          </Link>
         </div>
       </div>
     </div>

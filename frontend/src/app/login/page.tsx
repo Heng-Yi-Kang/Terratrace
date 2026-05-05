@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import AuthForm from '@/components/auth/AuthForm'
 import { signIn, getRedirectPath } from '@/utils/supabase/auth'
 
@@ -39,17 +40,17 @@ export default function LoginPage() {
           <div className="mt-6 text-center">
             <p className="text-text/70 text-sm">
               Don&apos;t have an account?{' '}
-              <a href="/signup" className="text-primary font-medium hover:text-secondary transition-colors">
+              <Link href="/signup" className="text-primary font-medium hover:text-secondary transition-colors">
                 Sign up
-              </a>
+              </Link>
             </p>
           </div>
         </div>
 
         <div className="mt-8 text-center">
-          <a href="/" className="text-text/60 text-sm hover:text-primary transition-colors">
+          <Link href="/" className="text-text/60 text-sm hover:text-primary transition-colors">
             ← Back to home
-          </a>
+          </Link>
         </div>
       </div>
     </main>
