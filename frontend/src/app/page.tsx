@@ -1,3 +1,4 @@
+import EcoRoutePlannerSection from '@/components/eco-route-planner-section'
 import WeatherForecastSection from '@/components/weather-forecast-section'
 
 // Heroicons SVG Icons
@@ -59,6 +60,7 @@ const Navbar = () => (
           <a href="#features" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">Features</a>
           <a href="/smart-recommendation" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">Smart Recommendation</a>
           <a href="#weather" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">Weather</a>
+          <a href="#eco-route" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">Eco Route</a>
           <a href="#testimonials" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">Stories</a>
           <a href="#cta" className="text-text/70 hover:text-primary transition-colors duration-200 cursor-pointer font-medium">About</a>
         </div>
@@ -413,6 +415,7 @@ export default function Home() {
       <ProblemSection />
       <FeaturesSection />
       <WeatherForecastSection />
+      <EcoRoutePlannerSection />
       <TestimonialsSection />
       <CTASection />
       <Footer />
