@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 import UserSidebar from '@/components/dashboard/UserSidebar'
 
@@ -10,11 +9,10 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex">
       {/* Mobile Menu Button */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -25,7 +23,7 @@ export default function DashboardLayout({
       </button>
 
       {/* Sidebar */}
-      <div className={`fixed inset-0 z-40 lg:relative lg:inset-auto lg:z-auto transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 transition-transform duration-300`}>
+      <div className={`fixed inset-y-0 left-0 w-72 z-40 lg:static lg:inset-auto lg:z-auto lg:h-screen lg:w-72 transform transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <UserSidebar />
       </div>
 
@@ -37,7 +35,7 @@ export default function DashboardLayout({
         />
       )}
 
-      <main className="lg:ml-72 p-4 sm:p-8 pt-16 lg:pt-8">
+      <main className="flex-1 p-4 sm:p-8 pt-16 lg:pt-8">
         <div className="max-w-6xl mx-auto">
           {children}
         </div>
