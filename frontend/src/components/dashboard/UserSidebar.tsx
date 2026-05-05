@@ -102,8 +102,8 @@ export default function UserSidebar() {
             <p className="text-white/80 text-xs truncate">{userEmail}</p>
           </div>
           <div className="flex items-center gap-1 bg-[#22C55E]/20 px-2 py-1 rounded-full">
-            <Award className="w-3 h-3 text-[#22C55E]" />
-            <span className="text-xs font-mono text-[#22C55E]">Eco</span>
+            <Award className="w-3 h-3 text-white" />
+            <span className="text-xs font-mono text-white">Eco</span>
           </div>
         </div>
       </div>
@@ -111,7 +111,7 @@ export default function UserSidebar() {
       {/* Quick Stats */}
       <div className="mx-4 mt-3 flex gap-2">
         <div className="flex-1 bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center">
-          <p className="font-mono text-lg font-bold text-[#22C55E]">0</p>
+          <p className="font-mono text-lg font-bold text-white">0</p>
           <p className="text-white/90 text-xs font-medium">Carbon Saved (kg)</p>
         </div>
         <div className="flex-1 bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center">
