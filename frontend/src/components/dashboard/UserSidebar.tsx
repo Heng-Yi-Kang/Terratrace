@@ -9,16 +9,18 @@ import {
   Bookmark,
   User,
   LogOut,
-  Award
+  Award,
+  BarChart3
 } from 'lucide-react'
 import { getCurrentUser, signOut } from '@/utils/supabase/auth'
 
-type DashboardTab = 'overview' | 'trips' | 'carbon' | 'saved' | 'profile'
+type DashboardTab = 'overview' | 'trips' | 'carbon' | 'saved' | 'profile' | 'analytics'
 
 const navItems = [
   { id: 'overview' as DashboardTab, label: 'Overview', icon: LayoutDashboard },
   { id: 'trips' as DashboardTab, label: 'My Trips', icon: Plane },
   { id: 'carbon' as DashboardTab, label: 'Carbon Footprint', icon: Leaf },
+  { id: 'analytics' as DashboardTab, label: 'Analytics', icon: BarChart3 },
   { id: 'saved' as DashboardTab, label: 'Saved Places', icon: Bookmark },
   { id: 'profile' as DashboardTab, label: 'Profile', icon: User },
 ]
@@ -45,7 +47,7 @@ export default function UserSidebar() {
     const match = pathname.match(/\/dashboard\/(\w+)/)
     if (match && match[1]) {
       const tab = match[1] as DashboardTab
-      if (['overview', 'trips', 'carbon', 'saved', 'profile'].includes(tab)) {
+      if (['overview', 'trips', 'carbon', 'saved', 'profile', 'analytics'].includes(tab)) {
         return tab
       }
     }
