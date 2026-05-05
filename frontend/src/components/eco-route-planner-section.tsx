@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from 'react'
 
-type DestinationSuggestion = {
+type LocationSuggestion = {
   displayName: string
   lat: number
   lon: number
@@ -59,19 +59,52 @@ export default function EcoRoutePlannerSection() {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001'
 
   const [geoLoading, setGeoLoading] = useState(false)
+
+  const [startQuery, setStartQuery] = useState('')
   const [startPoint, setStartPoint] = useState<{ lat: number; lon: number } | null>(null)
-  const [startLabel, setStartLabel] = useState('Current location not selected yet')
+  const [startLabel, setStartLabel] = useState('Starting location not selected yet')
+  const [startOptions, setStartOptions] = useState<LocationSuggestion[]>([])
+  const [startSearchLoading, setStartSearchLoading] = useState(false)
 
   const [destinationQuery, setDestinationQuery] = useState('')
-  const [destination, setDestination] = useState<DestinationSuggestion | null>(null)
-  const [destinationOptions, setDestinationOptions] = useState<DestinationSuggestion[]>([])
-  const [searchLoading, setSearchLoading] = useState(false)
+  const [destination, setDestination] = useState<LocationSuggestion | null>(null)
+  const [destinationOptions, setDestinationOptions] = useState<LocationSuggestion[]>([])
+  const [destinationSearchLoading, setDestinationSearchLoading] = useState(false)
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [plan, setPlan] = useState<RoutePlanResponse | null>(null)
 
   const canSubmit = Boolean(startPoint && destination && !loading)
+
+  useEffect(() => {
+    const query = startQuery.trim()
+
+    if (query.length < 2 || (startPoint && startLabel === startQuery)) {
+      setStartOptions([])
+      return
+    }
+
+    const timeout = setTimeout(async () => {
+      setStartSearchLoading(true)
+      try {
+        const response = await fetch(`${baseUrl}/api/eco-route/search-location?query=${encodeURIComponent(query)}`)
+        const payload = (await response.json()) as { suggestions?: LocationSuggestion[]; error?: string }
+
+        if (!response.ok) {
+          throw new Error(payload.error || 'Unable to search starting location.')
+        }
+
+        setStartOptions(payload.suggestions || [])
+      } catch {
+        setStartOptions([])
+      } finally {
+        setStartSearchLoading(false)
+      }
+    }, 300)
+
+    return () => clearTimeout(timeout)
+  }, [baseUrl, startLabel, startPoint, startQuery])
 
   useEffect(() => {
     const query = destinationQuery.trim()
@@ -82,20 +115,20 @@ export default function EcoRoutePlannerSection() {
     }
 
     const timeout = setTimeout(async () => {
-      setSearchLoading(true)
+      setDestinationSearchLoading(true)
       try {
         const response = await fetch(`${baseUrl}/api/eco-route/search-destination?query=${encodeURIComponent(query)}`)
-        const payload = (await response.json()) as { suggestions?: DestinationSuggestion[]; error?: string }
+        const payload = (await response.json()) as { suggestions?: LocationSuggestion[]; error?: string }
 
         if (!response.ok) {
-          throw new Error(payload.error || 'Unable to search destinations.')
+          throw new Error(payload.error || 'Unable to search destination.')
         }
 
         setDestinationOptions(payload.suggestions || [])
       } catch {
         setDestinationOptions([])
       } finally {
-        setSearchLoading(false)
+        setDestinationSearchLoading(false)
       }
     }, 300)
 
@@ -118,8 +151,11 @@ export default function EcoRoutePlannerSection() {
           lon: Number(position.coords.longitude.toFixed(6)),
         }
 
+        const label = `Lat ${point.lat}, Lon ${point.lon}`
         setStartPoint(point)
-        setStartLabel(`Lat ${point.lat}, Lon ${point.lon}`)
+        setStartLabel(label)
+        setStartQuery(label)
+        setStartOptions([])
         setGeoLoading(false)
       },
       () => {
@@ -133,7 +169,14 @@ export default function EcoRoutePlannerSection() {
     )
   }
 
-  const selectDestination = (item: DestinationSuggestion) => {
+  const selectStart = (item: LocationSuggestion) => {
+    setStartPoint({ lat: item.lat, lon: item.lon })
+    setStartLabel(item.displayName)
+    setStartQuery(item.displayName)
+    setStartOptions([])
+  }
+
+  const selectDestination = (item: LocationSuggestion) => {
     setDestination(item)
     setDestinationQuery(item.displayName)
     setDestinationOptions([])
@@ -143,7 +186,7 @@ export default function EcoRoutePlannerSection() {
     event.preventDefault()
 
     if (!startPoint || !destination) {
-      setError('Please choose current location and destination first.')
+      setError('Please choose starting location and destination first.')
       return
     }
 
@@ -188,24 +231,58 @@ export default function EcoRoutePlannerSection() {
         <div className="text-center mb-12">
           <h2 className="font-heading font-bold text-3xl md:text-4xl text-text mb-4">Eco Route Planner</h2>
           <p className="text-text/70 max-w-2xl mx-auto">
-            Choose your current location and destination to compare low-impact routes.
+            Choose your starting location and destination to compare low-impact routes.
           </p>
         </div>
 
         <div className="bg-white/80 backdrop-blur-sm rounded-organic-lg p-6 md:p-8 shadow-organic">
           <form onSubmit={onPlanRoute} className="space-y-5">
             <div className="grid md:grid-cols-2 gap-4">
-              <div className="rounded-2xl bg-background p-4 border border-white/70">
-                <p className="text-sm font-medium text-text mb-2">Current location</p>
-                <p className="text-sm text-text/70 mb-3 break-words">{startLabel}</p>
-                <button
-                  type="button"
-                  onClick={getCurrentLocation}
-                  disabled={geoLoading}
-                  className="bg-primary text-white px-4 py-2.5 rounded-xl font-semibold hover:bg-secondary disabled:opacity-70 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer"
-                >
-                  {geoLoading ? 'Locating...' : 'Use Current Location'}
-                </button>
+              <div className="rounded-2xl bg-background p-4 border border-white/70 relative">
+                <label htmlFor="startLocation" className="block text-sm font-medium text-text mb-2">
+                  Starting location
+                </label>
+                <input
+                  id="startLocation"
+                  value={startQuery}
+                  onChange={(event) => {
+                    setStartQuery(event.target.value)
+                    setStartPoint(null)
+                    setStartLabel('Starting location not selected yet')
+                  }}
+                  placeholder="Type a city, town, or place"
+                  className="w-full px-4 py-3 rounded-xl border border-text/20 text-text bg-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-colors duration-200"
+                />
+
+                <div className="mt-3 flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={getCurrentLocation}
+                    disabled={geoLoading}
+                    className="bg-primary text-white px-4 py-2.5 rounded-xl font-semibold hover:bg-secondary disabled:opacity-70 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer"
+                  >
+                    {geoLoading ? 'Locating...' : 'Use Current Location'}
+                  </button>
+                  <p className="text-xs text-text/65 break-words">{startLabel}</p>
+                </div>
+
+                {startSearchLoading && <p className="text-xs text-text/60 mt-2">Searching starting locations...</p>}
+
+                {startOptions.length > 0 && (
+                  <ul className="absolute z-20 left-4 right-4 mt-2 bg-white border border-text/15 rounded-xl shadow-organic max-h-56 overflow-y-auto">
+                    {startOptions.map((item) => (
+                      <li key={`${item.displayName}-${item.lat}-${item.lon}`}>
+                        <button
+                          type="button"
+                          onClick={() => selectStart(item)}
+                          className="w-full text-left px-4 py-3 hover:bg-primary/10 transition-colors duration-200 cursor-pointer"
+                        >
+                          <span className="text-sm text-text">{item.displayName}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
 
               <div className="rounded-2xl bg-background p-4 border border-white/70 relative">
@@ -223,7 +300,7 @@ export default function EcoRoutePlannerSection() {
                   className="w-full px-4 py-3 rounded-xl border border-text/20 text-text bg-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-colors duration-200"
                 />
 
-                {searchLoading && <p className="text-xs text-text/60 mt-2">Searching destinations...</p>}
+                {destinationSearchLoading && <p className="text-xs text-text/60 mt-2">Searching destinations...</p>}
 
                 {destinationOptions.length > 0 && (
                   <ul className="absolute z-20 left-4 right-4 mt-2 bg-white border border-text/15 rounded-xl shadow-organic max-h-56 overflow-y-auto">

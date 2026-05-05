@@ -125,7 +125,7 @@ const fetchModeRoute = async (mode: Mode, start: Coordinate, destination: Coordi
   }
 }
 
-router.get('/search-destination', async (req: Request, res: Response) => {
+const searchLocationHandler = async (req: Request, res: Response) => {
   const query = String(req.query.query || '').trim()
   if (!query || query.length < 2) {
     return res.status(400).json({ error: 'Query must contain at least 2 characters.' })
@@ -135,9 +135,12 @@ router.get('/search-destination', async (req: Request, res: Response) => {
     const suggestions = await geocode(query)
     return res.status(200).json({ suggestions })
   } catch {
-    return res.status(502).json({ error: 'Unable to search destination right now.' })
+    return res.status(502).json({ error: 'Unable to search location right now.' })
   }
-})
+}
+
+router.get('/search-location', searchLocationHandler)
+router.get('/search-destination', searchLocationHandler)
 
 router.post('/plan', async (req: Request, res: Response) => {
   const startLat = Number(req.body?.startLat)
