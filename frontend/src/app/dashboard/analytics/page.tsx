@@ -1,25 +1,6 @@
 import ImpactCard from '@/app/component/analytics/ImpactCard';
 import { calculateCarbonSaved } from '@/utils/carbonCalculator';
 
-// Icon Components
-const LeafIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9A9 9 0 0012 3a9 9 0 00-4.5 9c0 4.97 2.015 9 4.5 9z" />
-  </svg>
-);
-
-const DocumentIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.66V6.75a9 9 0 015.25-2.763m0 9a9 9 0 015.25 2.763m0 0a41.24 41.24 0 003.15 4.728M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-  </svg>
-);
-
-const TargetIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-);
-
 const DownloadIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
@@ -99,27 +80,13 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-background via-white to-cyan-secondary/10">
-      {/* Header Section */}
-      <div className="sticky top-0 z-40 backdrop-blur-md bg-white/40 border-b border-white/20">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <a href="/" className="flex items-center gap-3 group cursor-pointer">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-organic flex items-center justify-center transition-transform duration-200 group-hover:scale-105 shadow-organic">
-                <LeafIcon />
-              </div>
-              <div>
-                <h1 className="text-3xl md:text-4xl font-heading font-bold text-text leading-tight">
-                  Analytics
-                </h1>
-                <p className="text-xs text-text/60 font-medium tracking-wide uppercase">Track Your Impact</p>
-              </div>
-            </a>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-12">
+        {/* Header */}
+        <div className="mb-12">
+          <h1 className="font-sans font-bold text-3xl text-text">Analytics</h1>
+          <p className="font-sans text-text/60 mt-2">Track Your Impact</p>
+        </div>
         {/* Personal Impact Dashboard Section */}
         <section className="mb-16">
           <div className="mb-8">

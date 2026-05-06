@@ -146,46 +146,46 @@ export default function UserSidebar() {
   const animatedTrips = useCountUp(totalTrips, totalTrips > 0)
 
   return (
-    <aside className="w-72 min-h-screen flex flex-col bg-[#0891B2] text-white">
+    <aside className="w-72 min-h-screen flex flex-col bg-cyan-900 text-white">
       {/* Logo */}
-      <div className="p-6 border-b border-white/20">
+      <div className="p-6 border-b border-cyan-700/50">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-[#22C55E]/20 flex items-center justify-center">
-            <Leaf className="w-5 h-5 text-[#22C55E]" />
+          <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 flex items-center justify-center">
+            <Leaf className="w-5 h-5 text-emerald-400" />
           </div>
           <div>
             <h1 className="font-sans font-bold text-xl tracking-tight">Terratrace</h1>
-            <p className="text-white/80 text-sm">Eco Travel Dashboard</p>
+            <p className="text-cyan-300 text-sm">Eco Travel Dashboard</p>
           </div>
         </div>
       </div>
 
       {/* User Profile Card */}
-      <div className="mx-4 mt-4 p-4 bg-white/10 backdrop-blur-sm rounded-2xl">
+      <div className="mx-4 mt-4 p-4 bg-cyan-800/50 backdrop-blur-sm rounded-2xl border border-cyan-700/30">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-full bg-[#22C55E]/20 flex items-center justify-center">
-            <span className="font-sans font-bold text-lg text-[#22C55E]">{getInitial()}</span>
+          <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center">
+            <span className="font-sans font-bold text-lg text-emerald-400">{getInitial()}</span>
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-sans font-semibold text-sm truncate text-white">{username || 'Eco Traveler'}</p>
-            <p className="text-white/80 text-xs truncate">{userEmail}</p>
+            <p className="text-cyan-300 text-xs truncate">{userEmail}</p>
           </div>
-          <div className="flex items-center gap-1 bg-[#22C55E]/20 px-2 py-1 rounded-full">
-            <Award className="w-3 h-3 text-white" />
-            <span className="text-xs font-mono text-white">Eco</span>
+          <div className="flex items-center gap-1 bg-emerald-500/20 px-2 py-1 rounded-full border border-emerald-500/30">
+            <Award className="w-3 h-3 text-emerald-400" />
+            <span className="text-xs font-mono text-emerald-400">Eco</span>
           </div>
         </div>
       </div>
 
       {/* Quick Stats */}
       <div className="mx-4 mt-3 flex gap-2">
-        <div className="flex-1 bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center">
+        <div className="flex-1 bg-cyan-800/50 backdrop-blur-sm rounded-xl p-3 text-center border border-cyan-700/30">
           <p className="font-mono text-lg font-bold text-white">{animatedCarbon}</p>
-          <p className="text-white/90 text-xs font-medium">Carbon Saved (kg)</p>
+          <p className="text-cyan-300 text-xs font-medium">Carbon Saved (kg)</p>
         </div>
-        <div className="flex-1 bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center">
+        <div className="flex-1 bg-cyan-800/50 backdrop-blur-sm rounded-xl p-3 text-center border border-cyan-700/30">
           <p className="font-mono text-lg font-bold text-white">{animatedTrips}</p>
-          <p className="text-white/90 text-xs font-medium">Trips</p>
+          <p className="text-cyan-300 text-xs font-medium">Trips</p>
         </div>
       </div>
 
@@ -200,14 +200,14 @@ export default function UserSidebar() {
                 <button
                   onClick={() => handleTabChange(item.id)}
                   aria-current={isActive ? 'page' : undefined}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#22C55E] focus:ring-offset-2 focus:ring-offset-[#0891B2] ${
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-cyan-900 ${
                     isActive
-                      ? 'bg-white/20 border-l-4 border-[#22C55E]'
-                      : 'hover:bg-white/10 border-l-4 border-transparent'
+                      ? 'bg-cyan-800 border-l-4 border-emerald-500'
+                      : 'hover:bg-cyan-800/50 border-l-4 border-transparent'
                   }`}
                 >
-                  <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-white/80'}`} />
-                  <span className={`font-sans font-medium text-sm ${isActive ? 'text-white' : 'text-white/90'}`}>
+                  <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-cyan-300'}`} />
+                  <span className={`font-sans font-medium text-sm ${isActive ? 'text-white' : 'text-cyan-200'}`}>
                     {item.label}
                   </span>
                 </button>
@@ -218,11 +218,11 @@ export default function UserSidebar() {
       </nav>
 
       {/* Sign Out */}
-      <div className="p-4 border-t border-white/20 mt-auto">
+      <div className="p-4 border-t border-cyan-700/50 mt-auto">
         <button
           onClick={handleSignOut}
           disabled={isSigningOut}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white/90 hover:text-white transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#22C55E] focus:ring-offset-2 focus:ring-offset-[#0891B2]"
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-cyan-800/50 hover:bg-cyan-700 text-cyan-200 hover:text-white transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-cyan-900"
         >
           <LogOut className="w-5 h-5" />
           <span className="font-sans font-medium">
