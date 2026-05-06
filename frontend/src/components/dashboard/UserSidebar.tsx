@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard,
@@ -16,6 +16,52 @@ import {
 import { getCurrentUser, signOut } from '@/utils/supabase/auth'
 
 type DashboardTab = 'overview' | 'trips' | 'carbon' | 'saved' | 'profile' | 'analytics' | 'community'
+
+const SAVED_TRIPS_KEY = 'terratrace_saved_trips'
+
+const mockTrips = [
+  { id: 1, ecoScore: 92, status: 'upcoming' },
+  { id: 2, ecoScore: 88, status: 'upcoming' },
+  { id: 3, ecoScore: 95, status: 'completed' },
+  { id: 4, ecoScore: 76, status: 'completed' },
+]
+
+function calculateCarbonSaved(trips: { ecoScore: number }[]): number {
+  const avgEcoScore = trips.length > 0
+    ? trips.reduce((sum, t) => sum + t.ecoScore, 0) / trips.length
+    : 75
+  const baselineScore = 50
+  const carbonPerTrip = 50
+  return Math.round(trips.length * carbonPerTrip * ((avgEcoScore - baselineScore) / 50))
+}
+
+function useCountUp(end: number, enabled: boolean, duration: number = 1000, start: number = 0) {
+  const [count, setCount] = useState(start)
+  const hasAnimated = useRef(false)
+
+  useEffect(() => {
+    if (!enabled || hasAnimated.current) return
+    hasAnimated.current = true
+
+    const startTime = performance.now()
+    const diff = end - start
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      const easeOut = 1 - Math.pow(1 - progress, 3)
+      setCount(start + diff * easeOut)
+
+      if (progress < 1) {
+        requestAnimationFrame(animate)
+      }
+    }
+
+    requestAnimationFrame(animate)
+  }, [end, enabled, duration, start])
+
+  return Math.floor(count).toLocaleString()
+}
 
 const navItems = [
   { id: 'overview' as DashboardTab, label: 'Overview', icon: LayoutDashboard },
@@ -33,6 +79,8 @@ export default function UserSidebar() {
   const [isSigningOut, setIsSigningOut] = useState(false)
   const [userEmail, setUserEmail] = useState('')
   const [username, setUsername] = useState('')
+  const [totalTrips, setTotalTrips] = useState(0)
+  const [carbonSaved, setCarbonSaved] = useState(0)
 
   useEffect(() => {
     async function fetchUser() {
@@ -43,6 +91,22 @@ export default function UserSidebar() {
       }
     }
     fetchUser()
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const stored = localStorage.getItem(SAVED_TRIPS_KEY)
+    let savedTrips: { id: number; ecoScore: number; status: string }[] = []
+    if (stored) {
+      try {
+        savedTrips = JSON.parse(stored) as { id: number; ecoScore: number; status: string }[]
+      } catch {
+        savedTrips = []
+      }
+    }
+    const allTrips = [...mockTrips, ...savedTrips]
+    setTotalTrips(allTrips.length)
+    setCarbonSaved(calculateCarbonSaved(allTrips))
   }, [])
 
   const getActiveTab = (): DashboardTab => {
@@ -77,6 +141,9 @@ export default function UserSidebar() {
     if (userEmail) return userEmail.charAt(0).toUpperCase()
     return 'U'
   }
+
+  const animatedCarbon = useCountUp(carbonSaved, carbonSaved > 0)
+  const animatedTrips = useCountUp(totalTrips, totalTrips > 0)
 
   return (
     <aside className="w-72 min-h-screen flex flex-col bg-[#0891B2] text-white">
@@ -113,11 +180,11 @@ export default function UserSidebar() {
       {/* Quick Stats */}
       <div className="mx-4 mt-3 flex gap-2">
         <div className="flex-1 bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center">
-          <p className="font-mono text-lg font-bold text-white">0</p>
+          <p className="font-mono text-lg font-bold text-white">{animatedCarbon}</p>
           <p className="text-white/90 text-xs font-medium">Carbon Saved (kg)</p>
         </div>
         <div className="flex-1 bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center">
-          <p className="font-mono text-lg font-bold text-white">0</p>
+          <p className="font-mono text-lg font-bold text-white">{animatedTrips}</p>
           <p className="text-white/90 text-xs font-medium">Trips</p>
         </div>
       </div>

@@ -40,6 +40,23 @@ const UserIcon = ({ className = "w-12 h-12" }: { className?: string }) => (
   </svg>
 );
 
+const TypedText = ({ text, delay = 0, className = "" }: { text: string; delay?: number; className?: string }) => {
+  const letters = text.split("");
+  return (
+    <span className={`inline-block ${className}`}>
+      {letters.map((letter, index) => (
+        <span
+          key={index}
+          style={{ animationDelay: `${delay + index * 50}ms` }}
+          className="inline-block animate-type-letter"
+        >
+          {letter === " " ? " " : letter}
+        </span>
+      ))}
+    </span>
+  );
+};
+
 const ArrowRightIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
     <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
@@ -95,7 +112,9 @@ const HeroSection = () => (
         <span className="inline-block mr-2 animate-blur-in [animation-delay:0ms]">Explore</span>
         <span className="inline-block mr-2 animate-blur-in [animation-delay:150ms]">the</span>
         <span className="inline-block animate-blur-in [animation-delay:300ms]">World,</span>
-        <span className="text-primary block mt-2 animate-blur-in [animation-delay:600ms]">Leave Only Footprints.</span>
+        <span className="text-primary block mt-2">
+          <TypedText text="Leave Only Footprints." delay={1100} />
+        </span>
       </h1>
 
       <p className="text-lg md:text-xl text-text/70 max-w-2xl mx-auto mb-10 leading-relaxed">

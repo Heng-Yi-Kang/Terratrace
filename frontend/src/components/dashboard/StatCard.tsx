@@ -8,11 +8,10 @@ type StatCardProps = {
   color?: 'primary' | 'secondary' | 'cta' | 'cyan'
 }
 
-function useCountUp(end: number, duration: number = 1500, start: number = 0, decimals: number = 0) {
+function useCountUp(end: number, elementRef: React.RefObject<HTMLDivElement>, duration: number = 1500, start: number = 0, decimals: number = 0) {
   const [count, setCount] = useState(start)
   const [isAnimating, setIsAnimating] = useState(false)
   const hasAnimated = useRef(false)
-  const cardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (typeof end !== 'number') {
@@ -20,7 +19,7 @@ function useCountUp(end: number, duration: number = 1500, start: number = 0, dec
       return
     }
 
-    const element = cardRef.current
+    const element = elementRef.current
     if (!element) return
 
     const observer = new IntersectionObserver(
@@ -71,9 +70,10 @@ export default function StatCard({
   icon,
   color = 'primary'
 }: StatCardProps) {
+  const cardRef = useRef<HTMLDivElement>(null)
   const numericValue = typeof value === 'number' ? value : parseFloat(value)
   const hasDecimals = typeof value === 'string' && value.includes('.')
-  const displayValue = useCountUp(numericValue, 1500, 0, hasDecimals ? 1 : 0)
+  const displayValue = useCountUp(numericValue, cardRef, 1500, 0, hasDecimals ? 1 : 0)
 
   const colorClasses = {
     primary: 'bg-primary/10 text-primary',

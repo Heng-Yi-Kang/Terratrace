@@ -4,53 +4,25 @@ import { useState, useEffect } from 'react'
 import StatCard from './StatCard'
 import { getCurrentUser } from '@/utils/supabase/auth'
 
-const stats = [
-  {
-    title: 'Total Trips',
-    value: 12,
-    subtitle: '+3 this month',
-    color: 'primary' as const,
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
-  },
-  {
-    title: 'Carbon Saved',
-    value: '248 kg',
-    subtitle: 'CO₂ equivalent',
-    color: 'secondary' as const,
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
-  },
-  {
-    title: 'Places Visited',
-    value: 34,
-    subtitle: 'Across 8 countries',
-    color: 'cyan' as const,
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    ),
-  },
-  {
-    title: 'CO₂ Offset',
-    value: '512 kg',
-    subtitle: 'Via tree planting',
-    color: 'cta' as const,
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-      </svg>
-    ),
-  },
+const SAVED_TRIPS_KEY = 'terratrace_saved_trips'
+
+const mockTrips = [
+  { id: 1, destination: 'Copenhagen, Denmark', dates: 'May 15 - May 22, 2026', ecoScore: 92, status: 'upcoming', imageColor: 'bg-emerald-500', savedFromRecommendation: false },
+  { id: 2, destination: 'Amsterdam, Netherlands', dates: 'April 5 - April 10, 2026', ecoScore: 88, status: 'upcoming', imageColor: 'bg-cyan-500', savedFromRecommendation: false },
+  { id: 3, destination: 'Vienna, Austria', dates: 'Feb 20 - Feb 27, 2026', ecoScore: 95, status: 'completed', imageColor: 'bg-teal-500', savedFromRecommendation: false },
+  { id: 4, destination: 'Barcelona, Spain', dates: 'Jan 10 - Jan 15, 2026', ecoScore: 76, status: 'completed', imageColor: 'bg-green-600', savedFromRecommendation: false },
 ]
+
+type SavedTrip = { id: number; destination?: string; ecoScore: number; status: string; savedFromRecommendation?: boolean }
+
+function calculateCarbonSaved(trips: { ecoScore: number }[]): number {
+  const avgEcoScore = trips.length > 0
+    ? trips.reduce((sum, t) => sum + t.ecoScore, 0) / trips.length
+    : 75
+  const baselineScore = 50
+  const carbonPerTrip = 50
+  return Math.round(trips.length * carbonPerTrip * ((avgEcoScore - baselineScore) / 50))
+}
 
 const recentActivity = [
   { id: 1, text: 'Saved "Green Valley Hotel" to favorites', time: '2 hours ago' },
@@ -61,6 +33,9 @@ const recentActivity = [
 
 export default function OverviewTab() {
   const [username, setUsername] = useState('')
+  const [totalTrips, setTotalTrips] = useState(0)
+  const [carbonSaved, setCarbonSaved] = useState(0)
+  const [placesVisited, setPlacesVisited] = useState(0)
 
   useEffect(() => {
     async function fetchUser() {
@@ -71,6 +46,71 @@ export default function OverviewTab() {
     }
     fetchUser()
   }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const stored = localStorage.getItem(SAVED_TRIPS_KEY)
+    let savedTrips: SavedTrip[] = []
+    if (stored) {
+      try {
+        savedTrips = JSON.parse(stored) as SavedTrip[]
+      } catch {
+        savedTrips = []
+      }
+    }
+    const allTrips = [...mockTrips, ...savedTrips]
+    setTotalTrips(allTrips.length)
+    setCarbonSaved(calculateCarbonSaved(allTrips))
+    setPlacesVisited(allTrips.filter(t => t.status === 'completed').length)
+  }, [])
+
+  const stats = [
+    {
+      title: 'Total Trips',
+      value: totalTrips,
+      subtitle: '+3 this month',
+      color: 'primary' as const,
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+    },
+    {
+      title: 'Carbon Saved',
+      value: `${carbonSaved} kg`,
+      subtitle: 'CO₂ equivalent',
+      color: 'secondary' as const,
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+    },
+    {
+      title: 'Places Visited',
+      value: placesVisited || 34,
+      subtitle: 'Across 8 countries',
+      color: 'cyan' as const,
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      ),
+    },
+    {
+      title: 'CO₂ Offset',
+      value: '512 kg',
+      subtitle: 'Via tree planting',
+      color: 'cta' as const,
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+        </svg>
+      ),
+    },
+  ]
 
   return (
     <div className="space-y-8">
