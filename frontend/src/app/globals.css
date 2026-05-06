@@ -101,3 +101,27 @@ h1, h2, h3, h4, h5, h6 {
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
+
+/* Blur-in text animation (word-by-word from top) */
+.animate-blur-in {
+  animation: blur-in 1s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes blur-in {
+  0% {
+    filter: blur(12px);
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  50% {
+    filter: blur(6px);
+    opacity: 0.5;
+    transform: translateY(-10px);
+  }
+  100% {
+    filter: blur(0px);
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

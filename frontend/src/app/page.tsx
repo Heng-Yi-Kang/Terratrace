@@ -92,8 +92,10 @@ const HeroSection = () => (
       </div>
 
       <h1 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl text-text mb-6 leading-tight">
-        Explore the World,
-        <span className="text-primary block mt-2">Leave Only Footprints.</span>
+        <span className="inline-block mr-2 animate-blur-in [animation-delay:0ms]">Explore</span>
+        <span className="inline-block mr-2 animate-blur-in [animation-delay:150ms]">the</span>
+        <span className="inline-block animate-blur-in [animation-delay:300ms]">World,</span>
+        <span className="text-primary block mt-2 animate-blur-in [animation-delay:600ms]">Leave Only Footprints.</span>
       </h1>
 
       <p className="text-lg md:text-xl text-text/70 max-w-2xl mx-auto mb-10 leading-relaxed">

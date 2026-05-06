@@ -15,7 +15,8 @@
     "lint": "npm run lint --workspaces --if-present"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "shadcn": "^4.7.0"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.2",
