@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import EcoRoutePlannerSection from '@/components/eco-route-planner-section'
 import WeatherForecastSection from '@/components/weather-forecast-section'
 
 // Heroicons SVG Icons
@@ -100,10 +101,10 @@ const HeroSection = () => (
       </p>
 
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-        <button className="bg-cta text-text px-8 py-4 rounded-organic font-heading font-semibold text-lg hover:bg-cta/90 transition-colors duration-200 cursor-pointer shadow-organic-lg flex items-center gap-3 group">
+        <Link href="/login" className="bg-cta text-text px-8 py-4 rounded-organic font-heading font-semibold text-lg hover:bg-cta/90 transition-colors duration-200 cursor-pointer shadow-organic-lg flex items-center gap-3 group">
           Start Your Eco Journey
           <ArrowRightIcon />
-        </button>
+        </Link>
         <button className="bg-white/80 backdrop-blur-sm text-text px-8 py-4 rounded-organic font-heading font-medium hover:bg-white transition-colors duration-200 cursor-pointer shadow-organic">
           Learn More
         </button>
@@ -221,6 +222,10 @@ const FeaturesSection = () => (
           <p className="text-text/70 leading-relaxed">
             Smart routing that prioritizes low-impact travel. Find trains over flights, local experiences over tourist traps.
           </p>
+          <a href="#eco-route" className="inline-flex mt-5 items-center gap-2 text-primary font-semibold hover:text-secondary transition-colors duration-200 cursor-pointer">
+            Open Eco Route Planner
+            <ArrowRightIcon />
+          </a>
         </div>
 
         <div className="bg-white/80 backdrop-blur-sm rounded-organic-lg p-8 shadow-organic hover:shadow-organic-lg transition-shadow duration-200 cursor-pointer group">
@@ -234,6 +239,10 @@ const FeaturesSection = () => (
           <p className="text-text/70 leading-relaxed">
             Curated eco-certified hotels, restaurants, and activities. Support local communities while protecting nature.
           </p>
+          <a href="/smart-recommendation" className="inline-flex mt-5 items-center gap-2 text-primary font-semibold hover:text-secondary transition-colors duration-200 cursor-pointer">
+            Try Smart Recommendation
+            <ArrowRightIcon />
+          </a>
         </div>
       </div>
     </div>
@@ -413,6 +422,7 @@ export default function Home() {
       <ProblemSection />
       <FeaturesSection />
       <WeatherForecastSection />
+      <EcoRoutePlannerSection />
       <TestimonialsSection />
       <CTASection />
       <Footer />
