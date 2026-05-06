@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
-import { getCurrentUser, signOut } from '@/utils/supabase/auth'
+import { signOut } from '@/utils/supabase/auth'
+import { useUser } from '@/hooks/useUser'
 
 export type NavItem = {
   id: string
@@ -18,21 +19,12 @@ type ReusableSidebarProps<T extends string = string> = {
 }
 
 export default function ReusableSidebar<T extends string>({ navItems, logoSubtitle, activeTab, onTabChange }: ReusableSidebarProps<T>) {
-  const [userEmail, setUserEmail] = useState('')
-  const [username, setUsername] = useState('')
   const [isSigningOut, setIsSigningOut] = useState(false)
   const router = useRouter()
+  const { data: user } = useUser()
 
-  useEffect(() => {
-    async function fetchUser() {
-      const { data } = await getCurrentUser()
-      if (data?.user) {
-        setUserEmail(data.user.email || '')
-        setUsername(data.user.user_metadata?.username || '')
-      }
-    }
-    fetchUser()
-  }, [])
+  const userEmail = user?.email || ''
+  const username = user?.user_metadata?.username || ''
 
   const getInitial = () => {
     if (username) return username.charAt(0).toUpperCase()

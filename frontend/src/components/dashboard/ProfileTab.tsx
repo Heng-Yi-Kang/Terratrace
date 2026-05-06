@@ -1,16 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { getCurrentUser, signOut, deleteAccount } from '@/utils/supabase/auth'
-import { supabase } from '@/utils/supabase/client'
+import { useState } from 'react'
+import { signOut } from '@/utils/supabase/auth'
+import { useUser, useUpdateUser, useDeleteAccount, useChangePassword } from '@/hooks/useUser'
 
 export default function ProfileTab() {
-  const [username, setUsername] = useState('')
-  const [email, setEmail] = useState('')
-  const [role, setRole] = useState('')
+  const { data: user } = useUser()
+  const updateUser = useUpdateUser()
+  const changePassword = useChangePassword()
+  const deleteAccountMutation = useDeleteAccount()
+
   const [isEditing, setIsEditing] = useState(false)
   const [newUsername, setNewUsername] = useState('')
-  const [isUpdating, setIsUpdating] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   // Password change state
@@ -18,27 +19,21 @@ export default function ProfileTab() {
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [isChangingPassword, setIsChangingPassword] = useState(false)
   const [passwordMessage, setPasswordMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   // Delete account state
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
-  const [isDeleting, setIsDeleting] = useState(false)
   const [deleteMessage, setDeleteMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
-  useEffect(() => {
-    async function fetchUser() {
-      const { data } = await getCurrentUser()
-      if (data?.user) {
-        setUsername(data.user.user_metadata?.username || '')
-        setNewUsername(data.user.user_metadata?.username || '')
-        setEmail(data.user.email || '')
-        setRole(data.user.user_metadata?.role || 'user')
-      }
-    }
-    fetchUser()
-  }, [])
+  const username = user?.user_metadata?.username || ''
+  const email = user?.email || ''
+  const role = user?.user_metadata?.role || 'user'
+
+  // Sync newUsername when user data loads
+  if (!isEditing && newUsername !== username && username) {
+    setNewUsername(username)
+  }
 
   const handleUpdate = async () => {
     if (!newUsername.trim()) {
@@ -51,21 +46,14 @@ export default function ProfileTab() {
       return
     }
 
-    setIsUpdating(true)
     setMessage(null)
 
-    const { data, error } = await supabase.auth.updateUser({
-      data: { username: newUsername.trim() }
-    })
-
-    if (error) {
-      setMessage({ type: 'error', text: error.message })
-      setIsUpdating(false)
-    } else {
-      setUsername(newUsername.trim())
+    try {
+      await updateUser.mutateAsync({ username: newUsername.trim() })
       setIsEditing(false)
       setMessage({ type: 'success', text: 'Profile updated successfully!' })
-      setIsUpdating(false)
+    } catch (err) {
+      setMessage({ type: 'error', text: (err as Error).message })
     }
   }
 
@@ -91,36 +79,17 @@ export default function ProfileTab() {
       return
     }
 
-    setIsChangingPassword(true)
     setPasswordMessage(null)
 
-    // Re-authenticate user to verify current password
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password: currentPassword,
-    })
-
-    if (signInError) {
-      setPasswordMessage({ type: 'error', text: 'Current password is incorrect' })
-      setIsChangingPassword(false)
-      return
-    }
-
-    // Update password
-    const { error: updateError } = await supabase.auth.updateUser({
-      password: newPassword,
-    })
-
-    if (updateError) {
-      setPasswordMessage({ type: 'error', text: updateError.message })
-      setIsChangingPassword(false)
-    } else {
+    try {
+      await changePassword.mutateAsync({ email, currentPassword, newPassword })
       setPasswordMessage({ type: 'success', text: 'Password changed successfully!' })
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
       setShowPasswordForm(false)
-      setIsChangingPassword(false)
+    } catch (err) {
+      setPasswordMessage({ type: 'error', text: (err as Error).message })
     }
   }
 
@@ -135,17 +104,14 @@ export default function ProfileTab() {
   const handleDeleteAccount = async () => {
     if (deleteConfirmText !== 'DELETE') return
 
-    setIsDeleting(true)
     setDeleteMessage(null)
 
-    const { error } = await deleteAccount()
-
-    if (error) {
-      setDeleteMessage({ type: 'error', text: error.message })
-      setIsDeleting(false)
-    } else {
+    try {
+      await deleteAccountMutation.mutateAsync()
       await signOut()
       window.location.href = '/?deleted=true'
+    } catch (err) {
+      setDeleteMessage({ type: 'error', text: (err as Error).message })
     }
   }
 
@@ -212,14 +178,14 @@ export default function ProfileTab() {
                 />
                 <button
                   onClick={handleUpdate}
-                  disabled={isUpdating}
+                  disabled={updateUser.isPending}
                   className="px-6 py-3 bg-cta text-white rounded-xl font-sans font-medium hover:bg-cta/90 transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isUpdating ? 'Saving...' : 'Save'}
+                  {updateUser.isPending ? 'Saving...' : 'Save'}
                 </button>
                 <button
                   onClick={handleCancel}
-                  disabled={isUpdating}
+                  disabled={updateUser.isPending}
                   className="px-6 py-3 bg-text/10 text-text rounded-xl font-sans font-medium hover:bg-text/20 transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
@@ -333,14 +299,14 @@ export default function ProfileTab() {
                 <div className="flex gap-3 pt-2">
                   <button
                     onClick={handleChangePassword}
-                    disabled={isChangingPassword}
+                    disabled={changePassword.isPending}
                     className="px-6 py-3 bg-cta text-white rounded-xl font-sans font-medium hover:bg-cta/90 transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isChangingPassword ? 'Updating...' : 'Update Password'}
+                    {changePassword.isPending ? 'Updating...' : 'Update Password'}
                   </button>
                   <button
                     onClick={handleCancelPassword}
-                    disabled={isChangingPassword}
+                    disabled={changePassword.isPending}
                     className="px-6 py-3 bg-text/10 text-text rounded-xl font-sans font-medium hover:bg-text/20 transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Cancel
@@ -426,14 +392,14 @@ export default function ProfileTab() {
             <div className="flex gap-3">
               <button
                 onClick={handleDeleteAccount}
-                disabled={deleteConfirmText !== 'DELETE' || isDeleting}
+                disabled={deleteConfirmText !== 'DELETE' || deleteAccountMutation.isPending}
                 className="flex-1 px-6 py-3 bg-red-600 text-white rounded-xl font-sans font-medium hover:bg-red-700 transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isDeleting ? 'Deleting...' : 'Delete Account'}
+                {deleteAccountMutation.isPending ? 'Deleting...' : 'Delete Account'}
               </button>
               <button
                 onClick={closeDeleteModal}
-                disabled={isDeleting}
+                disabled={deleteAccountMutation.isPending}
                 className="px-6 py-3 bg-text/10 text-text rounded-xl font-sans font-medium hover:bg-text/20 transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel

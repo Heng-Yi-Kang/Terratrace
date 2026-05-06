@@ -1,11 +1,10 @@
 "use client"
 import { useMemo, useRef, useState } from "react"
 import SearchBar from "./SearchBar"
-import PlaceCard, { type Place } from "./PlaceCard"
+import PlaceCard from "./PlaceCard"
 import CountCard from "./CountCard"
 import { SVGProps } from "react"
-
-type Props = { places: Place[] }
+import { useLocations } from "@/hooks/useLocations"
 
 const HotelIcon = (props: SVGProps<SVGSVGElement>) => {
     return (
@@ -45,7 +44,8 @@ const TransportIcon = (props: SVGProps<SVGSVGElement>) => {
     )
 }
 
-export default function EcoDirectoryClient({ places }: Props) {
+export default function EcoDirectoryClient() {
+    const { data: places = [], isLoading, error } = useLocations()
     const [query, setQuery] = useState('')
     const [page, setPage] = useState(0)
     const catalogRef = useRef<HTMLDivElement>(null)
@@ -82,6 +82,24 @@ export default function EcoDirectoryClient({ places }: Props) {
         const startingPlace = page * itemsPerPage
         return filteredPlaces.slice(startingPlace, startingPlace + itemsPerPage)
     }, [filteredPlaces, page])
+
+    if (isLoading) {
+        return (
+            <main className="min-h-screen flex items-center justify-center">
+                <div className="animate-pulse text-primary">Loading eco destinations...</div>
+            </main>
+        )
+    }
+
+    if (error) {
+        return (
+            <main className="min-h-screen px-4 py-10">
+                <p className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-900">
+                    Failed to load eco destinations: {error.message}
+                </p>
+            </main>
+        )
+    }
 
     const totalPages = Math.ceil(filteredPlaces.length / itemsPerPage)
 

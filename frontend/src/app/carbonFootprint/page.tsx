@@ -585,7 +585,7 @@ const ImpactInsights = ({ result }: { result: CarbonResult | null }) => {
     <section id="impact" className="min-h-screen py-20 px-4 relative overflow-hidden">
       <div className="max-w-4xl mx-auto">
         <div>
-          <h2 className="font-heading font-bold text-3xl md:text-4xl text-center mb-4 text-text">Your Travel's Carbon Footprint</h2>
+          <h2 className="font-heading font-bold text-3xl md:text-4xl text-center mb-4 text-text">Your Travel&apos;s Carbon Footprint</h2>
           <p className="text-center text-text/70 mb-8">Based on your inputs, your travel plan has an estimated carbon footprint of</p>
           <div>
 
@@ -624,7 +624,7 @@ const ImpactInsights = ({ result }: { result: CarbonResult | null }) => {
 
                 <div className=" mt-6">
                   <h3 className="font-bold text-xl text-center items-centertext-text/80 mb-2">Highest Impact:</h3>
-                  <p className="text-center text-text text-lg font-normal m-2">{highestSource.name} contribute the most to your travel's carbon footprint.</p>
+                  <p className="text-center text-text text-lg font-normal m-2">{highestSource.name} contribute the most to your travel&apos;s carbon footprint.</p>
                   <p className="text-center text-text/80 italic">{recommendation}</p>
                 </div>
 

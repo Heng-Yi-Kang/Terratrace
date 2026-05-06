@@ -13,7 +13,8 @@ import {
   BarChart3,
   Users
 } from 'lucide-react'
-import { getCurrentUser, signOut } from '@/utils/supabase/auth'
+import { signOut } from '@/utils/supabase/auth'
+import { useUser } from '@/hooks/useUser'
 
 type DashboardTab = 'overview' | 'trips' | 'carbon' | 'saved' | 'profile' | 'analytics' | 'community'
 
@@ -77,21 +78,12 @@ export default function UserSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const [isSigningOut, setIsSigningOut] = useState(false)
-  const [userEmail, setUserEmail] = useState('')
-  const [username, setUsername] = useState('')
   const [totalTrips, setTotalTrips] = useState(0)
   const [carbonSaved, setCarbonSaved] = useState(0)
+  const { data: user } = useUser()
 
-  useEffect(() => {
-    async function fetchUser() {
-      const { data } = await getCurrentUser()
-      if (data?.user) {
-        setUserEmail(data.user.email || '')
-        setUsername(data.user.user_metadata?.username || '')
-      }
-    }
-    fetchUser()
-  }, [])
+  const userEmail = user?.email || ''
+  const username = user?.user_metadata?.username || ''
 
   useEffect(() => {
     if (typeof window === 'undefined') return

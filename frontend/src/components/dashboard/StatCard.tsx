@@ -8,7 +8,7 @@ type StatCardProps = {
   color?: 'primary' | 'secondary' | 'cta' | 'cyan'
 }
 
-function useCountUp(end: number, elementRef: React.RefObject<HTMLDivElement>, duration: number = 1500, start: number = 0, decimals: number = 0) {
+function useCountUp(end: number, elementRef: React.RefObject<HTMLDivElement | null>, duration: number = 1500, start: number = 0, decimals: number = 0) {
   const [count, setCount] = useState(start)
   const [isAnimating, setIsAnimating] = useState(false)
   const hasAnimated = useRef(false)

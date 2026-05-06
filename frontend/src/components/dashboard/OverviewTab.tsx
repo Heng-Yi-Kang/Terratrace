@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import StatCard from './StatCard'
-import { getCurrentUser } from '@/utils/supabase/auth'
+import { useUser } from '@/hooks/useUser'
 
 const SAVED_TRIPS_KEY = 'terratrace_saved_trips'
 
@@ -32,20 +32,11 @@ const recentActivity = [
 ]
 
 export default function OverviewTab() {
-  const [username, setUsername] = useState('')
   const [totalTrips, setTotalTrips] = useState(0)
   const [carbonSaved, setCarbonSaved] = useState(0)
   const [placesVisited, setPlacesVisited] = useState(0)
-
-  useEffect(() => {
-    async function fetchUser() {
-      const { data } = await getCurrentUser()
-      if (data?.user) {
-        setUsername(data.user.user_metadata?.username || '')
-      }
-    }
-    fetchUser()
-  }, [])
+  const { data: user } = useUser()
+  const username = user?.user_metadata?.username || ''
 
   useEffect(() => {
     if (typeof window === 'undefined') return

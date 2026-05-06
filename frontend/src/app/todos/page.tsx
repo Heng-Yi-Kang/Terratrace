@@ -1,7 +1,10 @@
 import { createClient, supabaseConnectionState } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
+import { HydrationBoundary, QueryClient, dehydrate } from "@tanstack/react-query";
+import TodosClient from "./components/TodosClient";
 
 export default async function TodosPage() {
+  const queryClient = new QueryClient();
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
@@ -18,16 +21,16 @@ export default async function TodosPage() {
 
   const { data: todos } = await supabase.from("todos").select();
 
+  // Prefetch into cache so client can read from it
+  await queryClient.prefetchQuery({
+    queryKey: ['todos'],
+    queryFn: () => Promise.resolve(todos ?? []),
+    staleTime: 2 * 60 * 1000,
+  });
+
   return (
-    <main className="max-w-2xl mx-auto px-4 py-10">
-      <h1 className="text-2xl font-semibold mb-6">Todos</h1>
-      <ul className="space-y-2">
-        {todos?.map((todo) => (
-          <li key={todo.id} className="rounded-lg border border-text/20 bg-white/70 px-4 py-3">
-            {todo.name}
-          </li>
-        ))}
-      </ul>
-    </main>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <TodosClient />
+    </HydrationBoundary>
   );
 }
