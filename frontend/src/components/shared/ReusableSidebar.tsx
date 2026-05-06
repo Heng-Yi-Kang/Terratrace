@@ -51,7 +51,15 @@ export default function ReusableSidebar<T extends string>({ navItems, logoSubtit
   }
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-64 text-white flex flex-col z-50 bg-cyan-800">
+    <aside
+      className="fixed left-0 top-0 h-full w-64 text-white flex flex-col z-50"
+      style={{
+        backgroundImage: 'linear-gradient(to bottom, rgba(8, 145, 178, 0.92), rgba(22, 78, 99, 0.95)), url(/sidebar-bg.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
       {/* Logo */}
       <div className="p-6 border-b border-white/10">
         <h1 className="font-sans font-bold text-xl tracking-tight">Terratrace</h1>
