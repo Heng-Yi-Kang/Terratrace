@@ -1,6 +1,32 @@
+'use client';
+
+import { useEffect, useRef } from 'react';
 import Link from 'next/link'
 import EcoRoutePlannerSection from '@/components/eco-route-planner-section'
 import WeatherForecastSection from '@/components/weather-forecast-section'
+
+// Hook to observe elements for scroll animations
+const useScrollAnimation = () => {
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  useEffect(() => {
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    const animatedElements = document.querySelectorAll('.animate-on-scroll, .slide-in-left, .slide-in-right, .scale-in, .stagger-children');
+    animatedElements.forEach((el) => observerRef.current?.observe(el));
+
+    return () => observerRef.current?.disconnect();
+  }, []);
+};
 
 // Heroicons SVG Icons
 const LeafIcon = () => (
@@ -65,7 +91,7 @@ const ArrowRightIcon = () => (
 
 // Navbar Component
 const Navbar = () => (
-  <nav className="fixed top-4 left-4 right-4 z-50">
+  <nav className="fixed top-4 left-4 right-4 z-50 animate-on-scroll">
     <div className="max-w-6xl mx-auto bg-white/80 backdrop-blur-md rounded-organic shadow-organic">
       <div className="flex items-center justify-between px-6 py-4">
         <a href="#" className="flex items-center gap-2 cursor-pointer group">
@@ -101,7 +127,7 @@ const HeroSection = () => (
     <div className="absolute bottom-20 right-10 w-96 h-96 bg-cyan-secondary/20 rounded-full blur-3xl"></div>
 
     <div className="max-w-4xl mx-auto text-center relative z-10">
-      <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 mb-8 shadow-organic">
+      <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 mb-8 shadow-organic animate-on-scroll">
         <div className="w-8 h-8 bg-cta rounded-full flex items-center justify-center">
           <LeafIcon />
         </div>
@@ -117,11 +143,11 @@ const HeroSection = () => (
         </span>
       </h1>
 
-      <p className="text-lg md:text-xl text-text/70 max-w-2xl mx-auto mb-10 leading-relaxed">
+      <p className="text-lg md:text-xl text-text/70 max-w-2xl mx-auto mb-10 leading-relaxed animate-on-scroll">
         Plan eco-friendly journeys, track your carbon footprint, and discover destinations that share your commitment to sustainability. Every trip counts.
       </p>
 
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-on-scroll">
         <Link href="/login" className="bg-cta text-text px-8 py-4 rounded-organic font-heading font-semibold text-lg hover:bg-cta/90 transition-colors duration-200 cursor-pointer shadow-organic-lg flex items-center gap-3 group">
           Start Your Eco Journey
           <ArrowRightIcon />
@@ -132,7 +158,7 @@ const HeroSection = () => (
       </div>
 
       {/* Stats preview */}
-      <div className="grid grid-cols-3 gap-4 mt-16 max-w-3xl mx-auto">
+      <div className="grid grid-cols-3 gap-4 mt-16 max-w-3xl mx-auto stagger-children">
         <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-organic text-center">
           <div className="font-heading font-bold text-2xl md:text-3xl text-primary">2.5M+</div>
           <div className="text-sm text-text/60 mt-1">CO2 kg Saved</div>
@@ -154,7 +180,7 @@ const HeroSection = () => (
 const ProblemSection = () => (
   <section className="py-20 px-4 bg-white/50">
     <div className="max-w-6xl mx-auto">
-      <div className="text-center mb-12">
+      <div className="text-center mb-12 animate-on-scroll">
         <h2 className="font-heading font-bold text-3xl md:text-4xl text-text mb-4">
           Why Sustainable Travel Matters
         </h2>
@@ -164,14 +190,14 @@ const ProblemSection = () => (
       </div>
 
       <div className="grid md:grid-cols-2 gap-8 items-center">
-        <div className="bg-gradient-to-br from-text/5 to-primary/10 rounded-organic-lg p-8 md:p-12">
+        <div className="bg-gradient-to-br from-text/5 to-primary/10 rounded-organic-lg p-8 md:p-12 slide-in-left">
           <div className="font-heading font-bold text-5xl md:text-6xl text-primary mb-4">72%</div>
           <p className="text-lg text-text/80">
             of travelers want to reduce their environmental impact but don&apos;t know where to start.
           </p>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-6 stagger-children">
           <div className="flex items-start gap-4 bg-white/80 rounded-organic p-5 shadow-organic cursor-pointer hover:shadow-organic-lg transition-shadow duration-200">
             <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center shrink-0">
               <ChartIcon />
@@ -211,7 +237,7 @@ const ProblemSection = () => (
 const FeaturesSection = () => (
   <section id="features" className="py-20 px-4">
     <div className="max-w-6xl mx-auto">
-      <div className="text-center mb-16">
+      <div className="text-center mb-16 animate-on-scroll">
         <h2 className="font-heading font-bold text-3xl md:text-4xl text-text mb-4">
           Plan with Purpose
         </h2>
@@ -220,7 +246,7 @@ const FeaturesSection = () => (
         </p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-8">
+      <div className="grid md:grid-cols-3 gap-8 stagger-children">
         <div className="bg-white/80 backdrop-blur-sm rounded-organic-lg p-8 shadow-organic hover:shadow-organic-lg transition-shadow duration-200 cursor-pointer group">
           <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center mb-6 group-hover:scale-105 transition-transform duration-200">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-8 h-8">
@@ -274,7 +300,7 @@ const FeaturesSection = () => (
 const TestimonialsSection = () => (
   <section id="testimonials" className="py-20 px-4 bg-gradient-to-b from-white/50 to-background">
     <div className="max-w-6xl mx-auto">
-      <div className="text-center mb-16">
+      <div className="text-center mb-16 animate-on-scroll">
         <h2 className="font-heading font-bold text-3xl md:text-4xl text-text mb-4">
           Stories from Eco Explorers
         </h2>
@@ -283,7 +309,7 @@ const TestimonialsSection = () => (
         </p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-8">
+      <div className="grid md:grid-cols-3 gap-8 stagger-children">
         <div className="bg-white rounded-organic-lg p-8 shadow-organic hover:shadow-organic-lg transition-shadow duration-200">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-14 h-14 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center">
@@ -346,7 +372,7 @@ const TestimonialsSection = () => (
 const CTASection = () => (
   <section id="cta" className="py-20 px-4">
     <div className="max-w-4xl mx-auto">
-      <div className="bg-gradient-to-br from-primary to-secondary rounded-organic-lg p-12 md:p-16 text-center shadow-organic-lg relative overflow-hidden">
+      <div className="bg-gradient-to-br from-primary to-secondary rounded-organic-lg p-12 md:p-16 text-center shadow-organic-lg relative overflow-hidden scale-in">
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full blur-2xl"></div>
@@ -386,7 +412,7 @@ const CTASection = () => (
 
 // Footer
 const Footer = () => (
-  <footer className="py-12 px-4 bg-text/5">
+  <footer className="py-12 px-4 bg-text/5 animate-on-scroll">
     <div className="max-w-6xl mx-auto">
       <div className="grid md:grid-cols-4 gap-8 mb-12">
         <div className="md:col-span-2">
@@ -436,6 +462,8 @@ const Footer = () => (
 
 // Main Page Component
 export default function Home() {
+  useScrollAnimation();
+
   return (
     <main className="min-h-screen">
       <Navbar />

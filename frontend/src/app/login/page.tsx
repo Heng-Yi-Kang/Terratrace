@@ -4,6 +4,22 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import AuthForm from '@/components/auth/AuthForm'
 import { signIn, getRedirectPath } from '@/utils/supabase/auth'
+import { motion } from 'framer-motion'
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+}
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+}
 
 export default function LoginPage() {
   const router = useRouter()
@@ -20,8 +36,13 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={staggerContainer}
+        className="w-full max-w-md"
+      >
+        <motion.div variants={fadeInUp} className="text-center mb-8">
           <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 mb-6 shadow-organic">
             <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-4 h-4">
@@ -32,9 +53,9 @@ export default function LoginPage() {
           </div>
           <h1 className="font-heading font-bold text-3xl text-text mb-2">Welcome Back</h1>
           <p className="text-text/70">Log in to continue your eco-friendly journey</p>
-        </div>
+        </motion.div>
 
-        <div className="bg-white/80 backdrop-blur-md rounded-organic-lg p-8 shadow-organic">
+        <motion.div variants={fadeInUp} className="bg-white/80 backdrop-blur-md rounded-organic-lg p-8 shadow-organic">
           <AuthForm mode="login" onSubmit={handleLogin} />
 
           <div className="mt-6 text-center">
@@ -45,14 +66,14 @@ export default function LoginPage() {
               </Link>
             </p>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="mt-8 text-center">
+        <motion.div variants={fadeInUp} className="mt-8 text-center">
           <Link href="/" className="text-text/60 text-sm hover:text-primary transition-colors">
             ← Back to home
           </Link>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </main>
   )
 }
