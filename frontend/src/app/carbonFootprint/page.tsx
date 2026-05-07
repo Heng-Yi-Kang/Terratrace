@@ -3,7 +3,6 @@
 
 import { useEffect, useState } from 'react';
 import SelectOptions from './component/selectOptions';
-import Chart from './component/doughnutChart';
 
 type Option<T extends string> = {
   label: string;
@@ -527,22 +526,6 @@ const CarbonCalculator = ({
   );
 };
 
-const getHighestSource = (result: CarbonResult) => {
-  const sources = [
-    { name: "Flight", value: result.flightEmissions },
-    { name: "Car", value: result.carEmissions },
-    { name: "Hotel", value: result.hotelEmissions },
-    { name: "Rail", value: result.railEmissions },
-    { name: "Bus", value: result.busEmissions },
-    { name: "Taxi", value: result.taxiEmissions },
-  ];
-
-  return sources.reduce((max, curr) =>
-    curr.value > max.value ? curr : max
-  );
-};
-
-
 const ImpactInsights = ({ result }: { result: CarbonResult | null }) => {
 
   if (!result) {
@@ -561,25 +544,6 @@ const ImpactInsights = ({ result }: { result: CarbonResult | null }) => {
   const railPercentage = total ? ((result.railEmissions / total) * 100).toFixed(1) : '0.0';
   const busPercentage = total ? ((result.busEmissions / total) * 100).toFixed(1) : '0.0';
   const taxiPercentage = total ? ((result.taxiEmissions / total) * 100).toFixed(1) : '0.0';
-
-
-  let recommendation = "";
-
-  const highestSource = getHighestSource(result);
-
-  if (highestSource.name === "Flight") {
-    recommendation = "To reduce impact, consider taking a train or bus for shorter distances, or choose airlines with better sustainability practices.";
-  } else if (highestSource.name === "Car") {
-    recommendation = "To reduce impact, try carpooling, using public transportation, or switching to a more fuel-efficient or electric vehicle.";
-  } else if (highestSource.name === "Hotel") {
-    recommendation = "To reduce impact, look for eco-friendly hotels that have sustainability certifications, or consider alternative accommodations like hostels or vacation rentals.";
-  } else if (highestSource.name === "Rail") {
-    recommendation = "To reduce impact, consider taking trains more often, as they generally have lower emissions per passenger than cars or planes.";
-  } else if (highestSource.name === "Bus") {
-    recommendation = "To reduce impact, try using buses for longer trips, as they can be more environmentally friendly than individual car travel.";
-  } else if (highestSource.name === "Taxi") {
-    recommendation = "To reduce impact, consider carpooling or using ride-sharing services to minimize the number of vehicles on the road.";
-  }
 
   return (
     <section id="impact" className="min-h-screen py-20 px-4 relative overflow-hidden">
@@ -608,63 +572,44 @@ const ImpactInsights = ({ result }: { result: CarbonResult | null }) => {
 
               </div>
 
-              {/* chart or breakdown of emissions*/}
-              <div>
+              {/* breakdown of emissions*/}
+              <div className=" mt-6">
+                  <h3 className="font-bold text-xl text-text/80 mb-2">Breakdown:</h3>
 
-                {result && (
-                  <Chart
-                    flight={flightPercentage ? parseFloat(flightPercentage) : 0}
-                    car={carPercentage ? parseFloat(carPercentage) : 0}
-                    hotel={hotelPercentage ? parseFloat(hotelPercentage) : 0}
-                    rail={railPercentage ? parseFloat(railPercentage) : 0}
-                    bus={busPercentage ? parseFloat(busPercentage) : 0}
-                    taxi={taxiPercentage ? parseFloat(taxiPercentage) : 0}
-                  />
-                )}
+                  <div className="flex">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <PlaneIcon />
+                        <p className="text-text text-lg font-normal m-2"> <span className="font-semibold">{result ? result.flightEmissions.toFixed(2) : '0.00'}</span> kg CO₂ <span className="font-semibold">({flightPercentage}%)</span></p>
+                      </div>
+                      <div className="flex items-center gap-2 ">
+                        <CarIcon />
+                        <p className="text-text text-lg font-normal m-2"> <span className="font-semibold">{result ? result.carEmissions.toFixed(2) : '0.00'}</span> kg CO₂ <span className="font-semibold">({carPercentage}%)</span></p>
+                      </div>
+                      <div className="flex items-center gap-2 ">
+                        <HotelIcon />
+                        <p className="text-text text-lg font-normal m-2"> <span className="font-semibold">{result ? result.hotelEmissions.toFixed(2) : '0.00'}</span> kg CO2 <span className="font-semibold">({hotelPercentage}%)</span></p>
+                      </div>
+                    </div>
 
-                <div className=" mt-6">
-                  <h3 className="font-bold text-xl text-center items-centertext-text/80 mb-2">Highest Impact:</h3>
-                  <p className="text-center text-text text-lg font-normal m-2">{highestSource.name} contribute the most to your travel&apos;s carbon footprint.</p>
-                  <p className="text-center text-text/80 italic">{recommendation}</p>
-                </div>
+                    <div className="ml-10">
+                      <div className="flex items-center gap-2 ">
+                        <TrainIcon />
+                        <p className="text-text text-lg font-normal m-2"> <span className="font-semibold">{result ? result.railEmissions.toFixed(2) : '0.00'}</span> kg CO₂ <span className="font-semibold">({railPercentage}%)</span></p>
+                      </div>
+                      <div className="flex items-center gap-2 ">
+                        <BusIcon />
+                        <p className="text-text text-lg font-normal m-2"> <span className="font-semibold">{result ? result.busEmissions.toFixed(2) : '0.00'}</span> kg CO₂ <span className="font-semibold">({busPercentage}%)</span></p>
+                      </div>
+                      <div className="flex items-center gap-2 ">
+                        <TaxiIcon />
+                        <p className="text-text text-lg font-normal m-2"> <span className="font-semibold">{result ? result.taxiEmissions.toFixed(2) : '0.00'}</span> kg CO₂ <span className="font-semibold">({taxiPercentage}%)</span></p>
+                      </div>
+                    </div>
 
-                <hr className="m-6" />
-                <h3 className="font-bold text-xl text-text mb-2">Breakdown:</h3>
-
-                <div className="flex">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <PlaneIcon />
-                      <p className="text-text text-lg font-normal m-2"> <span className="font-semibold">{result ? result.flightEmissions.toFixed(2) : '0.00'}</span> kg CO₂ <span className="font-semibold">({flightPercentage}%)</span></p>
-                    </div>
-                    <div className="flex items-center gap-2 ">
-                      <CarIcon />
-                      <p className="text-text text-lg font-normal m-2"> <span className="font-semibold">{result ? result.carEmissions.toFixed(2) : '0.00'}</span> kg CO₂ <span className="font-semibold">({carPercentage}%)</span></p>
-                    </div>
-                    <div className="flex items-center gap-2 ">
-                      <HotelIcon />
-                      <p className="text-text text-lg font-normal m-2"> <span className="font-semibold">{result ? result.hotelEmissions.toFixed(2) : '0.00'}</span> kg CO2 <span className="font-semibold">({hotelPercentage}%)</span></p>
-                    </div>
-                  </div>
-
-                  <div className="ml-10">
-                    <div className="flex items-center gap-2 ">
-                      <TrainIcon />
-                      <p className="text-text text-lg font-normal m-2"> <span className="font-semibold">{result ? result.railEmissions.toFixed(2) : '0.00'}</span> kg CO₂ <span className="font-semibold">({railPercentage}%)</span></p>
-                    </div>
-                    <div className="flex items-center gap-2 ">
-                      <BusIcon />
-                      <p className="text-text text-lg font-normal m-2"> <span className="font-semibold">{result ? result.busEmissions.toFixed(2) : '0.00'}</span> kg CO₂ <span className="font-semibold">({busPercentage}%)</span></p>
-                    </div>
-                    <div className="flex items-center gap-2 ">
-                      <TaxiIcon />
-                      <p className="text-text text-lg font-normal m-2"> <span className="font-semibold">{result ? result.taxiEmissions.toFixed(2) : '0.00'}</span> kg CO₂ <span className="font-semibold">({taxiPercentage}%)</span></p>
-                    </div>
                   </div>
 
                 </div>
-
-              </div>
 
             </div>
 
@@ -674,6 +619,21 @@ const ImpactInsights = ({ result }: { result: CarbonResult | null }) => {
     </section >
   )
 }
+
+const getHighestSource = (result: CarbonResult) => {
+  const sources = [
+    { name: "Flight", value: result.flightEmissions },
+    { name: "Car", value: result.carEmissions },
+    { name: "Hotel", value: result.hotelEmissions },
+    { name: "Rail", value: result.railEmissions },
+    { name: "Bus", value: result.busEmissions },
+    { name: "Taxi", value: result.taxiEmissions },
+  ];
+
+  return sources.reduce((max, curr) =>
+    curr.value > max.value ? curr : max
+  );
+};
 
 const CarbonOffset = ({ result }: { result: CarbonResult | null }) => {
 

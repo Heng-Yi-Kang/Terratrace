@@ -1,5 +1,8 @@
+'use client';
+
 import ImpactCard from '@/app/component/analytics/ImpactCard';
 import { calculateCarbonSaved } from '@/utils/carbonCalculator';
+import { useEffect, useState, useRef } from 'react';
 
 const DownloadIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
@@ -67,6 +70,72 @@ const AlertIcon = () => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
   </svg>
 );
+
+function useAnimatedBar(targetPercent: number, elementRef: React.RefObject<HTMLDivElement | null>, delay: number = 0) {
+  const [width, setWidth] = useState(0)
+  const hasAnimated = useRef(false)
+
+  useEffect(() => {
+    const element = elementRef.current
+    if (!element) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !hasAnimated.current) {
+          hasAnimated.current = true
+          setTimeout(() => {
+            const startTime = performance.now()
+            const duration = 800
+            const animate = (currentTime: number) => {
+              const elapsed = currentTime - startTime
+              const progress = Math.min(elapsed / duration, 1)
+              const easeOut = 1 - Math.pow(1 - progress, 3)
+              setWidth(targetPercent * easeOut)
+              if (progress < 1) {
+                requestAnimationFrame(animate)
+              }
+            }
+            requestAnimationFrame(animate)
+          }, delay)
+        }
+      },
+      { threshold: 0.3 }
+    )
+
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [targetPercent, delay])
+
+  return `${width}%`
+}
+
+interface TransportBarProps {
+  method: string
+  saved: number
+  percentage: number
+  color: string
+  delay: number
+}
+
+function TransportBar({ method, saved, percentage, color, delay }: TransportBarProps) {
+  const barRef = useRef<HTMLDivElement>(null)
+  const animatedWidth = useAnimatedBar(percentage, barRef, delay)
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <span className="font-medium text-text">{method}</span>
+        <span className="text-sm font-semibold text-primary">{saved} kg CO2</span>
+      </div>
+      <div className="h-3 bg-text/10 rounded-full overflow-hidden">
+        <div
+          ref={barRef}
+          className={`h-full bg-gradient-to-r ${color} to-secondary rounded-full transition-all duration-500`}
+          style={{ width: animatedWidth }}
+        ></div>
+      </div>
+    </div>
+  )
+}
 
 export default function DashboardPage() {
   // Trip data
@@ -136,22 +205,11 @@ export default function DashboardPage() {
             <h3 className="text-lg font-heading font-semibold text-text mb-6">Transport Method Comparison</h3>
             <div className="space-y-6">
               {[
-                { method: "Train", saved: 8.5, percentage: 68, color: "from-primary" },
-                { method: "Bicycle", saved: 2.1, percentage: 17, color: "from-secondary" },
-                { method: "Bus", saved: 4.2, percentage: 34, color: "from-cyan-primary" },
+                { method: "Train", saved: 8.5, percentage: 68, color: "from-primary", delay: 0 },
+                { method: "Bicycle", saved: 2.1, percentage: 17, color: "from-secondary", delay: 150 },
+                { method: "Bus", saved: 4.2, percentage: 34, color: "from-cyan-primary", delay: 300 },
               ].map((item) => (
-                <div key={item.method}>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="font-medium text-text">{item.method}</span>
-                    <span className="text-sm font-semibold text-primary">{item.saved} kg CO2</span>
-                  </div>
-                  <div className="h-3 bg-text/10 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full bg-gradient-to-r ${item.color} to-secondary rounded-full transition-all duration-500`}
-                      style={{ width: `${item.percentage}%` }}
-                    ></div>
-                  </div>
-                </div>
+                <TransportBar key={item.method} method={item.method} saved={item.saved} percentage={item.percentage} color={item.color} delay={item.delay} />
               ))}
             </div>
           </div>
