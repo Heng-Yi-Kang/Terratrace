@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import SmartRecommendationModal from './SmartRecommendationModal'
+import SmartRecommendationSection from '@/components/smart-recommendation-section'
 import type { Trip, SavedTripFromRecommendation, TripStatus, EcoScoreFilter } from '@/types/trip'
 
 const SAVED_TRIPS_KEY = 'terratrace_saved_trips'
@@ -44,26 +44,7 @@ const mockTrips: Trip[] = [
 export default function TripsTab() {
   const [statusFilter, setStatusFilter] = useState<TripStatus>('all')
   const [ecoFilter, setEcoFilter] = useState<EcoScoreFilter>('all')
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
-  const [dateLimits, setDateLimits] = useState({ min: '', max: '' })
-  const [showRecommendationModal, setShowRecommendationModal] = useState(false)
   const [savedTrips, setSavedTrips] = useState<SavedTripFromRecommendation[]>([])
-
-  useEffect(() => {
-    const today = new Date()
-    const maxDate = new Date()
-    maxDate.setDate(today.getDate() + 33)
-
-    const fmt = (d: Date) => {
-      const year = d.getFullYear()
-      const month = String(d.getMonth() + 1).padStart(2, '0')
-      const day = String(d.getDate()).padStart(2, '0')
-      return `${year}-${month}-${day}`
-    }
-
-    setDateLimits({ min: fmt(today), max: fmt(maxDate) })
-  }, [])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -81,7 +62,6 @@ export default function TripsTab() {
     const updated = [trip, ...savedTrips]
     setSavedTrips(updated)
     localStorage.setItem(SAVED_TRIPS_KEY, JSON.stringify(updated))
-    setShowRecommendationModal(false)
   }
 
   const allTrips: Trip[] = [...mockTrips, ...savedTrips]
@@ -90,87 +70,19 @@ export default function TripsTab() {
     if (statusFilter !== 'all' && trip.status !== statusFilter) return false
     if (ecoFilter === 'high' && trip.ecoScore < 90) return false
     if (ecoFilter === 'medium' && (trip.ecoScore >= 90 || trip.ecoScore < 70)) return false
-    if (startDate || endDate) {
-      const tripDates = trip.dates.replace(/,\s*\d{4}$/, '').split(' - ')
-      const months: Record<string, number> = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 }
-      const parseTripDate = (d: string) => {
-        const parts = d.trim().split(' ')
-        return new Date(2026, months[parts[0]], parseInt(parts[1]))
-      }
-      const tripStart = parseTripDate(tripDates[0])
-      const tripEnd = parseTripDate(tripDates[1] || tripDates[0])
-      if (startDate && tripEnd < new Date(startDate)) return false
-      if (endDate && tripStart > new Date(endDate)) return false
-    }
     return true
   })
 
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="font-sans font-bold text-3xl text-text">My Trips</h1>
-          <p className="font-sans text-text/60 mt-2">Plan and manage your eco-friendly journeys</p>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <button
-            onClick={() => setShowRecommendationModal(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-sans font-medium hover:bg-secondary transition-colors duration-200 cursor-pointer"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            Get Smart Recommendations
-          </button>
-          <button className="flex items-center gap-2 px-6 py-3 border border-primary text-primary rounded-xl font-sans font-medium hover:bg-primary/5 transition-colors duration-200 cursor-pointer">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Manual Plan
-          </button>
-        </div>
+      <div>
+        <h1 className="font-sans font-bold text-3xl text-text">My Trips</h1>
+        <p className="font-sans text-text/60 mt-2">Plan and manage your eco-friendly journeys</p>
       </div>
 
-      {/* Date Range Filter */}
-      <div className="flex flex-wrap gap-4 items-end">
-        <div>
-          <label htmlFor="tripStartDate" className="block text-sm font-medium text-text mb-2">
-            From
-          </label>
-          <input
-            type="date"
-            id="tripStartDate"
-            value={startDate}
-            min={dateLimits.min}
-            max={dateLimits.max}
-            onChange={(event) => setStartDate(event.target.value)}
-            className="px-4 py-2 rounded-xl border border-text/20 text-text bg-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-colors duration-200"
-          />
-        </div>
-        <div>
-          <label htmlFor="tripEndDate" className="block text-sm font-medium text-text mb-2">
-            To
-          </label>
-          <input
-            type="date"
-            id="tripEndDate"
-            value={endDate}
-            min={startDate || dateLimits.min}
-            max={dateLimits.max}
-            onChange={(event) => setEndDate(event.target.value)}
-            className="px-4 py-2 rounded-xl border border-text/20 text-text bg-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-colors duration-200"
-          />
-        </div>
-        {(startDate || endDate) && (
-          <button
-            onClick={() => { setStartDate(''); setEndDate('') }}
-            className="px-4 py-2 text-sm text-text/60 hover:text-text transition-colors duration-200 cursor-pointer"
-          >
-            Clear dates
-          </button>
-        )}
-      </div>
+      {/* Smart Recommendation Section */}
+      <SmartRecommendationSection />
 
       {/* Filters */}
       <div className="flex flex-wrap gap-4">
@@ -266,12 +178,6 @@ export default function TripsTab() {
             Plan Your First Trip
           </button>
         </div>
-      )}
-    {showRecommendationModal && (
-        <SmartRecommendationModal
-          onClose={() => setShowRecommendationModal(false)}
-          onSave={handleTripSaved}
-        />
       )}
     </div>
   )

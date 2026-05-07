@@ -100,7 +100,11 @@ const Navbar = () => (
   </nav>
 )
 
-export default function SmartRecommendationSection() {
+interface SmartRecommendationSectionProps {
+  hideNavbar?: boolean
+}
+
+export default function SmartRecommendationSection({ hideNavbar = false }: SmartRecommendationSectionProps) {
   const [city, setCity] = useState('Kuala Lumpur')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
@@ -181,16 +185,9 @@ export default function SmartRecommendationSection() {
 
   return (
     <>
-      <Navbar />
-      <section className="py-20 px-4 pt-32">
+      {!hideNavbar && <Navbar />}
+      <section className="py-12 px-4">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-10">
-          <h1 className="font-heading font-bold text-3xl md:text-4xl text-text mb-3">Smart Recommendation</h1>
-          <p className="text-text/70 max-w-2xl mx-auto">
-            AI-powered green destination recommendations based on budget, interests, trusted web sources, and real-time weather context.
-          </p>
-        </div>
-
         <div className="bg-white/80 backdrop-blur-sm rounded-organic-lg p-6 md:p-8 shadow-organic">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid md:grid-cols-2 gap-4">
