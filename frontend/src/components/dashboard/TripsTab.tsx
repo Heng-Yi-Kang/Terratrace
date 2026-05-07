@@ -82,7 +82,7 @@ export default function TripsTab() {
       </div>
 
       {/* Smart Recommendation Section */}
-      <SmartRecommendationSection />
+      <SmartRecommendationSection hideNavbar={true} />
 
       {/* Filters */}
       <div className="flex flex-wrap gap-4">
