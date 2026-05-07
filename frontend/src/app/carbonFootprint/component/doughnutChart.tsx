@@ -46,6 +46,10 @@ export default function Chart({ flight, car, hotel, rail, bus, taxi }: Props) {
 
     const options = {
         responsive: true,
+        animation: {
+            duration: 800,
+            easing: 'easeOutQuart' as const,
+        },
         plugins: {
             legend: {
                 labels: {

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { motion, useInView } from 'framer-motion'
 
 const carbonData = {
   totalCarbon: 892,
@@ -12,6 +13,60 @@ const carbonData = {
     { month: 'Mar', footprint: 110, saved: 52 },
     { month: 'Apr', footprint: 88, saved: 41 },
   ],
+}
+
+type StatsCardProps = {
+  title: string
+  value: number
+  unit: string
+  icon: React.ReactNode
+  iconBgClass: string
+}
+
+function StatsCard({ title, value, unit, icon, iconBgClass }: StatsCardProps) {
+  const ref = useRef<HTMLDivElement>(null)
+  const isInView = useInView(ref, { once: true, amount: 0.5 })
+  const [displayValue, setDisplayValue] = useState(0)
+  const hasAnimated = useRef(false)
+
+  useEffect(() => {
+    if (!isInView || hasAnimated.current) return
+    hasAnimated.current = true
+
+    const duration = 1500
+    const startTime = performance.now()
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      const easeOut = 1 - Math.pow(1 - progress, 3)
+      setDisplayValue(Math.floor(value * easeOut))
+
+      if (progress < 1) {
+        requestAnimationFrame(animate)
+      } else {
+        setDisplayValue(value)
+      }
+    }
+
+    requestAnimationFrame(animate)
+  }, [isInView, value])
+
+  return (
+    <div ref={ref} className="bg-white/80 backdrop-blur-md rounded-organic p-6 shadow-organic">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="font-sans text-sm font-medium text-text/60">{title}</p>
+          <p className="font-sans font-bold text-4xl text-text mt-2">
+            {displayValue.toLocaleString()} <span className="text-lg font-normal text-text/60">{unit}</span>
+          </p>
+        </div>
+        <div className={`w-14 h-14 rounded-full ${iconBgClass} flex items-center justify-center`}>
+          {icon}
+        </div>
+      </div>
+    </div>
+  )
 }
 
 const tips = [
@@ -76,67 +131,76 @@ export default function CarbonTab() {
 
       {/* Carbon Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white/80 backdrop-blur-md rounded-organic p-6 shadow-organic">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-sans text-sm font-medium text-text/60">Total Footprint</p>
-              <p className="font-sans font-bold text-4xl text-text mt-2">{carbonData.totalCarbon} <span className="text-lg font-normal text-text/60">kg CO₂</span></p>
-            </div>
-            <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center">
-              <svg className="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
-              </svg>
-            </div>
-          </div>
-        </div>
+        <StatsCard
+          title="Total Footprint"
+          value={carbonData.totalCarbon}
+          unit="kg CO₂"
+          iconBgClass="bg-red-100"
+          icon={
+            <svg className="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+            </svg>
+          }
+        />
 
-        <div className="bg-white/80 backdrop-blur-md rounded-organic p-6 shadow-organic">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-sans text-sm font-medium text-text/60">Carbon Saved</p>
-              <p className="font-sans font-bold text-4xl text-primary mt-2">{carbonData.carbonSaved} <span className="text-lg font-normal text-text/60">kg CO₂</span></p>
-            </div>
-            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
-              <svg className="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
-              </svg>
-            </div>
-          </div>
-        </div>
+        <StatsCard
+          title="Carbon Saved"
+          value={carbonData.carbonSaved}
+          unit="kg CO₂"
+          iconBgClass="bg-primary/10"
+          icon={
+            <svg className="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+            </svg>
+          }
+        />
 
-        <div className="bg-white/80 backdrop-blur-md rounded-organic p-6 shadow-organic">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-sans text-sm font-medium text-text/60">CO₂ Offset</p>
-              <p className="font-sans font-bold text-4xl text-secondary mt-2">{carbonData.offset} <span className="text-lg font-normal text-text/60">kg CO₂</span></p>
-            </div>
-            <div className="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center">
-              <svg className="w-7 h-7 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-              </svg>
-            </div>
-          </div>
-        </div>
+        <StatsCard
+          title="CO₂ Offset"
+          value={carbonData.offset}
+          unit="kg CO₂"
+          iconBgClass="bg-secondary/10"
+          icon={
+            <svg className="w-7 h-7 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+            </svg>
+          }
+        />
       </div>
 
       {/* Chart Placeholder */}
       <div className="bg-white/80 backdrop-blur-md rounded-organic p-6 shadow-organic">
         <h2 className="font-sans font-semibold text-xl text-text mb-6">Monthly Comparison</h2>
         <div className="h-48 flex items-end justify-around gap-4">
-          {carbonData.monthlyData.map((data) => (
-            <div key={data.month} className="flex flex-col items-center gap-2 flex-1">
+          {carbonData.monthlyData.map((data, index) => (
+            <motion.div
+              key={data.month}
+              className="flex flex-col items-center gap-2 flex-1"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.5 }}
+              transition={{ duration: 0.5, delay: index * 0.1, ease: 'easeOut' }}
+            >
               <div className="w-full flex flex-col-reverse gap-1">
-                <div
-                  className="bg-red-400 rounded-t-md transition-all duration-300"
-                  style={{ height: `${(data.footprint / maxFootprint) * 120}px` }}
+                <motion.div
+                  className="bg-red-400 rounded-t-md"
+                  initial={{ scaleY: 0 }}
+                  whileInView={{ scaleY: 1 }}
+                  viewport={{ once: true, amount: 0.5 }}
+                  transition={{ duration: 0.5, delay: index * 0.1, ease: 'easeOut' }}
+                  style={{ height: `${(data.footprint / maxFootprint) * 120}px`, originY: 1 }}
                 />
-                <div
-                  className="bg-primary rounded-t-md transition-all duration-300"
-                  style={{ height: `${(data.saved / maxFootprint) * 120}px` }}
+                <motion.div
+                  className="bg-primary rounded-t-md"
+                  initial={{ scaleY: 0 }}
+                  whileInView={{ scaleY: 1 }}
+                  viewport={{ once: true, amount: 0.5 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 + 0.05, ease: 'easeOut' }}
+                  style={{ height: `${(data.saved / maxFootprint) * 120}px`, originY: 1 }}
                 />
               </div>
               <span className="font-sans text-xs text-text/60">{data.month}</span>
-            </div>
+            </motion.div>
           ))}
         </div>
         <div className="flex items-center justify-center gap-6 mt-6">
