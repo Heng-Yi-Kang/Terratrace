@@ -1,9 +1,57 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link'
 import EcoRoutePlannerSection from '@/components/eco-route-planner-section'
 import WeatherForecastSection from '@/components/weather-forecast-section'
+
+// Count-up hook for stats animation
+function useCountUp(end: number, duration: number = 1500, start: number = 0, format: (n: number) => string = (n) => Math.floor(n).toLocaleString()) {
+  const [count, setCount] = useState(start)
+  const [isAnimating, setIsAnimating] = useState(false)
+  const hasAnimated = useRef(false)
+  const elementRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const element = elementRef.current
+    if (!element) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !hasAnimated.current) {
+          setIsAnimating(true)
+          hasAnimated.current = true
+        }
+      },
+      { threshold: 0.5 }
+    )
+
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!isAnimating) return
+
+    const startTime = performance.now()
+    const diff = end - start
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      const easeOut = 1 - Math.pow(1 - progress, 3)
+      setCount(start + diff * easeOut)
+
+      if (progress < 1) {
+        requestAnimationFrame(animate)
+      }
+    }
+
+    requestAnimationFrame(animate)
+  }, [isAnimating, end, start, duration])
+
+  return { count, ref: elementRef, display: format(count) }
+}
 
 // Hook to observe elements for scroll animations
 const useScrollAnimation = () => {
@@ -120,7 +168,12 @@ const Navbar = () => (
 );
 
 // Hero Section
-const HeroSection = () => (
+const HeroSection = () => {
+  const statsRef1 = useCountUp(2500000, 2000, 0, (n) => n >= 1000000 ? (n / 1000000).toFixed(1) + 'M+' : Math.floor(n).toLocaleString())
+  const statsRef2 = useCountUp(50000, 2000, 0, (n) => n >= 1000 ? Math.floor(n / 1000) + 'K+' : Math.floor(n).toLocaleString())
+  const statsRef3 = useCountUp(120, 2000, 0, (n) => Math.floor(n) + '+')
+
+  return (
   <section className="min-h-screen flex items-center justify-center pt-24 pb-16 px-4 relative overflow-hidden">
     {/* Background decorative elements */}
     <div className="absolute top-20 left-10 w-64 h-64 bg-secondary/20 rounded-full blur-3xl"></div>
@@ -160,21 +213,22 @@ const HeroSection = () => (
       {/* Stats preview */}
       <div className="grid grid-cols-3 gap-4 mt-16 max-w-3xl mx-auto stagger-children">
         <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-organic text-center">
-          <div className="font-heading font-bold text-2xl md:text-3xl text-primary">2.5M+</div>
+          <div ref={statsRef1.ref} className="font-heading font-bold text-2xl md:text-3xl text-primary">{statsRef1.display}</div>
           <div className="text-sm text-text/60 mt-1">CO2 kg Saved</div>
         </div>
         <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-organic text-center">
-          <div className="font-heading font-bold text-2xl md:text-3xl text-primary">50K+</div>
+          <div ref={statsRef2.ref} className="font-heading font-bold text-2xl md:text-3xl text-primary">{statsRef2.display}</div>
           <div className="text-sm text-text/60 mt-1">Eco Trips Planned</div>
         </div>
         <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-organic text-center">
-          <div className="font-heading font-bold text-2xl md:text-3xl text-primary">120+</div>
+          <div ref={statsRef3.ref} className="font-heading font-bold text-2xl md:text-3xl text-primary">{statsRef3.display}</div>
           <div className="text-sm text-text/60 mt-1">Green Destinations</div>
         </div>
       </div>
     </div>
   </section>
-);
+  )
+}
 
 // Problem Section
 const ProblemSection = () => (
