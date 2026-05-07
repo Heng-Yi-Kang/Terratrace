@@ -201,7 +201,7 @@ const HeroSection = () => {
       </p>
 
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-on-scroll">
-        <Link href="/login" className="bg-cta text-text px-8 py-4 rounded-organic font-heading font-semibold text-lg hover:bg-cta/90 transition-colors duration-200 cursor-pointer shadow-organic-lg flex items-center gap-3 group">
+        <Link href="/login" className="bg-cta text-text px-8 py-4 rounded-organic font-heading font-semibold text-lg border-2 border-transparent hover:border-cta hover:bg-transparent hover:text-cta hover:scale-105 transition-all duration-200 cursor-pointer shadow-organic-lg flex items-center gap-3 group">
           Start Your Eco Journey
           <ArrowRightIcon />
         </Link>
@@ -212,15 +212,15 @@ const HeroSection = () => {
 
       {/* Stats preview */}
       <div className="grid grid-cols-3 gap-4 mt-16 max-w-3xl mx-auto stagger-children">
-        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-organic text-center">
+        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-organic text-center hover:scale-105 transition-transform duration-200 cursor-pointer">
           <div ref={statsRef1.ref} className="font-heading font-bold text-2xl md:text-3xl text-primary">{statsRef1.display}</div>
           <div className="text-sm text-text/60 mt-1">CO2 kg Saved</div>
         </div>
-        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-organic text-center">
+        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-organic text-center hover:scale-105 transition-transform duration-200 cursor-pointer">
           <div ref={statsRef2.ref} className="font-heading font-bold text-2xl md:text-3xl text-primary">{statsRef2.display}</div>
           <div className="text-sm text-text/60 mt-1">Eco Trips Planned</div>
         </div>
-        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-organic text-center">
+        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-organic text-center hover:scale-105 transition-transform duration-200 cursor-pointer">
           <div ref={statsRef3.ref} className="font-heading font-bold text-2xl md:text-3xl text-primary">{statsRef3.display}</div>
           <div className="text-sm text-text/60 mt-1">Green Destinations</div>
         </div>
@@ -252,7 +252,7 @@ const ProblemSection = () => (
         </div>
 
         <div className="space-y-6 stagger-children">
-          <div className="flex items-start gap-4 bg-white/80 rounded-organic p-5 shadow-organic cursor-pointer hover:shadow-organic-lg transition-shadow duration-200">
+          <div className="flex items-start gap-4 bg-white/80 rounded-organic p-5 shadow-organic hover:shadow-organic-lg hover:scale-105 transition-all duration-200 cursor-pointer">
             <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center shrink-0">
               <ChartIcon />
             </div>
@@ -262,7 +262,7 @@ const ProblemSection = () => (
             </div>
           </div>
 
-          <div className="flex items-start gap-4 bg-white/80 rounded-organic p-5 shadow-organic cursor-pointer hover:shadow-organic-lg transition-shadow duration-200">
+          <div className="flex items-start gap-4 bg-white/80 rounded-organic p-5 shadow-organic hover:shadow-organic-lg hover:scale-105 transition-all duration-200 cursor-pointer">
             <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center shrink-0">
               <MapPinIcon />
             </div>
@@ -272,7 +272,7 @@ const ProblemSection = () => (
             </div>
           </div>
 
-          <div className="flex items-start gap-4 bg-white/80 rounded-organic p-5 shadow-organic cursor-pointer hover:shadow-organic-lg transition-shadow duration-200">
+          <div className="flex items-start gap-4 bg-white/80 rounded-organic p-5 shadow-organic hover:shadow-organic-lg hover:scale-105 transition-all duration-200 cursor-pointer">
             <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center shrink-0">
               <HeartIcon />
             </div>
@@ -301,7 +301,7 @@ const FeaturesSection = () => (
       </div>
 
       <div className="grid md:grid-cols-3 gap-8 stagger-children">
-        <div className="bg-white/80 backdrop-blur-sm rounded-organic-lg p-8 shadow-organic hover:shadow-organic-lg transition-shadow duration-200 cursor-pointer group">
+        <div className="bg-white/80 backdrop-blur-sm rounded-organic-lg p-8 shadow-organic hover:shadow-organic-lg hover:scale-105 transition-all duration-200 cursor-pointer group">
           <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center mb-6 group-hover:scale-105 transition-transform duration-200">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-8 h-8">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
@@ -313,7 +313,7 @@ const FeaturesSection = () => (
           </p>
         </div>
 
-        <div className="bg-white/80 backdrop-blur-sm rounded-organic-lg p-8 shadow-organic hover:shadow-organic-lg transition-shadow duration-200 cursor-pointer group">
+        <div className="bg-white/80 backdrop-blur-sm rounded-organic-lg p-8 shadow-organic hover:shadow-organic-lg hover:scale-105 transition-all duration-200 cursor-pointer group">
           <div className="w-16 h-16 bg-gradient-to-br from-cyan-primary to-cyan-secondary rounded-2xl flex items-center justify-center mb-6 group-hover:scale-105 transition-transform duration-200">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-8 h-8">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c1.128-.449 2.018-1.273 2.018-2.365 0-1.092-.89-1.916-2.018-2.365l-4.875-2.437M4.503 8.25l4.875 2.437c1.128.449 2.018 1.273 2.018 2.365 0 1.092-.89 1.916-2.018 2.365l-4.875 2.437M12 12.75h.008v.008H12v-.008z" />
@@ -329,7 +329,7 @@ const FeaturesSection = () => (
           </a>
         </div>
 
-        <div className="bg-white/80 backdrop-blur-sm rounded-organic-lg p-8 shadow-organic hover:shadow-organic-lg transition-shadow duration-200 cursor-pointer group">
+        <div className="bg-white/80 backdrop-blur-sm rounded-organic-lg p-8 shadow-organic hover:shadow-organic-lg hover:scale-105 transition-all duration-200 cursor-pointer group">
           <div className="w-16 h-16 bg-gradient-to-br from-cta to-cta/70 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-105 transition-transform duration-200">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-8 h-8">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -364,7 +364,7 @@ const TestimonialsSection = () => (
       </div>
 
       <div className="grid md:grid-cols-3 gap-8 stagger-children">
-        <div className="bg-white rounded-organic-lg p-8 shadow-organic hover:shadow-organic-lg transition-shadow duration-200">
+        <div className="bg-white rounded-organic-lg p-8 shadow-organic hover:shadow-organic-lg hover:scale-105 transition-all duration-200">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-14 h-14 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center">
               <UserIcon className="w-7 h-7 text-white" />
@@ -382,7 +382,7 @@ const TestimonialsSection = () => (
           </div>
         </div>
 
-        <div className="bg-white rounded-organic-lg p-8 shadow-organic hover:shadow-organic-lg transition-shadow duration-200">
+        <div className="bg-white rounded-organic-lg p-8 shadow-organic hover:shadow-organic-lg hover:scale-105 transition-all duration-200">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-14 h-14 bg-gradient-to-br from-cyan-primary to-cyan-secondary rounded-full flex items-center justify-center">
               <UserIcon className="w-7 h-7 text-white" />
@@ -400,7 +400,7 @@ const TestimonialsSection = () => (
           </div>
         </div>
 
-        <div className="bg-white rounded-organic-lg p-8 shadow-organic hover:shadow-organic-lg transition-shadow duration-200">
+        <div className="bg-white rounded-organic-lg p-8 shadow-organic hover:shadow-organic-lg hover:scale-105 transition-all duration-200">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-14 h-14 bg-gradient-to-br from-cta to-cta/70 rounded-full flex items-center justify-center">
               <UserIcon className="w-7 h-7 text-white" />
