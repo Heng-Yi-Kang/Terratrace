@@ -1,0 +1,223 @@
+# Terratrace API & Supabase Integration Tests
+# Designed for VS Code / IDE REST Client Extensions
+
+@baseUrl = http://localhost:3001
+@supabaseUrl = https://ovhvvtuxoolmhfbjwova.supabase.co
+@supabaseAnonKey = sb_publishable_TmewZlkU6Nmu_5ZjlTqs2A_XkvYsm3y
+@supabaseServiceKey = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92aHZ2dHV4b29sbWhmYmp3b3ZhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjA5MjMxMiwiZXhwIjoyMDkxNjY4MzEyfQ.MuqYKhlM4xY0YuvMLpm8KPDBb4lO21yKoEcuRtzTSzA
+
+###
+# =========================================================================
+# SECTION 1: EXPRESS BACKEND ENDPOINTS
+# =========================================================================
+
+# @name healthCheck
+GET {{baseUrl}}/health HTTP/1.1
+
+###
+
+# @name apiWelcome
+GET {{baseUrl}}/api HTTP/1.1
+
+###
+
+# @name weatherForecast
+GET {{baseUrl}}/api/weather/forecast?city=Penang HTTP/1.1
+
+###
+
+# @name searchLocation
+GET {{baseUrl}}/api/eco-route/search-location?query=George%20Town HTTP/1.1
+
+###
+
+# @name searchDestination
+GET {{baseUrl}}/api/eco-route/search-destination?query=Kuala%20Lumpur HTTP/1.1
+
+###
+
+# @name planEcoRoute
+POST {{baseUrl}}/api/eco-route/plan HTTP/1.1
+Content-Type: application/json
+
+{
+  "startLat": 5.4141,
+  "startLon": 100.3288,
+  "destinationLat": 3.1390,
+  "destinationLon": 101.6869,
+  "destinationLabel": "Kuala Lumpur"
+}
+
+###
+
+# @name smartRecommendations
+POST {{baseUrl}}/api/recommendations/smart HTTP/1.1
+Content-Type: application/json
+
+{
+  "city": "Penang",
+  "startDate": "2026-06-01",
+  "endDate": "2026-06-05",
+  "budget": 500,
+  "interests": ["nature", "food"]
+}
+
+###
+# =========================================================================
+# SECTION 2: SUPABASE AUTHENTICATION
+# =========================================================================
+
+# @name signUpUser
+POST {{supabaseUrl}}/auth/v1/signup HTTP/1.1
+apikey: {{supabaseAnonKey}}
+Content-Type: application/json
+
+{
+  "email": "tester@terratrace.com",
+  "password": "Password123!"
+}
+
+###
+
+# @name signInUser
+# Use these credentials to sign in and generate the access token (JWT)
+POST {{supabaseUrl}}/auth/v1/token?action=signin HTTP/1.1
+apikey: {{supabaseAnonKey}}
+Content-Type: application/json
+
+{
+  "email": "tester@terratrace.com",
+  "password": "Password123!"
+}
+
+###
+
+# Capture token from the sign-in response for use in the variables below
+@userToken = {{signInUser.response.body.access_token}}
+@userId = {{signInUser.response.body.user.id}}
+
+###
+
+# @name getUserProfile
+GET {{supabaseUrl}}/auth/v1/user HTTP/1.1
+apikey: {{supabaseAnonKey}}
+Authorization: Bearer {{userToken}}
+
+###
+# =========================================================================
+# SECTION 3: SUPABASE DATABASE RLS POLICIES (locations table)
+# =========================================================================
+
+# @name selectLocationsPublic
+# Should succeed since public select is enabled
+GET {{supabaseUrl}}/rest/v1/locations?select=id,name,category,city HTTP/1.1
+apikey: {{supabaseAnonKey}}
+
+###
+
+# @name insertLocationAnon
+# Should FAIL (401/403) due to RLS preventing anonymous write
+POST {{supabaseUrl}}/rest/v1/locations HTTP/1.1
+apikey: {{supabaseAnonKey}}
+Content-Type: application/json
+Prefer: return=representation
+
+{
+  "name": "Test Eco Hotel",
+  "public_id": "tst123",
+  "foursquare_id": "test-fsq-id-123",
+  "category": "accommodation",
+  "city": "Penang",
+  "country": "Malaysia",
+  "eco_score": 85
+}
+
+###
+
+# @name insertLocationAdmin
+# Should SUCCEED using the service role key bypassing RLS
+POST {{supabaseUrl}}/rest/v1/locations HTTP/1.1
+apikey: {{supabaseServiceKey}}
+Authorization: Bearer {{supabaseServiceKey}}
+Content-Type: application/json
+Prefer: return=representation
+
+{
+  "name": "Admin Seeding Eco Lodge",
+  "public_id": "adm999",
+  "foursquare_id": "admin-fsq-id-999",
+  "category": "accommodation",
+  "city": "Penang",
+  "country": "Malaysia",
+  "eco_score": 95
+}
+
+###
+# =========================================================================
+# SECTION 4: SUPABASE DATABASE RLS POLICIES (todos table)
+# =========================================================================
+
+# @name getTodosAnon
+# Should return 401/403 or empty array since anon has no access
+GET {{supabaseUrl}}/rest/v1/todos HTTP/1.1
+apikey: {{supabaseAnonKey}}
+
+###
+
+# @name getTodosAuthenticated
+# Should return user-specific todos list
+GET {{supabaseUrl}}/rest/v1/todos HTTP/1.1
+apikey: {{supabaseAnonKey}}
+Authorization: Bearer {{userToken}}
+
+###
+
+# @name insertTodoAuthenticated
+# Should succeed and link automatically or manually to auth.uid()
+POST {{supabaseUrl}}/rest/v1/todos HTTP/1.1
+apikey: {{supabaseAnonKey}}
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+Prefer: return=representation
+
+{
+  "name": "Try plant-based meals today",
+  "is_complete": false,
+  "user_id": "{{userId}}"
+}
+
+###
+
+@todoId = {{insertTodoAuthenticated.response.body[0].id}}
+
+###
+
+# @name toggleTodoComplete
+# Should succeed for the owner
+PATCH {{supabaseUrl}}/rest/v1/todos?id=eq.{{todoId}} HTTP/1.1
+apikey: {{supabaseAnonKey}}
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+Prefer: return=representation
+
+{
+  "is_complete": true
+}
+
+###
+
+# @name deleteTodo
+# Should succeed for the owner
+DELETE {{supabaseUrl}}/rest/v1/todos?id=eq.{{todoId}} HTTP/1.1
+apikey: {{supabaseAnonKey}}
+Authorization: Bearer {{userToken}}
+
+###
+# =========================================================================
+# SECTION 5: ACCOUNT DELETION
+# =========================================================================
+
+# @name deleteUserAccount
+# Uses backend service role wrapper to remove user and cascade delete
+DELETE {{baseUrl}}/api/user/account HTTP/1.1
+Authorization: Bearer {{userToken}}
