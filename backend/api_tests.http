@@ -63,6 +63,18 @@ Content-Type: application/json
 }
 
 ###
+# @name getLocations
+GET {{baseUrl}}/api/locations HTTP/1.1
+
+###
+# @name getLocationDetails
+GET {{baseUrl}}/api/locations/SwXtZT HTTP/1.1
+
+###
+# @name getLocationRecommendations
+GET {{baseUrl}}/api/locations/recommendations?category=accommodation&city=Penang&excludeId=SwXtZT HTTP/1.1
+
+###
 # =========================================================================
 # SECTION 2: SUPABASE AUTHENTICATION
 # =========================================================================

@@ -1,6 +1,4 @@
-import { cookies } from "next/headers"
 import { notFound } from "next/navigation"
-import { createClient, supabaseConnectionState } from "@/utils/supabase/server"
 import { Place } from "../components/PlaceCard"
 import PlaceHero from "./components/PlaceHero"
 import MorePlaces from "./components/MorePlaces"
@@ -11,39 +9,24 @@ type Props = {
 }
 
 export default async function PlaceDetails({ params }: Props) {
-    const cookieStore = await cookies()
-    const supabase = createClient(cookieStore)
-
-    if (!supabase) {
-        return (
-            <main className="min-h-screen px-4 py-10">
-                <p className="rounded-lg border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm text-yellow-900">
-                    Supabase is not configured. Missing env vars: {supabaseConnectionState.missingEnvVars.join(", ")}
-                </p>
-            </main>
-        )
-    }
-
     const routePlaceName = decodeURIComponent((await params).placeName).split("-")
     const placeId = routePlaceName.at(-1)
 
-    const { data: row, error } = await supabase
-        .from("locations")
-        .select("id,name,category,city,lat,long,eco_certs,image_url,ex_booking_url,public_id")
-        .eq("public_id", placeId)
-        .single()
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001'
+    let place: Place | null = null
 
-    if (error || !row) {
-        console.log("ERROR: Place not found!")
-        notFound()
+    try {
+        const res = await fetch(`${baseUrl}/api/locations/${placeId}`, { cache: 'no-store' })
+        if (res.ok) {
+            place = await res.json()
+        }
+    } catch (err) {
+        console.error("Error fetching place from backend:", err)
     }
 
-    const place: Place = {
-        ...row,
-        ecoCerts: row.eco_certs,
-        imageUrl: row.image_url,
-        bookingUrl: row.ex_booking_url,
-        publicId: row.public_id,
+    if (!place) {
+        console.log("ERROR: Place not found!")
+        notFound()
     }
 
     return (

@@ -1,7 +1,5 @@
-import { cookies } from "next/headers";
 import { Place } from "../../components/PlaceCard";
 import PlaceCard from "../../components/PlaceCard";
-import { createClient, supabaseConnectionState } from "@/utils/supabase/server"
 
 type Props = {
     category: string,
@@ -10,40 +8,22 @@ type Props = {
 }
 
 export default async function MorePlaces({ category, city, currentId }: Props) {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001'
+    let randomPlaces: Place[] = []
 
-    if (!supabase) {
-        return (
-            <main className="min-h-screen px-4 py-10">
-                <p className="rounded-lg border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm text-yellow-900">
-                    Supabase is not configured. Missing env vars: {supabaseConnectionState.missingEnvVars.join(", ")}
-                </p>
-            </main>
-        )
+    try {
+        const queryParams = new URLSearchParams({
+            category,
+            city: city || '',
+            excludeId: currentId
+        })
+        const res = await fetch(`${baseUrl}/api/locations/recommendations?${queryParams}`, { cache: 'no-store' })
+        if (res.ok) {
+            randomPlaces = await res.json()
+        }
+    } catch (err) {
+        console.error("Error fetching recommended places from backend:", err)
     }
-
-    const { data: rows, error } = await supabase
-        .from('locations')
-        .select('*')
-        .eq('category', category)
-        .eq('city', city)
-        .neq('public_id', currentId)
-
-    const places: Place[] = (rows ?? []).map((row) => ({
-        id: String(row.id),
-        name: row.name ?? "Unnamed",
-        category: row.category,
-        city: row.city ?? undefined,
-        lat: row.lat,
-        long: row.long,
-        ecoCerts: Array.isArray(row.eco_certs) ? row.eco_certs : [],
-        bookingUrl: row.ex_booking_url ?? undefined,
-        imageUrl: row.image_url ?? undefined,
-        publicId: row.public_id,
-    }))
-
-    const randomPlaces = [...places].sort(() => 0.5 - Math.random()).slice(0, 4);
 
     return (
         <section className="py-20 px-4 bg-white/50 backdrop-blur-sm">

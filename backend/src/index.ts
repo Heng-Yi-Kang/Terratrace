@@ -5,6 +5,7 @@ import { createClient } from '@supabase/supabase-js'
 import weatherRoutes from './routes/weather'
 import smartRecommendationRoutes from './routes/smart-recommendation'
 import ecoRouteRoutes from './routes/eco-route'
+import locationsRoutes from './routes/locations'
 
 // Load environment variables
 dotenv.config()
@@ -33,6 +34,7 @@ app.get('/api', (_req: Request, res: Response) => {
 app.use('/api/weather', weatherRoutes)
 app.use('/api/recommendations', smartRecommendationRoutes)
 app.use('/api/eco-route', ecoRouteRoutes)
+app.use('/api/locations', locationsRoutes)
 
 // Delete user account
 app.delete('/api/user/account', async (req: Request, res: Response) => {
