@@ -1,5 +1,6 @@
 import { Place } from "../../components/PlaceCard"
 import { MapPin } from "lucide-react"
+import Image from "next/image"
 
 type Props = {
     place: Place
@@ -18,11 +19,14 @@ export default function PlaceHero({ place }: Props) {
         <div className="bg-white/80 backdrop-blur-md rounded-organic shadow-organic border border-cyan-700/5 p-6 md:p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                 {/* Left Column - Image Card */}
-                <div className="w-full aspect-video md:aspect-[4/3] overflow-hidden rounded-2xl shadow-sm border border-cyan-700/5">
-                    <img
+                <div className="relative w-full aspect-video md:aspect-[4/3] overflow-hidden rounded-2xl shadow-sm border border-cyan-700/5">
+                    <Image
                         src={place.imageUrl || "/placeholder-destination.jpg"}
                         alt={place.name}
-                        className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                        fill
+                        className="object-cover transition-transform duration-500 hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        unoptimized
                     />
                 </div>
 

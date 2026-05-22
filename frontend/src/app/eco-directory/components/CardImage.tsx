@@ -1,6 +1,7 @@
 "use client"
 import { useState } from "react"
 import type { Place } from "./PlaceCard"
+import Image from "next/image"
 
 type CardImageProps = {
     place: Place
@@ -40,11 +41,14 @@ export default function CardImage({ place }: CardImageProps) {
             <MissingImage />
         </div>
     ) : (
-        <img
-            className="w-full h-full object-cover"
+        <Image
+            className="object-cover"
             src={place.imageUrl}
             alt={place.name}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             onError={() => setNoImage(true)}
+            unoptimized
         />
     )
 }

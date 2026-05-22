@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { Place } from "../../components/PlaceCard";
 import { createClient, supabaseConnectionState } from "@/utils/supabase/server"
+import Image from "next/image";
 
 type Props = {
     place: Place
@@ -22,8 +23,8 @@ export default async function PlaceHero({ place }: Props) {
 
             <div className="relative z-10 mx-auto w-full max-w-6xl">
                 <div className="grid sm:grid-cols-1 lg:grid-cols-2 w-full items-center gap-8">
-                    <div className="mx-auto w-full max-w-[30rem] aspect-square overflow-hidden rounded-3xl shadow-lg">
-                        <img src={place.imageUrl} alt={place.name} className="h-full w-full object-cover" />
+                    <div className="relative mx-auto w-full max-w-[30rem] aspect-square overflow-hidden rounded-3xl shadow-lg">
+                        <Image src={place.imageUrl} alt={place.name} fill className="object-cover" sizes="(max-width: 768px) 100vw, 30rem" unoptimized />
                     </div>
 
                     <div className="text-left space-y-6">
