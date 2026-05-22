@@ -9,7 +9,7 @@ type Props = {
 }
 
 export default async function PlaceDetails({ params }: Props) {
-    const routePlaceName = decodeURIComponent((await params).placeName).split("-")
+    const routePlaceName = decodeURIComponent((await params).placeName).split("~")
     const placeId = routePlaceName.at(-1)
 
     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001'

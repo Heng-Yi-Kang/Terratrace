@@ -52,7 +52,7 @@ export default function PlaceCard({
             </div>
 
             <Link 
-                href={`/eco-directory/${encodeURIComponent(`${slugify(place.name)}-${place.publicId}`)}`} 
+                href={`/eco-directory/${encodeURIComponent(`${slugify(place.name)}~${place.publicId}`)}`} 
                 className="mt-auto p-4 block"
             >
                 <span className="w-full block text-center rounded-2xl bg-cta px-3 py-2 shadow-md font-heading font-semibold hover:bg-cta/80 transition-all duration-200">
