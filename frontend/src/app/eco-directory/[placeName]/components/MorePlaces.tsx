@@ -12,11 +12,14 @@ export default async function MorePlaces({ category, city, currentId }: Props) {
     let randomPlaces: Place[] = []
 
     try {
-        const queryParams = new URLSearchParams({
+        const params: Record<string, string> = {
             category,
-            city: city || '',
             excludeId: currentId
-        })
+        }
+        if (city) {
+            params.city = city
+        }
+        const queryParams = new URLSearchParams(params)
         const res = await fetch(`${baseUrl}/api/locations/recommendations?${queryParams}`, { cache: 'no-store' })
         if (res.ok) {
             randomPlaces = await res.json()
