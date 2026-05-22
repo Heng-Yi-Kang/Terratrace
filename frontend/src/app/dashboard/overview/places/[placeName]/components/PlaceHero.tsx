@@ -26,7 +26,6 @@ export default function PlaceHero({ place }: Props) {
                         fill
                         className="object-cover transition-transform duration-500 hover:scale-105"
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        unoptimized
                     />
                 </div>
 

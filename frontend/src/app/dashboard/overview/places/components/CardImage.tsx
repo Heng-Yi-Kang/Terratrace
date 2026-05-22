@@ -48,7 +48,6 @@ export default function CardImage({ place }: CardImageProps) {
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             onError={() => setNoImage(true)}
-            unoptimized
         />
     )
 }
