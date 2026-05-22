@@ -49,7 +49,7 @@ const mapDbLocationToPlace = (row: DatabaseLocation) => {
     long: Number(row.lng) || Number(row.long) || 0, // Map 'lng' to 'long'
     ecoCerts: Array.isArray(row.eco_certs) ? row.eco_certs : [],
     ecoTags: Array.isArray(row.eco_tags) ? row.eco_tags : [],
-    ecoScore: row.eco_score ? Number(row.eco_score) : undefined,
+    ecoScore: row.eco_score !== null && row.eco_score !== undefined ? Number(row.eco_score) : undefined,
     description: row.description ?? undefined,
     imageUrl: row.image_url ?? undefined,
     imageThumb: row.image_thumb ?? undefined,
