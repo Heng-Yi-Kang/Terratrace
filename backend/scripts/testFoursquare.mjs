@@ -72,7 +72,14 @@ const params = new URLSearchParams({
 const url = `https://places-api.foursquare.com/places/search?${params}`;
 console.log("Request URL:", url);
 
-const res = await fetch(url, { method: 'GET', headers })
-    .then(res => res.json())
-    .then(data => console.log(JSON.stringify(data, null, 2)))
-    .catch(err => console.error(err));
+try {
+    const res = await fetch(url, { method: 'GET', headers });
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`HTTP error! Status: ${res.status}, Body: ${text}`);
+    }
+    const data = await res.json();
+    console.log(JSON.stringify(data, null, 2));
+} catch (err) {
+    console.error(err);
+}
