@@ -4,7 +4,7 @@ const BASE_URL = 'https://placeholder.supabase.co'
 
 export const authHandlers = [
   http.post(`${BASE_URL}/auth/v1/token?action=signin`, async ({ request }) => {
-    const body = await request.json()
+    const body = (await request.json()) as any
     const { email, password } = body
 
     if (email === 'valid@test.com' && password === 'password123') {
