@@ -96,7 +96,7 @@ router.get('/recommendations', async (req: Request, res: Response) => {
 
     // Handle DB lowercase vs uppercase
     const categoryLower = category.toLowerCase()
-    query = query.or(`category.eq.${categoryLower},category.eq.${category}`)
+    query = query.in('category', [categoryLower, category])
 
     if (city) {
       query = query.eq('city', city)
