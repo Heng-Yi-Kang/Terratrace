@@ -198,7 +198,7 @@ async function seed() {
                 const photo = await fetchUnsplashPhoto(
                     `${category.unsplashQuery}`
                 );
-                await sleep(1300); // stay under Unsplash's 50 req/hour limit
+                await sleep(75000); // stay under Unsplash's 50 req/hour limit
 
                 const eco_tags = randomEcoTags(category.type);
                 const description = await generateEcoDescription(place.name, category.type, destination.city, eco_tags);
