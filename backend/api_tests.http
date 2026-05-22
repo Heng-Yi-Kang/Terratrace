@@ -2,9 +2,10 @@
 # Designed for VS Code / IDE REST Client Extensions
 
 @baseUrl = http://localhost:3001
-@supabaseUrl = https://ovhvvtuxoolmhfbjwova.supabase.co
-@supabaseAnonKey = sb_publishable_TmewZlkU6Nmu_5ZjlTqs2A_XkvYsm3y
-@supabaseServiceKey = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92aHZ2dHV4b29sbWhmYmp3b3ZhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjA5MjMxMiwiZXhwIjoyMDkxNjY4MzEyfQ.MuqYKhlM4xY0YuvMLpm8KPDBb4lO21yKoEcuRtzTSzA
+@supabaseUrl = {{$dotenv NEXT_PUBLIC_SUPABASE_URL}}
+@supabaseAnonKey = {{$dotenv NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}}
+@supabaseServiceKey = {{$dotenv SUPABASE_SERVICE_ROLE_KEY}}
+
 
 ###
 # =========================================================================

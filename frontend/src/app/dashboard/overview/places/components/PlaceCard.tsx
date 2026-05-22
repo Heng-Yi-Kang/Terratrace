@@ -65,10 +65,11 @@ export default function PlaceCard({
                 </div>
 
                 <div className="mt-5">
-                    <Link href={`/dashboard/overview/places/${encodeURIComponent(`${slugify(place.name)}-${place.publicId}`)}`}>
-                        <button className="w-full rounded-xl bg-cta text-text py-2 shadow-sm font-sans font-semibold hover:bg-cta/80 transition-all duration-200 cursor-pointer">
-                            View Details
-                        </button>
+                    <Link 
+                        href={`/dashboard/overview/places/${encodeURIComponent(`${slugify(place.name)}-${place.publicId}`)}`}
+                        className="w-full text-center block rounded-xl bg-cta text-text py-2 shadow-sm font-sans font-semibold hover:bg-cta/80 transition-all duration-200"
+                    >
+                        View Details
                     </Link>
                 </div>
             </div>

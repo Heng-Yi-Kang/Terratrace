@@ -83,11 +83,9 @@ export default async function PlaceDetails({ params }: Props) {
                                         href={`https://www.google.com/maps?q=${place.lat},${place.long}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="inline-block w-full"
+                                        className="inline-block w-full text-center px-6 py-3 rounded-xl bg-primary text-white font-heading font-semibold shadow-md hover:shadow-lg hover:opacity-90 transition-all duration-200 transform hover:-translate-y-1 cursor-pointer"
                                     >
-                                        <button className="w-full px-6 py-3 rounded-xl bg-primary text-white font-heading font-semibold shadow-md hover:shadow-lg hover:opacity-90 transition-all duration-200 transform hover:-translate-y-1 cursor-pointer">
-                                            Open in Google Maps
-                                        </button>
+                                        Open in Google Maps
                                     </a>
                                 </div>
                             </div>
@@ -123,10 +121,13 @@ export default async function PlaceDetails({ params }: Props) {
                         <p className="text-text/70 font-semibold text-lg mb-8">
                             Book your stay at {place.name} and be part of the sustainable tourism movement.
                         </p>
-                        <Link href={place.bookingUrl} target="_blank" rel="noopener noreferrer">
-                            <button className="px-10 py-4 rounded-2xl bg-cta text-text font-heading font-semibold text-lg shadow-md hover:shadow-lg hover:opacity-90 transition-all duration-200 transform hover:-translate-y-1 cursor-pointer">
-                                Complete Your Booking
-                            </button>
+                        <Link 
+                            href={place.bookingUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-block px-10 py-4 rounded-2xl bg-cta text-text font-heading font-semibold text-lg shadow-md hover:shadow-lg hover:opacity-90 transition-all duration-200 transform hover:-translate-y-1 cursor-pointer"
+                        >
+                            Complete Your Booking
                         </Link>
                     </div>
                 </section>
