@@ -140,7 +140,7 @@ async function fetchPlaces(lat, lng, categoryId, ecoTags, limit = 5) {
         .then(res => res.json())
         .catch(err => console.error(err));
 
-    return res.results ?? [];
+    return res?.results ?? [];
 }
 
 async function fetchUnsplashPhoto(query) {
