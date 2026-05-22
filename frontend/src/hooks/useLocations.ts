@@ -19,7 +19,8 @@ export function useLocations() {
   return useQuery({
     queryKey: ['locations'],
     queryFn: async (): Promise<Place[]> => {
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001'
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL
+      if (!baseUrl) throw new Error('NEXT_PUBLIC_API_BASE_URL is not configured')
       const response = await fetch(`${baseUrl}/api/locations`)
       if (!response.ok) {
         throw new Error('Failed to fetch destinations from backend')
