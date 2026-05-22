@@ -45,8 +45,8 @@ const mapDbLocationToPlace = (row: DatabaseLocation) => {
     city: row.city ?? undefined,
     country: row.country ?? undefined,
     address: row.address ?? undefined,
-    lat: Number(row.lat) || 0,
-    long: Number(row.lng) || Number(row.long) || 0, // Map 'lng' to 'long'
+    lat: Number(row.lat ?? 0),
+    long: Number(row.lng ?? row.long ?? 0), // Map 'lng' to 'long'
     ecoCerts: Array.isArray(row.eco_certs) ? row.eco_certs : [],
     ecoTags: Array.isArray(row.eco_tags) ? row.eco_tags : [],
     ecoScore: row.eco_score !== null && row.eco_score !== undefined ? Number(row.eco_score) : undefined,
