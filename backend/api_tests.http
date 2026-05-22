@@ -94,7 +94,7 @@ Content-Type: application/json
 
 # @name signInUser
 # Use these credentials to sign in and generate the access token (JWT)
-POST {{supabaseUrl}}/auth/v1/token?action=signin HTTP/1.1
+POST {{supabaseUrl}}/auth/v1/token?grant_type=password HTTP/1.1
 apikey: {{supabaseAnonKey}}
 Content-Type: application/json
 
