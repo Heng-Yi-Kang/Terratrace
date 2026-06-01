@@ -6,7 +6,7 @@ type Option<T extends string> = {
 type selectOptionsProps<T extends string> = {
     options: Option<T>[];
     selected: T;
-    setSelected: React.Dispatch<React.SetStateAction<T>>;
+    setSelected: (value: T) => void;
     placeholder?: string;
 }
 
