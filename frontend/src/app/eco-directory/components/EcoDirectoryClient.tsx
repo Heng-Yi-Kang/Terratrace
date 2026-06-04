@@ -131,7 +131,7 @@ export default function EcoDirectoryClient() {
                     <h1 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl text-center text-primary mt-2 mb-10">Next Destination.</h1>
                     <SearchBar value={query} onChange={setQuery} onSubmit={handleSearch} />
 
-                    <div className="grid gap-3 grid-cols-3 mt-10 w-11/12 mx-auto">
+                    <div className="grid gap-3 lg:grid-cols-3 sm:grid-cols-1  mt-10 w-11/12 mx-auto">
                         <CountCard Icon={HotelIcon} count={accommodationCount} name="Accommodations" />
                         <CountCard Icon={DiningIcon} count={diningCount} name="Dining" />
                         <CountCard Icon={TransportIcon} count={transportCount} name="Transport" />
@@ -150,7 +150,7 @@ export default function EcoDirectoryClient() {
                             Tourism contributes 8% of global carbon emissions. Every choice we make impacts our planet.
                         </p>
                     </div>
-                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-4">
                         {paginatedPlaces.map((place) => (
                             <PlaceCard key={place.id} place={place} />
                         ))}
