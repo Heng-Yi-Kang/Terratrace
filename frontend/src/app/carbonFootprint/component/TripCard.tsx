@@ -15,7 +15,9 @@ type Props = {
 
 export function TripCard({ trip, index, onUpdate, onRemove, onSwitchType }: Props) {
 
+
     const calc = calculate(trip)
+
 
     return (
 
@@ -75,7 +77,7 @@ export function TripCard({ trip, index, onUpdate, onRemove, onSwitchType }: Prop
 
                     <div>
                         <div className="flex flex-col gap-1">
-                            <span className='text-sm text-text/60'>Class</span>
+                            <span className='text-sm text-text/60'>Flight Class</span>
                             <SelectOptions
                                 selected={trip.flightClass}
                                 setSelected={(v) => onUpdate({ flightClass: v })}
@@ -89,27 +91,18 @@ export function TripCard({ trip, index, onUpdate, onRemove, onSwitchType }: Prop
 
 
                         <div className="flex flex-col gap-1 ml-auto">
-                            <span className="text-text/60 text-sm">Distance</span>
+                            <span className="text-text/60 text-sm mt-2 mb-1">Distance</span>
                             <div className='flex gap-2 items-baseline justify-baseline'>
-                                <input type="number" value={trip.distanceKm || ' '} onChange={(e) => onUpdate({ distanceKm: Number(e.target.value) })}
-                                    placeholder="0" className='w-full border border-gray-200 rounded-xl p-3 ' />
+                                <input type="number" value={trip.distanceKm || ''} onChange={(e) => onUpdate({ distanceKm: Number(e.target.value) })}
+                                    placeholder="1" className='w-full border border-gray-200 rounded-xl p-3 hover:border-primary cursor-pointer' />
                                 <span className="text-sm text-text/60 ">km</span>
                             </div>
                         </div>
                     </div>
 
                     <div >
-                        <div className="flex flex-col gap-1">
-                            <span className="text-text/60 text-sm">Passengers</span>
-                            <div className="flex items-baseline gap-2">
-                                <input type="number" value={trip.passengers || ' '} onChange={(e) => onUpdate({ passengers: Number(e.target.value) })}
-                                    placeholder="0" className='w-full border border-gray-200 rounded-md p-3 ' />
-                                <span className="text-sm text-text/60 ">pax</span>
-                            </div>
-                        </div>
-
-                        <div className="flex flex-col gap-1 ml-auto">
-                            <span className="text-text/60 text-sm">Trip type</span>
+                        <div className="flex flex-col gap-1 ml-auto mb-1">
+                            <span className="text-text/60 text-sm ">Trip type</span>
                             <SelectOptions
                                 selected={trip.isReturn ? 'return' : 'oneway'}
                                 setSelected={(v) => onUpdate({ isReturn: v === 'return' })}
@@ -119,6 +112,7 @@ export function TripCard({ trip, index, onUpdate, onRemove, onSwitchType }: Prop
                                 ]}
                             />
                         </div>
+
                     </div>
 
 
@@ -133,7 +127,7 @@ export function TripCard({ trip, index, onUpdate, onRemove, onSwitchType }: Prop
 
                     <div>
                         <div className="flex flex-col gap-1">
-                            <span className='text-xs text-text/60'>Fuel Type</span>
+                            <span className='text-sm text-text/60'>Car Type</span>
                             <SelectOptions
                                 selected={trip.CarType}
                                 setSelected={(v) => onUpdate({ CarType: v })}
@@ -141,17 +135,16 @@ export function TripCard({ trip, index, onUpdate, onRemove, onSwitchType }: Prop
                                     { value: 'petrol', label: 'Petrol' },
                                     { value: 'diesel', label: 'Diesel' },
                                     { value: 'hybrid', label: 'Hybrid' },
-                                    { value: 'electric', label: 'Electric' },
                                 ]}
                             />
                         </div>
 
 
                         <div className="flex flex-col gap-1">
-                            <span className="text-text/60 text-sm">Distance</span>
+                            <span className="text-text/60 text-sm mt-2 mb-1">Distance</span>
                             <div className='flex gap-2 items-baseline justify-baseline'>
-                                <input type="number" value={trip.distanceKm || ' '} onChange={(e) => onUpdate({ distanceKm: Number(e.target.value) })}
-                                    placeholder="0" className='w-full border border-gray-200 rounded-md p-3 ' />
+                                <input type="number" value={trip.distanceKm || ''} onChange={(e) => onUpdate({ distanceKm: Number(e.target.value) })}
+                                    placeholder="1" className='w-full border border-gray-200 rounded-md p-3 hover:border-primary cursor-pointer' />
                                 <span className="text-sm text-text/60 ">km</span>
                             </div>
                         </div>
@@ -159,10 +152,10 @@ export function TripCard({ trip, index, onUpdate, onRemove, onSwitchType }: Prop
 
                     <div>
                         <div className="flex flex-col gap-1">
-                            <span className="text-text/60 text-sm">Passengers in car</span>
+                            <span className="text-text/60 text-sm mb-1">Passengers</span>
                             <div className='flex gap-2 items-baseline justify-baseline'>
-                                <input type="number" value={trip.passengers || ' '} onChange={(e) => onUpdate({ passengers: Number(e.target.value) })}
-                                    placeholder="0" className='w-full border border-gray-200 rounded-md p-3 ' />
+                                <input type="number" value={trip.passengers || ''} onChange={(e) => onUpdate({ passengers: Number(e.target.value) })}
+                                    placeholder="1" className='w-full border border-gray-200 rounded-md p-3 hover:border-primary cursor-pointer' />
                                 <span className="text-sm text-text/60 ">pax</span>
                             </div>
                         </div>
@@ -177,7 +170,7 @@ export function TripCard({ trip, index, onUpdate, onRemove, onSwitchType }: Prop
                 <div className="grid grid-cols-2 gap-8 mt-2">
 
                     <div className="flex flex-col gap-1">
-                        <span className='text-xs text-text/60'>Hotel Type</span>
+                        <span className='text-sm text-text/60'>Hotel Type</span>
                         <SelectOptions
                             selected={trip.HotelType}
                             setSelected={(v) => onUpdate({ HotelType: v })}
@@ -191,10 +184,10 @@ export function TripCard({ trip, index, onUpdate, onRemove, onSwitchType }: Prop
 
 
                     <div className="flex flex-col gap-1">
-                        <span className="text-text/60 text-sm">Nights</span>
+                        <span className="text-text/60 text-sm mb-1">Nights</span>
                         <div className='flex gap-2 items-baseline justify-baseline'>
-                            <input type="number" value={trip.nights || ' '} onChange={(e) => onUpdate({ nights: Number(e.target.value) })}
-                                placeholder="1" className='w-full border border-gray-200 rounded-md p-3 ' />
+                            <input type="number" value={trip.nights || ''} onChange={(e) => onUpdate({ nights: Number(e.target.value) })}
+                                placeholder="1" className='w-full cursor-pointer border border-gray-200 rounded-md p-3 hover:border-primary' />
                             <span className="text-sm text-text/60 ">nights</span>
                         </div>
                     </div>
@@ -208,39 +201,43 @@ export function TripCard({ trip, index, onUpdate, onRemove, onSwitchType }: Prop
                 <div className="grid grid-cols-2 gap-8 mt-2">
 
                     <div>
-                    <div className="flex flex-col gap-1">
-                        <span className='text-xs text-text/60'>Rail Type</span>
-                        <SelectOptions
-                            selected={trip.RailType}
-                            setSelected={(v) => onUpdate({ RailType: v })}
-                            options={[
-                                { value: 'national', label: 'National' },
-                                { value: 'international', label: 'International' },
-                                { value: 'lightRail', label: 'Light rail' },
-                                { value: 'underground', label: 'Underground' },
-                            ]}
-                        />
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                        <span className="text-text/60 text-sm">Distance</span>
-                        <div className='flex gap-2 items-baseline justify-baseline'>
-                            <input type="number" value={trip.distanceKm || ' '} onChange={(e) => onUpdate({ distanceKm: Number(e.target.value) })}
-                                placeholder="0" className='w-full border border-gray-200 rounded-md p-3 ' />
-                            <span className="text-sm text-text/60 ">km</span>
+                        <div className="flex flex-col gap-1">
+                            <span className='text-sm text-text/60'>Rail Type</span>
+                            <SelectOptions
+                                selected={trip.RailType}
+                                setSelected={(v) => onUpdate({ RailType: v })}
+                                options={[
+                                    { value: 'national', label: 'National' },
+                                    { value: 'international', label: 'International' },
+                                    { value: 'lightRail', label: 'Light rail' },
+                                    { value: 'underground', label: 'Underground' },
+                                ]}
+                            />
                         </div>
-                    </div>
+
+                        <div className="flex flex-col gap-1">
+                            <span className="text-text/60 text-sm mt-2 mb-1">Distance</span>
+                            <div className='flex gap-2 items-baseline justify-baseline'>
+                                <input type="number" value={trip.distanceKm || ''} onChange={(e) => onUpdate({ distanceKm: Number(e.target.value) })}
+                                    placeholder="1" className='w-full border border-gray-200 cursor-pointer rounded-md p-3 hover:border-primary' />
+                                <span className="text-sm text-text/60 ">km</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div>
-                    <div className="flex flex-col gap-1">
-                        <span className="text-text/60 text-sm">Passengers</span>
-                        <div className='flex gap-2 items-baseline justify-baseline'>
-                            <input type="number" value={trip.passengers || ' '} onChange={(e) => onUpdate({ passengers: Number(e.target.value) })}
-                                placeholder="0" className='w-full border border-gray-200 rounded-md p-3 ' />
-                            <span className="text-sm text-text/60 ">pax</span>
+                        <div className="flex flex-col gap-1 ml-auto">
+                            <span className="text-text/60 text-sm ">Trip type</span>
+                            <SelectOptions
+                                selected={trip.isReturn ? 'return' : 'oneway'}
+                                setSelected={(v) => onUpdate({ isReturn: v === 'return' })}
+                                options={[
+                                    { value: 'oneway', label: 'One Way' },
+                                    { value: 'return', label: 'Return' }
+                                ]}
+                            />
                         </div>
-                    </div>
+
                     </div>
 
                 </div>
@@ -252,37 +249,31 @@ export function TripCard({ trip, index, onUpdate, onRemove, onSwitchType }: Prop
             {trip.type === 'bus' && (
                 <div className="grid grid-cols-2 gap-8 mt-2">
 
-                    <div className="flex flex-col gap-1">
-                        <span className='text-xs text-text/60'>Fuel Type</span>
-                        <SelectOptions
-                            selected={trip.BusType}
-                            setSelected={(v) => onUpdate({ BusType: v })}
-                            options={[
-                                { value: 'standard', label: 'Standard' },
-                                { value: 'coach', label: 'Coach' },
-                            ]}
-                        />
+                    <div>
+                        <div className="flex flex-col gap-1">
+                            <span className='text-sm text-text/60'>Bus Type</span>
+                            <SelectOptions
+                                selected={trip.BusType}
+                                setSelected={(v) => onUpdate({ BusType: v })}
+                                options={[
+                                    { value: 'standard', label: 'Standard' },
+                                    { value: 'coach', label: 'Coach' },
+                                ]}
+                            />
+                        </div>
+
                     </div>
 
-
-                    <div className="flex flex-col gap-1">
-                        <span className="text-text/60 text-sm">Distance</span>
-                        <div className='flex gap-2 items-baseline justify-baseline'>
-                            <input type="number" value={trip.distanceKm || ' '} onChange={(e) => onUpdate({ distanceKm: Number(e.target.value) })}
-                                placeholder="0" className='w-full border border-gray-200 rounded-md p-3 ' />
-                            <span className="text-sm text-text/60 ">km</span>
+                    <div>
+                        <div className="flex flex-col gap-1">
+                            <span className="text-text/60 text-sm mb-1">Distance</span>
+                            <div className='flex gap-2 items-baseline justify-baseline'>
+                                <input type="number" value={trip.distanceKm || ' '} onChange={(e) => onUpdate({ distanceKm: Number(e.target.value) })}
+                                    placeholder="1" className='w-full cursor-pointer border border-gray-200 rounded-md p-3 hover:border-primary' />
+                                <span className="text-sm text-text/60 ">km</span>
+                            </div>
                         </div>
                     </div>
-
-                    <div className="flex flex-col gap-1">
-                        <span className="text-text/60 text-sm">Passengers in car</span>
-                        <div className='flex gap-2 items-baseline justify-baseline'>
-                            <input type="number" value={trip.passengers || ' '} onChange={(e) => onUpdate({ passengers: Number(e.target.value) })}
-                                placeholder="0" className='w-full border border-gray-200 rounded-md p-3 ' />
-                            <span className="text-sm text-text/60 ">pax</span>
-                        </div>
-                    </div>
-
                 </div>
             )}
 
@@ -293,10 +284,10 @@ export function TripCard({ trip, index, onUpdate, onRemove, onSwitchType }: Prop
                 <div className="grid grid-cols-2 gap-8 mt-2">
 
                     <div className="flex flex-col gap-1">
-                        <span className="text-text/60 text-sm">Distance</span>
+                        <span className="text-text/60 text-sm mb-1">Distance</span>
                         <div className='flex gap-2 items-baseline justify-baseline'>
-                            <input type="number" value={trip.distanceKm || ' '} onChange={(e) => onUpdate({ distanceKm: Number(e.target.value) })}
-                                placeholder="0" className='w-full border border-gray-200 rounded-md p-3 ' />
+                            <input type="number" value={trip.distanceKm || ''} onChange={(e) => onUpdate({ distanceKm: Number(e.target.value) })}
+                                placeholder="1" className='w-full cursor-pointer border border-gray-200 rounded-md p-3 hover:border-primary' />
                             <span className="text-sm text-text/60 ">km</span>
                         </div>
                     </div>

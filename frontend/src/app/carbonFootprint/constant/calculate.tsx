@@ -8,8 +8,8 @@ export function calculate(trip: Trip){
         case 'flight': {
             const flightHaul = trip.distanceKm < 3700 ? 'short' : 'long'
 
-            return trip.distanceKm * m.FlightdistanceCategory[flightHaul] * m.FlightMultiplier[trip.flightClass]
-            *(trip.isReturn? 2 : 1)/trip.passengers
+            return trip.distanceKm * m.FlightMultiplier[flightHaul][trip.flightClass]
+            *(trip.isReturn? 2 : 1)
         }
 
         case 'car': 
@@ -17,9 +17,9 @@ export function calculate(trip: Trip){
         case 'hotel': 
             return trip.nights * m.HotelMultiplier[trip.HotelType]
         case 'rail': 
-            return trip.distanceKm * m.RailMultiplier[trip.RailType] * (trip.isReturn? 2 : 1)/ trip.passengers
+            return trip.distanceKm * m.RailMultiplier[trip.RailType] * (trip.isReturn? 2 : 1)
         case 'bus': 
-            return trip.distanceKm * m.BusMultiplier[trip.BusType] / trip.passengers
+            return trip.distanceKm * m.BusMultiplier[trip.BusType] 
         case 'taxi': 
             return trip.distanceKm * m.TaxiMultiplier.standard
     
@@ -40,7 +40,7 @@ export function CalcTotal(trips: Trip[]): CarbonResult {
         if(trip.type === 'flight'){
             flightEmissions += calculate(trip)
         } else if(trip.type === 'car'){
-            busEmissions += calculate(trip)
+            carEmissions += calculate(trip)
         } else if(trip.type === 'hotel'){
             hotelEmissions += calculate(trip)
         } else if(trip.type === 'rail'){

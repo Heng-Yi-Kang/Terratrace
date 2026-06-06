@@ -1,6 +1,6 @@
 
 export type FlightClass = "economy" | "business" | "first";
-export type CarType = "petrol" | "diesel" | "hybrid" | "electric";
+export type CarType = "petrol" | "diesel" | "hybrid" ;
 export type HotelType = "budget" | "standard" | "luxury";
 export type RailType = "national" | "international" | "lightRail" | "underground";
 export type BusType = "standard" | "coach";
@@ -13,7 +13,6 @@ export interface FlightTrip extends BaseTrip{
     distanceKm: number
     flightClass: FlightClass
     duration: 'short' | 'long'
-    passengers: number
     isReturn: boolean
 }
 
@@ -34,7 +33,6 @@ export interface RailTrip extends BaseTrip{
     type: 'rail'
     distanceKm: number
     RailType: RailType
-    passengers: number
     isReturn: boolean
 }
 
@@ -42,7 +40,6 @@ export interface BusTrip extends BaseTrip{
     type: 'bus'
     distanceKm: number
     BusType: BusType
-    passengers: number
 }
 
 export interface TaxiTrip extends BaseTrip{

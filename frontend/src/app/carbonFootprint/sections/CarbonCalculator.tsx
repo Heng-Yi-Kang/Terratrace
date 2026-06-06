@@ -1,8 +1,10 @@
 "use client";
 
 import { CarbonResult, Trip } from '../constant/types';
-import { calculate, CalcTotal } from '../constant/calculate'
 import { TripCard } from '../component/TripCard';
+import { useEffect, useState } from 'react'
+import { createClient } from '@/utils/supabase/client'
+import { calculateAndSave } from '@/utils/carbon';
 
 type Props = {
   trips: Trip[]
@@ -22,7 +24,6 @@ export function CarbonCalculator({ trips, setTrips, setResult }: Props) {
       flightClass: 'economy',
       distanceKm: 0,
       duration: 'short',
-      passengers: 1,
       isReturn: false
     }
 
@@ -54,15 +55,15 @@ export function CarbonCalculator({ trips, setTrips, setResult }: Props) {
 
 
       if (type === 'flight') {
-        return { id, type: 'flight', distanceKm: 0, flightClass: 'economy', duration: 'short', passengers: 1, isReturn: false } as Trip
+        return { id, type: 'flight', distanceKm: 0, flightClass: 'economy', duration: 'short',  isReturn: false } as Trip
       } else if (type === 'car') {
         return { id, type: 'car', distanceKm: 0, CarType: 'petrol', passengers: 1 } as Trip
       } else if (type === 'hotel') {
         return { id, type: 'hotel', nights: 1, HotelType: 'standard' } as Trip
       } else if (type === 'rail') {
-        return { id, type: 'rail', distanceKm: 0, RailType: 'national', passengers: 1, isReturn: false } as Trip
+        return { id, type: 'rail', distanceKm: 0, RailType: 'national',  isReturn: false } as Trip
       } else if (type === 'bus') {
-        return { id, type: 'bus', distanceKm: 0, BusType: 'standard', passengers: 1 } as Trip
+        return { id, type: 'bus', distanceKm: 0, BusType: 'standard' } as Trip
       } else {
         return { id, type: 'taxi', distanceKm: 0 } as Trip
       }
@@ -70,9 +71,47 @@ export function CarbonCalculator({ trips, setTrips, setResult }: Props) {
     setTrips(updates);
   }
 
-  const calculation = () => {
-    const total = CalcTotal(trips)
-    setResult(total)
+
+  const [loading, setLoading] = useState(false)
+  const [validationError, setValidationError] = useState<String | null>(null)
+
+  const calculation = async () => {
+    setValidationError(null)
+
+    for ( let i = 0; i<trips.length; i++){
+      const trip = trips[i]
+      const label = `Trip ${i + 1}`
+
+      if (trip.type == 'hotel'){
+        if (!trip.nights || trip.nights < 1) {
+          setValidationError(`${label}: must be at least 1 Night `)
+          return
+        }
+      } else {
+        if (!trip.distanceKm || trip.distanceKm < 0) {
+          setValidationError(`${label}: Distance must be at least more than 0 km `)
+          return
+        }
+      }
+
+      if (trip.type == 'car' && (!trip.passengers || trip.passengers < 1)){
+          setValidationError(`${label}: Passengers must be at least 1`)
+          return
+      }
+
+    }
+    setLoading(true)
+    try {
+      const supabase = createClient()
+      const {data: {user}} = await supabase.auth.getUser()
+
+      const result = await calculateAndSave(trips, user?.id)
+      setResult(result)
+    } catch (error) {
+      console.error('Calculation failed:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const reset = () => {
@@ -82,9 +121,10 @@ export function CarbonCalculator({ trips, setTrips, setResult }: Props) {
       distanceKm: 0,
       flightClass: 'economy',
       duration: 'short',
-      passengers: 1,
       isReturn: false
     }])
+
+    setValidationError(null)
 
     nextId = 2
     setResult(null)
@@ -93,12 +133,14 @@ export function CarbonCalculator({ trips, setTrips, setResult }: Props) {
 
   return (
 
-    <section>
+    <section className=" relative overflow-hidden ">
 
       <div className="max-w-4xl mx-auto">
-        <h2 className="font-bold text-3xl md:text-4xl text-center mb-8 text-text">
-          Enter Travel details
-        </h2>
+
+        <div className="mb-8">
+            <h2 className="text-2xl font-heading font-bold text-text mb-2"> Carbon Footprint Calculator</h2>
+            <p className="text-text/60">Calculate your carbon emissions from various travel activities</p>
+          </div>
 
         <div className=" space-y-2">
           {trips.map((trips, index) => (
@@ -119,8 +161,15 @@ export function CarbonCalculator({ trips, setTrips, setResult }: Props) {
           + Add another trip
         </button>
 
-        <button onClick={calculation} className="bg-primary mt-4 text-xl text-white p-4 w-full rounded-organic font-semibold hover:bg-primary/80 transition-colors duration-200 shadow-lg flex items-center justify-center">
-          Calculate
+        {validationError && (
+          <div className = "mt-4 text-red-400  p-3 text-sm">
+            {validationError}
+          </div>
+        )}
+
+
+        <button onClick={calculation} disabled={loading} className="bg-primary mt-4 text-xl text-white p-4 w-full rounded-organic font-semibold hover:bg-primary/80 transition-colors duration-200 shadow-lg flex items-center justify-center disabled:opacity-60">
+          {loading ? 'Calculating...' : 'Calculate'}
         </button>
 
         <button onClick={reset} className=" bg-white/40 mt-2 text-lg text-text/80 p-4 w-full rounded-organic font-semibold hover:bg-gray-200 hover:text-text transition-colors duration-200 shadow-lg flex items-center justify-center">

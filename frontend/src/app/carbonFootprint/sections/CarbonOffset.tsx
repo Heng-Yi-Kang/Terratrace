@@ -70,17 +70,13 @@ export const CarbonOffset = ({ result }: { result: CarbonResult | null }) => {
   }
 
   return (
-    <section className="min-h-screen py-20 px-4 relative overflow-hidden bg-white/50">
+    <section className=" relative overflow-hidden ">
       <div className="max-w-4xl mx-auto">
 
-        <h2 className="font-heading font-bold text-3xl mb-2 md:text-4xl text-center mb-12 text-text">
-          Offset Your Emissions
-        </h2>
-
-        <p className="text-center text-text/70 mb-8">
-          Take action to reduce or offset your <span className="font-semibold">{result.total.toFixed(2)} kg CO₂</span>
-        </p>
-
+        <div className="mb-8">
+            <h2 className="text-2xl font-heading font-bold text-text mb-2">Offset Your Emissions</h2>
+            <p className="text-text/60">Take action to reduce or offset your {result.total.toFixed(2)} kg CO₂</p>
+          </div>
         <div>
 
           <div className="grid md:grid-cols-3 gap-6">
@@ -131,14 +127,14 @@ export const CarbonOffset = ({ result }: { result: CarbonResult | null }) => {
                 Offset your emissions for ~RM {estimatedCost}
               </p>*/}
               <p className="text-sm text-text/100 mb-6">
-                Below listed some of the reputable organizations where you can purchase carbon credits.
+                Here are some of the reputable organizations where you can purchase carbon credits.
               </p>
 
               <div className="flex flex-col gap-2 mb-4">
                 <a
                   href="https://climateimpactx.com/carbon-credits/?=undefined&utm_source=792707340217&utm_medium=g&utm_campaign=23458475432&utm_content=c&creative=792707340217&keyword=carbon%20trading%20exchange&matchtype=p&network=g&device=c&utm_term=carbon%20trading%20exchange&gad_source=1&gad_campaignid=23458475432&gbraid=0AAAAAqCQ4M14qnFhk8z2mlwUGoC7IaDQd&gclid=Cj0KCQjwh-HPBhCIARIsAC0p3cfJExIMsxbEG1oy5v15HwrttMSjCWsmc13uIISqE_YhnLsoA08kJGYaArCDEALw_wcB"
                   target="_blank"
-                  className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors duration-200"
+                  className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/80 transition-colors duration-200"
                 >
                   Climate Impact X
                 </a>
@@ -146,7 +142,7 @@ export const CarbonOffset = ({ result }: { result: CarbonResult | null }) => {
                 <a
                   href="https://www.goldstandard.org/donate-to-gold-standard"
                   target="_blank"
-                  className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors duration-200"
+                  className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/80 transition-colors duration-200"
                 >
                   Gold Standard
                 </a>
@@ -154,7 +150,7 @@ export const CarbonOffset = ({ result }: { result: CarbonResult | null }) => {
                 <a
                   href="https://www.cooleffect.org/travel-offset"
                   target="_blank"
-                  className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors duration-200"
+                  className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/80 transition-colors duration-200"
                 >
                   Cool Effect
                 </a>
