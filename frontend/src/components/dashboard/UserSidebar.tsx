@@ -104,9 +104,13 @@ export default function UserSidebar() {
   const getActiveTab = (): DashboardTab => {
     const match = pathname.match(/\/dashboard\/(\w+)/)
     if (match && match[1]) {
-      const tab = match[1] as DashboardTab
+      const tab = match[1]
+
+      if (tab === 'carbonHistory') 
+        return 'carbon'
+
       if (['overview', 'trips', 'carbon', 'saved', 'profile', 'analytics', 'community'].includes(tab)) {
-        return tab
+        return tab as DashboardTab
       }
     }
     return 'overview'

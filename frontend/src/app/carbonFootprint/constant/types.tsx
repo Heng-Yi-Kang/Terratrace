@@ -12,7 +12,6 @@ export interface FlightTrip extends BaseTrip{
     type: 'flight'
     distanceKm: number
     flightClass: FlightClass
-    duration: 'short' | 'long'
     isReturn: boolean
 }
 

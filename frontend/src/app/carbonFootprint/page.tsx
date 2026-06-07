@@ -14,17 +14,23 @@ const defaultTrip: Trip = {
   type: 'flight',
   distanceKm: 0,
   flightClass: 'economy',
-  duration: 'short',
   isReturn: false
 };
 
-export default function CarbonFootprint() {
+type Props = {
+  onCalculated?: () => void
+}
+
+export default function CarbonFootprint({onCalculated}: Props) {
 
   const [trips, setTrips] = useState<Trip[]>([defaultTrip])
   const [result, setResult] = useState<CarbonResult | null>(null)
 
   const handleResult = (r: CarbonResult | null) => {
     setResult(r)
+    if (r && onCalculated){
+      onCalculated()
+    }
   }
 
   useEffect(() => {

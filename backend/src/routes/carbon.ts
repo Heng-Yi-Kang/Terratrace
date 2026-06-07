@@ -13,11 +13,24 @@ const getSupabase = () => {
     return createClient(url, key)
 }
 
+//helper
+const getUserFromToken = async (req: Request): Promise <string | null> => {
+    const authHeader = req.headers.authorization
+    if (!authHeader || !authHeader.startsWith('Bearer ')) 
+        return null
+
+    const token = authHeader.substring(7)
+    const supabase = getSupabase()
+    const {data, error} = await supabase.auth.getUser(token)
+    if (error || !data.user) 
+        return null
+    return data.user.id
+}
+
 // POST /api/carbon/calculate
 router.post('/calculate', async (req: Request, res: Response) => {
-console.log('HIT /api/carbon/calculate') // ← add this
-  console.log('Body:', req.body)  
-    const { trips, user_id }: { trips: TripInput[], user_id?: string } = req.body
+ 
+    const { trips }: { trips: TripInput[]} = req.body
 
     if (!trips || !Array.isArray(trips) || trips.length === 0) {
         res.status(400).json({ error: 'trips array is required ' })
@@ -45,11 +58,13 @@ console.log('HIT /api/carbon/calculate') // ← add this
 
     const result = CalcTotal(trips)
 
+    const user_id = await getUserFromToken(req)
+
     if (user_id) {
         try {
             const supabase = getSupabase()
             const { error } = await supabase.from('carbon_entries').insert({
-                user_id: user_id,
+                user_id,
                 trips,
                 total_emissions: result.total,
                 flight_emissions: result.flightEmissions,
@@ -70,7 +85,7 @@ console.log('HIT /api/carbon/calculate') // ← add this
 
 // Get /api/carbon/history
 router.get('/history', async (req: Request, res: Response) => {
-    const {user_id} = req.query
+    const user_id = await getUserFromToken(req)
 
     if (!user_id) {
         res.status(400).json({ error: 'user_id is required' })
@@ -99,10 +114,10 @@ router.get('/history', async (req: Request, res: Response) => {
 
 // GET /api/carbon/summary
 router.get('/summary', async (req: Request, res: Response) => {
-    const { user_id } = req.query
+    const user_id = await getUserFromToken(req)
 
     if (!user_id) {
-        res.status(400).json({ error: 'user_id is required' })
+        res.status(400).json({ error: 'Unauthorized' })
         return
     }
 
@@ -140,6 +155,12 @@ router.get('/summary', async (req: Request, res: Response) => {
 // delete /api/carbon/entry
 router.delete('/entries/:id', async (req: Request, res: Response) => {
     const { id } = req.params
+    const user_id = await getUserFromToken(req)
+
+    if (!user_id) {
+        res.status(400).json({ error: 'Unauthorized' })
+        return
+    }
 
     try {
         const supabase = getSupabase()
@@ -147,6 +168,7 @@ router.delete('/entries/:id', async (req: Request, res: Response) => {
             .from('carbon_entries')
             .delete()
             .eq('id', id)
+            .eq('user_id', user_id)
 
         if (error) {
             res.status(500).json({ error: error.message })

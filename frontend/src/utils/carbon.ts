@@ -21,15 +21,25 @@ export type CarbonSummary = {
     entries: CarbonEntry[]
 }
 
-//calculate + save 
-export async function calculateAndSave (trips: any[], userid?: string) {
+//authHeaders
+async function getAuthHeaders(): Promise<HeadersInit> {
+    const { createClient } = await import ('@/utils/supabase/client')
+    const supabase = createClient()
+    const {data: {session}} = await supabase.auth.getSession()
+    return{
+        'Content-type': 'application/json',
+        ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}`} : {})
+    }
+}
 
+//calculate + save 
+export async function calculateAndSave (trips: any[]) {
+
+    const headers = await getAuthHeaders()
     const response = await fetch(`${API}/api/carbon/calculate`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ trips, user_id: userid }),
+        headers,
+        body: JSON.stringify({ trips }),
     })
     if (!response.ok)
         throw new Error(`Calculation Failed`)
@@ -38,18 +48,20 @@ export async function calculateAndSave (trips: any[], userid?: string) {
 }
 
 //fetch full history
-export async function fetchHistory(user_id: string): Promise<CarbonEntry[]> {
+export async function fetchHistory(): Promise<CarbonEntry[]> {
 
-    const response = await fetch(`${API}/api/carbon/history?user_id=${user_id}`)
+    const headers = await getAuthHeaders()
+    const response = await fetch(`${API}/api/carbon/history`, {headers})
     if (!response.ok)
         throw new Error(`Failed to fetch history`)
     return response.json()
 }
 
 //fetch full summary
-export async function fetchSummary(user_id: string): Promise<CarbonSummary> {
+export async function fetchSummary(): Promise<CarbonSummary> {
 
-    const response = await fetch(`${API}/api/carbon/summary?user_id=${user_id}`)
+    const headers = await getAuthHeaders()
+    const response = await fetch(`${API}/api/carbon/summary`, {headers})
     if (!response.ok)
         throw new Error(`Failed to fetch summary`)
     return response.json()
@@ -57,8 +69,11 @@ export async function fetchSummary(user_id: string): Promise<CarbonSummary> {
 
 //delete entry
 export async function deleteEntry(id: string) {
+
+    const headers = await getAuthHeaders()
     const response = await fetch(`${API}/api/carbon/entries/${id}`, {
         method: 'DELETE',
+        headers,
     })
     if (!response.ok) throw new Error(`Failed to delete entry`)
     return response.json()

@@ -32,9 +32,10 @@ export default function HistoryPage() {
                     setError('Please log in to view your history.');
                     return
                 }
-                const data = await fetchHistory(user.id)
+                const data = await fetchHistory()
                 setRecords(data)
             } catch {
+                console.log('History error:', error)
                 setError('Failed to load history. Please try again.')
             } finally {
                 setLoading(false)

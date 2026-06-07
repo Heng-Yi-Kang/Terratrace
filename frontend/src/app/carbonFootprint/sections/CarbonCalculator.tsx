@@ -2,7 +2,7 @@
 
 import { CarbonResult, Trip } from '../constant/types';
 import { TripCard } from '../component/TripCard';
-import { useEffect, useState } from 'react'
+import { useRef, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { calculateAndSave } from '@/utils/carbon';
 
@@ -23,7 +23,6 @@ export function CarbonCalculator({ trips, setTrips, setResult }: Props) {
       type: 'flight',
       flightClass: 'economy',
       distanceKm: 0,
-      duration: 'short',
       isReturn: false
     }
 
@@ -55,7 +54,7 @@ export function CarbonCalculator({ trips, setTrips, setResult }: Props) {
 
 
       if (type === 'flight') {
-        return { id, type: 'flight', distanceKm: 0, flightClass: 'economy', duration: 'short',  isReturn: false } as Trip
+        return { id, type: 'flight', distanceKm: 0, flightClass: 'economy',  isReturn: false } as Trip
       } else if (type === 'car') {
         return { id, type: 'car', distanceKm: 0, CarType: 'petrol', passengers: 1 } as Trip
       } else if (type === 'hotel') {
@@ -75,12 +74,15 @@ export function CarbonCalculator({ trips, setTrips, setResult }: Props) {
   const [loading, setLoading] = useState(false)
   const [validationError, setValidationError] = useState<String | null>(null)
 
+  const isCanceled = useRef(false)
+
   const calculation = async () => {
     setValidationError(null)
 
     for ( let i = 0; i<trips.length; i++){
       const trip = trips[i]
       const label = `Trip ${i + 1}`
+      isCanceled.current = false
 
       if (trip.type == 'hotel'){
         if (!trip.nights || trip.nights < 1) {
@@ -100,12 +102,14 @@ export function CarbonCalculator({ trips, setTrips, setResult }: Props) {
       }
 
     }
+
     setLoading(true)
+
     try {
       const supabase = createClient()
       const {data: {user}} = await supabase.auth.getUser()
 
-      const result = await calculateAndSave(trips, user?.id)
+      const result = await calculateAndSave(trips)
       setResult(result)
     } catch (error) {
       console.error('Calculation failed:', error)
@@ -115,12 +119,12 @@ export function CarbonCalculator({ trips, setTrips, setResult }: Props) {
   }
 
   const reset = () => {
+    isCanceled.current = true
     setTrips([{
       id: '1',
       type: 'flight',
       distanceKm: 0,
       flightClass: 'economy',
-      duration: 'short',
       isReturn: false
     }])
 

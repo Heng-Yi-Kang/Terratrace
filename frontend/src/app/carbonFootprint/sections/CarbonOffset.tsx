@@ -134,6 +134,7 @@ export const CarbonOffset = ({ result }: { result: CarbonResult | null }) => {
                 <a
                   href="https://climateimpactx.com/carbon-credits/?=undefined&utm_source=792707340217&utm_medium=g&utm_campaign=23458475432&utm_content=c&creative=792707340217&keyword=carbon%20trading%20exchange&matchtype=p&network=g&device=c&utm_term=carbon%20trading%20exchange&gad_source=1&gad_campaignid=23458475432&gbraid=0AAAAAqCQ4M14qnFhk8z2mlwUGoC7IaDQd&gclid=Cj0KCQjwh-HPBhCIARIsAC0p3cfJExIMsxbEG1oy5v15HwrttMSjCWsmc13uIISqE_YhnLsoA08kJGYaArCDEALw_wcB"
                   target="_blank"
+                  rel="noopener noreferrer"
                   className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/80 transition-colors duration-200"
                 >
                   Climate Impact X
@@ -142,6 +143,7 @@ export const CarbonOffset = ({ result }: { result: CarbonResult | null }) => {
                 <a
                   href="https://www.goldstandard.org/donate-to-gold-standard"
                   target="_blank"
+                  rel="noopener noreferrer"
                   className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/80 transition-colors duration-200"
                 >
                   Gold Standard
@@ -150,6 +152,7 @@ export const CarbonOffset = ({ result }: { result: CarbonResult | null }) => {
                 <a
                   href="https://www.cooleffect.org/travel-offset"
                   target="_blank"
+                  rel="noopener noreferrer"
                   className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/80 transition-colors duration-200"
                 >
                   Cool Effect

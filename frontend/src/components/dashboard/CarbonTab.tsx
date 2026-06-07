@@ -89,6 +89,7 @@ export default function CarbonTab() {
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('month')
   const [summary, setSummary] = useState<CarbonSummary | null>(null)
   const [loading, setLoading] = useState(true)
+  const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
     const load = async () => {
@@ -96,7 +97,7 @@ export default function CarbonTab() {
         const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
-        const data = await fetchSummary(user.id)
+        const data = await fetchSummary()
         setSummary(data)
       } catch (error) {
         console.error('Error fetching carbon summary:', error)
@@ -106,7 +107,7 @@ export default function CarbonTab() {
     }
 
     load()
-  }, [])
+  }, [refreshKey])
 
   const chartData = summary ? groupByPeriod(summary.entries, selectedPeriod) : []
   const maxFootprint = Math.max(...chartData.map((d) => d.footprint), 1)
@@ -227,7 +228,7 @@ export default function CarbonTab() {
       </div>
 
       <div>
-        <CarbonFootprint />
+        <CarbonFootprint onCalculated={() => setRefreshKey(prev => prev + 1)}/>
       </div>
 
 
