@@ -1,3 +1,5 @@
+'use client'
+
 import CardImage from "./CardImage"
 import Link from "next/link"
 import { useFavourites, useAddFavourite, useRemoveFavourite } from "@/hooks/useFavourites"

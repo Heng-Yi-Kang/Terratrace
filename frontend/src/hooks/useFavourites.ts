@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/utils/supabase/client'
 import { useUser } from './useUser'
 import { Place } from './useLocations'
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 
 const LOCAL_FAVOURITES_KEY = 'terratrace_local_favourites'
 
@@ -29,35 +29,6 @@ async function fetchWithAuth(url: string, options: RequestInit = {}) {
 
 export function useFavourites() {
   const { data: user } = useUser()
-  const [localFavourites, setLocalFavourites] = useState<Place[]>([])
-  const queryClient = useQueryClient()
-
-  // Listen to local changes
-  useEffect(() => {
-    if (!user) {
-      const updateLocal = () => {
-        const stored = localStorage.getItem(LOCAL_FAVOURITES_KEY)
-        if (stored) {
-          try {
-            setLocalFavourites(JSON.parse(stored))
-          } catch (e) {
-            console.error(e)
-          }
-        } else {
-          setLocalFavourites([])
-        }
-      }
-      updateLocal()
-
-      // Set up simple listener for React Query queryClient invalidations on 'local' key
-      const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
-        if (event?.type === 'updated' && event?.query?.queryKey?.includes('local')) {
-          updateLocal()
-        }
-      })
-      return () => unsubscribe()
-    }
-  }, [user, queryClient])
 
   const dbQuery = useQuery({
     queryKey: ['favourites', user?.id],
@@ -69,11 +40,29 @@ export function useFavourites() {
     staleTime: 2 * 60 * 1000, // 2 minutes
   })
 
+  const localQuery = useQuery({
+    queryKey: ['favourites', 'local'],
+    queryFn: async (): Promise<Place[]> => {
+      if (typeof window === 'undefined') return []
+      const stored = localStorage.getItem(LOCAL_FAVOURITES_KEY)
+      if (stored) {
+        try {
+          return JSON.parse(stored)
+        } catch (e) {
+          console.error(e)
+        }
+      }
+      return []
+    },
+    enabled: !user,
+    initialData: [],
+  })
+
   return {
-    data: user ? (dbQuery.data ?? []) : localFavourites,
-    isLoading: user ? dbQuery.isLoading : false,
-    isError: user ? dbQuery.isError : false,
-    error: user ? dbQuery.error : null,
+    data: user ? (dbQuery.data ?? []) : (localQuery.data ?? []),
+    isLoading: user ? dbQuery.isLoading : localQuery.isLoading,
+    isError: user ? dbQuery.isError : localQuery.isError,
+    error: user ? dbQuery.error : localQuery.error,
     isLocal: !user,
   }
 }
@@ -154,13 +143,23 @@ export function useSyncFavourites() {
             const list: Place[] = JSON.parse(stored)
             if (list.length > 0) {
               const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001'
+              const failed: Place[] = []
               for (const place of list) {
-                await fetchWithAuth(`${baseUrl}/api/favourites`, {
-                  method: 'POST',
-                  body: JSON.stringify({ locationId: place.id }),
-                }).catch(e => console.error('Error syncing local favorite:', e))
+                try {
+                  await fetchWithAuth(`${baseUrl}/api/favourites`, {
+                    method: 'POST',
+                    body: JSON.stringify({ locationId: place.id }),
+                  })
+                } catch (e) {
+                  console.error('Error syncing local favorite:', e)
+                  failed.push(place)
+                }
               }
-              localStorage.removeItem(LOCAL_FAVOURITES_KEY)
+              if (failed.length > 0) {
+                localStorage.setItem(LOCAL_FAVOURITES_KEY, JSON.stringify(failed))
+              } else {
+                localStorage.removeItem(LOCAL_FAVOURITES_KEY)
+              }
               queryClient.invalidateQueries({ queryKey: ['favourites', user.id] })
             }
           } catch (e) {
@@ -172,3 +171,4 @@ export function useSyncFavourites() {
     sync()
   }, [user, queryClient])
 }
+
