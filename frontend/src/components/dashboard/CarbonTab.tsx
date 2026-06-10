@@ -60,6 +60,7 @@ export function StatsCard({ title, value, unit, icon, iconBgClass }: StatsCardPr
     </div>
   )
 }
+
 function groupByPeriod(entries: CarbonEntry[], period: 'week' | 'month' | 'year') {
   const now = new Date()
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -81,7 +82,14 @@ function groupByPeriod(entries: CarbonEntry[], period: 'week' | 'month' | 'year'
     grouped[key] = (grouped[key] || 0) + entry.total_emissions
   })
 
-  return Object.entries(grouped).map(([label, footprint]) => ({ label, footprint }))
+  return Object.entries(grouped).map(([label, footprint]) => ({ label, footprint })).sort((a,b) => {
+    if(period == 'year'){
+      return months.indexOf(a.label) - months.indexOf(b.label)
+    }
+    const dateA = new Date(a.label + ' 2026')
+    const dateB = new Date(b.label + ' 2026')
+    return dateA.getTime() - dateB.getTime()
+  })
 
 }
 
