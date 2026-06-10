@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { motion, useInView } from 'framer-motion'
-import CarbonFootprint from '@/app/carbonFootprint/page'
-import { createClient } from '@/utils/supabase/client'
+import { CarbonFootprint } from '@/app/carbonFootprint/CarbonFootprintView'
+import { getCurrentUser } from '@/utils/supabase/auth'
 import { fetchSummary, type CarbonSummary, type CarbonEntry } from '@/utils/carbon'
 
 
@@ -94,8 +94,7 @@ export default function CarbonTab() {
   useEffect(() => {
     const load = async () => {
       try {
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
+        const { data: { user } } = await getCurrentUser()
         if (!user) return
         const data = await fetchSummary()
         setSummary(data)

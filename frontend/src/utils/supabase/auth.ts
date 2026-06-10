@@ -1,79 +1,103 @@
-import { createClient } from './client'
-import { redirect } from 'next/navigation'
-
 export type UserRole = 'user' | 'admin'
 
+export type AppUser = {
+  id: string
+  email: string
+  role: UserRole
+  username?: string
+  user_metadata: {
+    role: UserRole
+    username?: string
+  }
+}
+
+const API = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+
+async function authFetch(path: string, options: RequestInit = {}) {
+  const response = await fetch(`${API}${path}`, {
+    ...options,
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
+    },
+  })
+
+  const body = await response.json().catch(() => ({}))
+  if (!response.ok) {
+    const message = typeof body.error === 'string'
+      ? body.error
+      : body.error?.message || 'Request failed'
+    return {
+      data: body.data ?? null,
+      error: { message },
+    }
+  }
+
+  return {
+    data: body.data ?? body,
+    error: body.error ?? null,
+  }
+}
+
 export async function signIn(email: string, password: string) {
-  const supabase = createClient()
-  if (!supabase) return { error: { message: 'Supabase not configured' } }
-  return supabase.auth.signInWithPassword({ email, password })
+  return authFetch('/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  })
 }
 
 export async function signUp(email: string, password: string, username?: string, role: UserRole = 'user') {
-  const supabase = createClient()
-  if (!supabase) return { error: { message: 'Supabase not configured' } }
-  return supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: { role, username }
-    }
+  return authFetch('/api/auth/signup', {
+    method: 'POST',
+    body: JSON.stringify({ email, password, username, role }),
   })
 }
 
 export async function signOut() {
-  const supabase = createClient()
-  if (!supabase) return { error: { message: 'Supabase not configured' } }
-  return supabase.auth.signOut()
+  return authFetch('/api/auth/logout', { method: 'POST' })
 }
 
-export async function getCurrentUser() {
-  const supabase = createClient()
-  if (!supabase) return { data: { user: null }, error: null }
-  return supabase.auth.getUser()
+export async function getCurrentUser(): Promise<{ data: { user: AppUser | null }; error: { message: string } | null }> {
+  const result = await authFetch('/api/auth/me')
+  if (result.error) return { data: { user: null }, error: null }
+  return result as { data: { user: AppUser | null }; error: null }
 }
 
 export async function getSession() {
-  const supabase = createClient()
-  if (!supabase) return { data: { session: null }, error: null }
-  return supabase.auth.getSession()
+  const { data, error } = await getCurrentUser()
+  return {
+    data: {
+      session: data.user ? { user: data.user } : null,
+    },
+    error,
+  }
+}
+
+export async function updateCurrentUser(metadata: Record<string, unknown>) {
+  return authFetch('/api/auth/me', {
+    method: 'PATCH',
+    body: JSON.stringify(metadata),
+  })
+}
+
+export async function changePassword(currentPassword: string, newPassword: string) {
+  return authFetch('/api/auth/password', {
+    method: 'PATCH',
+    body: JSON.stringify({ currentPassword, newPassword }),
+  })
 }
 
 export async function deleteAccount() {
-  const supabase = createClient()
-  if (!supabase) return { error: { message: 'Supabase not configured' } }
-
-  // Get the current session to get the access token
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) {
-    return { error: { message: 'Not authenticated' } }
-  }
-
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-
-  const response = await fetch(`${apiUrl}/api/user/account`, {
-    method: 'DELETE',
-    headers: {
-      'Authorization': `Bearer ${session.access_token}`
-    }
-  })
-
-  if (!response.ok) {
-    const data = await response.json()
-    return { error: { message: data.error || 'Failed to delete account' } }
-  }
-
+  const result = await authFetch('/api/user/account', { method: 'DELETE' })
+  if (result.error) return { error: result.error }
   return { success: true }
 }
 
 export async function getRedirectPath(): Promise<string> {
-  const supabase = createClient()
-  if (!supabase) return '/login'
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return '/login'
-
-  const role = user.user_metadata?.role as UserRole | undefined
+  const { data } = await getCurrentUser()
+  const role = data.user?.user_metadata?.role
+  if (!data.user) return '/login'
   return role === 'admin' ? '/admin/dashboard' : '/dashboard'
 }
 

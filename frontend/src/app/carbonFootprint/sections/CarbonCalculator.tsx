@@ -3,7 +3,6 @@
 import { CarbonResult, Trip } from '../constant/types';
 import { TripCard } from '../component/TripCard';
 import { useRef, useState } from 'react'
-import { createClient } from '@/utils/supabase/client'
 import { calculateAndSave } from '@/utils/carbon';
 
 type Props = {
@@ -106,9 +105,6 @@ export function CarbonCalculator({ trips, setTrips, setResult }: Props) {
     setLoading(true)
 
     try {
-      const supabase = createClient()
-      const {data: {user}} = await supabase.auth.getUser()
-
       const result = await calculateAndSave(trips)
       setResult(result)
     } catch (error) {

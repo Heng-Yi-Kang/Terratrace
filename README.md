@@ -81,6 +81,18 @@ Terratrace uses a minimal, lightweight state management approach:
    npm run dev
    ```
 
+   Start local Postgres first:
+
+   ```bash
+   docker compose up -d postgres
+   ```
+
+   Then start the app:
+
+   ```bash
+   npm run dev
+   ```
+
    This starts both:
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:3001
@@ -100,16 +112,37 @@ Terratrace uses a minimal, lightweight state management approach:
 
 | File | Variables |
 |------|-----------|
-| `.env` (root) | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` |
-| `frontend/.env.local` | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` |
-| `backend/.env` | `PORT`, `NODE_ENV`, `FRONTEND_URL` |
+| `.env` (root) | `NEXT_PUBLIC_API_BASE_URL`, `JWT_SECRET`, `SESSION_COOKIE_NAME` |
+| `frontend/.env.local` | `NEXT_PUBLIC_API_BASE_URL`, `JWT_SECRET`, `SESSION_COOKIE_NAME` |
+| `backend/.env` | `PORT`, `NODE_ENV`, `CORS_ORIGIN`, `DATABASE_URL`, `JWT_SECRET`, `SESSION_COOKIE_NAME` |
+
+## Local Database
+
+Terratrace now uses plain PostgreSQL, not Supabase at runtime. The Docker Compose database uses:
+
+```bash
+DATABASE_URL=postgresql://terratrace:terratrace@localhost:5432/terratrace
+```
+
+To import once from hosted Supabase, provide `SUPABASE_DATABASE_URL` and run:
+
+```bash
+bash db/migrate-from-supabase.sh
+```
+
+The import copies app tables and converts `auth.users` into the app-owned `users` table, preserving bcrypt-compatible password hashes.
 
 ## API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/health` | Health check |
-| GET | `/api/user` | Get user info |
+| POST | `/api/auth/login` | Log in and set session cookie |
+| POST | `/api/auth/signup` | Create user and set session cookie |
+| POST | `/api/auth/logout` | Clear session cookie |
+| GET | `/api/auth/me` | Get current user |
+| PATCH | `/api/auth/me` | Update current user profile |
+| PATCH | `/api/auth/password` | Change password |
 | DELETE | `/api/user/account` | Delete user account |
 
 ## Documentation

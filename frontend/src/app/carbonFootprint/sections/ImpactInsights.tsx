@@ -55,6 +55,8 @@ const getHighestSource = (result: CarbonResult) => {
 }
 
 export const ImpactInsights = ({ result }: { result: CarbonResult | null }) => {
+  const {ref: totalRef, display: totalDisplay} = useCountUp(result?.total ?? 0,2)
+  const {ref: treesRef, display: treesDisplay} = useCountUp(Math.round((result?.total ?? 0)/ 22), 0)
 
   if (!result) {
     return (
@@ -89,9 +91,6 @@ export const ImpactInsights = ({ result }: { result: CarbonResult | null }) => {
   } else if (highestSource.name === 'Taxi') {
     recommendation = 'To reduce impact, consider carpooling or using ride-sharing services to minimize the number of vehicles on the road.'
   }
-
-  const {ref: totalRef, display: totalDisplay} = useCountUp(result?.total ?? 0,2)
-  const {ref: treesRef, display: treesDisplay} = useCountUp(Math.round((result?.total ?? 0)/ 22), 0)
 
   return (
     <section className=" relative overflow-hidden ">

@@ -1,7 +1,6 @@
 'use client'
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/utils/supabase/client'
 import { useUser } from './useUser'
 import { Place } from './useLocations'
 import { useEffect } from 'react'
@@ -10,16 +9,12 @@ const LOCAL_FAVOURITES_KEY = 'terratrace_local_favourites'
 
 // Helper for HTTP requests
 async function fetchWithAuth(url: string, options: RequestInit = {}) {
-  const { data: { session } } = await supabase.auth.getSession()
-  const token = session?.access_token
-  
   const headers = {
     ...options.headers,
     'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   }
 
-  const response = await fetch(url, { ...options, headers })
+  const response = await fetch(url, { ...options, headers, credentials: 'include' })
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}))
     throw new Error(errorData.error || `HTTP error! Status: ${response.status}`)
@@ -171,4 +166,3 @@ export function useSyncFavourites() {
     sync()
   }, [user, queryClient])
 }
-

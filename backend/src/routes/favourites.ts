@@ -1,7 +1,7 @@
 import { Router, Response } from 'express'
-import { supabase } from '../utils/supabase'
 import { requireAuth, AuthRequest } from '../middleware/auth'
 import { mapDbLocationToPlace } from './locations'
+import { query } from '../utils/db'
 
 const router = Router()
 
@@ -10,28 +10,24 @@ router.use(requireAuth)
 
 // GET /api/favourites - Retrieve all favourites for the authenticated user
 router.get('/', async (req: AuthRequest, res: Response) => {
-  const userId = req.user.id
+  const userId = req.user!.id
 
   try {
-    const { data, error } = await supabase
-      .from('user_favourites')
-      .select('id, created_at, locations(*)')
-      .eq('user_id', userId)
+    const { rows } = await query(
+      `select f.id as favourite_id, f.created_at as saved_at, l.*
+       from user_favourites f
+       join locations l on l.id = f.location_id
+       where f.user_id = $1
+       order by f.created_at desc`,
+      [userId],
+    )
 
-    if (error) {
-      console.error('Error fetching favourites:', error)
-      return res.status(500).json({ error: 'Failed to retrieve favourites' })
-    }
-
-    const places = (data ?? [])
-      .filter((row: any) => row.locations !== null && row.locations !== undefined)
-      .map((row: any) => {
-        const rawLocation = Array.isArray(row.locations) ? row.locations[0] : row.locations
-        const place = mapDbLocationToPlace(rawLocation)
+    const places = rows.map((row: any) => {
+        const place = mapDbLocationToPlace(row)
         return {
           ...place,
-          favouriteId: row.id,
-          savedAt: row.created_at,
+          favouriteId: row.favourite_id,
+          savedAt: row.saved_at,
         }
       })
 
@@ -44,7 +40,7 @@ router.get('/', async (req: AuthRequest, res: Response) => {
 
 // POST /api/favourites - Add a location to favourites
 router.post('/', async (req: AuthRequest, res: Response) => {
-  const userId = req.user.id
+  const userId = req.user!.id
   const { locationId } = req.body
 
   if (!locationId) {
@@ -52,36 +48,30 @@ router.post('/', async (req: AuthRequest, res: Response) => {
   }
 
   try {
-    const { data, error } = await supabase
-      .from('user_favourites')
-      .insert({ user_id: userId, location_id: locationId })
-      .select('id, created_at, locations(*)')
-      .single()
+    const { rows } = await query(
+      `with inserted as (
+         insert into user_favourites (user_id, location_id)
+         values ($1, $2)
+         returning id, created_at, location_id
+       )
+       select inserted.id as favourite_id, inserted.created_at as saved_at, l.*
+       from inserted
+       join locations l on l.id = inserted.location_id`,
+      [userId, locationId],
+    )
 
-    if (error) {
-      if (error.code === '23505') {
-        return res.status(409).json({ error: 'This location is already in your favourites' })
-      }
-      console.error('Error adding favourite:', error)
-      return res.status(500).json({ error: 'Failed to add favourite' })
-    }
+    if (!rows[0]) return res.status(404).json({ error: 'Location not found' })
 
-    if (!data || !data.locations) {
-      return res.status(500).json({ error: 'Failed to retrieve favorited location details' })
-    }
-
-    const rawLocation = Array.isArray(data.locations) ? data.locations[0] : data.locations
-    if (!rawLocation) {
-      return res.status(500).json({ error: 'Failed to retrieve favorited location details' })
-    }
-
-    const place = mapDbLocationToPlace(rawLocation as any)
+    const place = mapDbLocationToPlace(rows[0] as any)
     return res.status(201).json({
       ...place,
-      favouriteId: data.id,
-      savedAt: data.created_at,
+      favouriteId: rows[0].favourite_id,
+      savedAt: rows[0].saved_at,
     })
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.code === '23505') {
+      return res.status(409).json({ error: 'This location is already in your favourites' })
+    }
     console.error('Unexpected error in POST favourites:', error)
     return res.status(500).json({ error: 'An unexpected error occurred' })
   }
@@ -89,20 +79,11 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 
 // DELETE /api/favourites/:locationId - Remove a location from favourites
 router.delete('/:locationId', async (req: AuthRequest, res: Response) => {
-  const userId = req.user.id
+  const userId = req.user!.id
   const { locationId } = req.params
 
   try {
-    const { error } = await supabase
-      .from('user_favourites')
-      .delete()
-      .eq('user_id', userId)
-      .eq('location_id', locationId)
-
-    if (error) {
-      console.error('Error deleting favourite:', error)
-      return res.status(500).json({ error: 'Failed to delete favourite' })
-    }
+    await query('delete from user_favourites where user_id = $1 and location_id = $2', [userId, locationId])
 
     return res.status(200).json({ success: true, message: 'Favourite removed successfully' })
   } catch (error) {

@@ -1,8 +1,12 @@
 'use client'
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getCurrentUser, deleteAccount as deleteAccountApi } from '@/utils/supabase/auth'
-import { supabase } from '@/utils/supabase/client'
+import {
+  changePassword,
+  deleteAccount as deleteAccountApi,
+  getCurrentUser,
+  updateCurrentUser,
+} from '@/utils/supabase/auth'
 
 export function useUser() {
   return useQuery({
@@ -21,7 +25,7 @@ export function useUpdateUser() {
 
   return useMutation({
     mutationFn: async (metadata: Record<string, unknown>) => {
-      const { data, error } = await supabase.auth.updateUser({ data: metadata })
+      const { data, error } = await updateCurrentUser(metadata)
       if (error) throw error
       return data
     },
@@ -48,19 +52,9 @@ export function useDeleteAccount() {
 
 export function useChangePassword() {
   return useMutation({
-    mutationFn: async ({ email, currentPassword, newPassword }: { email: string; currentPassword: string; newPassword: string }) => {
-      // Re-authenticate
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password: currentPassword,
-      })
-      if (signInError) throw signInError
-
-      // Update password
-      const { error: updateError } = await supabase.auth.updateUser({
-        password: newPassword,
-      })
-      if (updateError) throw updateError
+    mutationFn: async ({ currentPassword, newPassword }: { email: string; currentPassword: string; newPassword: string }) => {
+      const { error } = await changePassword(currentPassword, newPassword)
+      if (error) throw error
       return { success: true }
     },
   })

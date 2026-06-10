@@ -1,14 +1,18 @@
 import express, { Application, Request, Response, NextFunction } from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
-import { createClient } from '@supabase/supabase-js'
+import cookieParser from 'cookie-parser'
 import weatherRoutes from './routes/weather'
 import smartRecommendationRoutes from './routes/smart-recommendation'
 import ecoRouteRoutes from './routes/eco-route'
 import carbonRoutes from './routes/carbon'
 import locationsRoutes from './routes/locations'
 import favouritesRoutes from './routes/favourites'
+import authRoutes from './routes/auth'
+import todosRoutes from './routes/todos'
 import { requireAuth } from './middleware/auth'
+import { query } from './utils/db'
+import { clearSessionCookie } from './utils/auth'
 
 // Load environment variables
 dotenv.config()
@@ -16,14 +20,14 @@ dotenv.config()
 const app: Application = express()
 const PORT = process.env.PORT || 3001
 
-// Supabase Admin client (server-side only)
-const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
 // Middleware
-app.use(cors())
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  credentials: true,
+}))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+app.use(cookieParser())
 
 // Health check route
 app.get('/health', (_req: Request, res: Response) => {
@@ -37,29 +41,18 @@ app.get('/api', (_req: Request, res: Response) => {
 app.use('/api/weather', weatherRoutes)
 app.use('/api/recommendations', smartRecommendationRoutes)
 app.use('/api/eco-route', ecoRouteRoutes)
+app.use('/api/auth', authRoutes)
 app.use('/api/carbon', carbonRoutes)
 app.use('/api/locations', locationsRoutes)
 app.use('/api/favourites', favouritesRoutes)
+app.use('/api/todos', todosRoutes)
 
 // Delete user account
 app.delete('/api/user/account', requireAuth, async (req: Request, res: Response) => {
   try {
-    if (!supabaseUrl || !supabaseServiceKey) {
-      res.status(500).json({ error: 'Supabase not configured' })
-      return
-    }
-
     const userId = (req as any).user.id
-
-    // Delete user using admin client
-    const adminClient = createClient(supabaseUrl, supabaseServiceKey)
-    const { error: deleteError } = await adminClient.auth.admin.deleteUser(userId)
-
-    if (deleteError) {
-      console.error('Error deleting user:', deleteError)
-      res.status(500).json({ error: deleteError.message || 'Failed to delete account' })
-      return
-    }
+    await query('delete from users where id = $1', [userId])
+    clearSessionCookie(res)
 
     res.status(200).json({ success: true, message: 'Account deleted successfully' })
   } catch (error) {

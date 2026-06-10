@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { getCurrentUser } from '@/utils/supabase/auth'
 import { fetchHistory, deleteEntry, type CarbonEntry } from '@/utils/carbon'
 import Link from 'next/link'
 import * as icons from '../component/icons'
@@ -26,8 +26,7 @@ export default function HistoryPage() {
     useEffect(() => {
         const load = async () => {
             try {
-                const supabase = createClient()
-                const { data: { user } } = await supabase.auth.getUser()
+                const { data: { user } } = await getCurrentUser()
                 if (!user) {
                     setError('Please log in to view your history.');
                     return

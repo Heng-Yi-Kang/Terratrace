@@ -19,8 +19,6 @@
     "shadcn": "^4.7.0"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.10.2",
-    "@supabase/supabase-js": "^2.103.0",
     "chart.js": "^4.5.1",
     "docx": "^9.6.1",
     "react-chartjs-2": "^5.3.1"

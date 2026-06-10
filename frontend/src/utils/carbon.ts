@@ -23,12 +23,8 @@ export type CarbonSummary = {
 
 //authHeaders
 async function getAuthHeaders(): Promise<HeadersInit> {
-    const { createClient } = await import ('@/utils/supabase/client')
-    const supabase = createClient()
-    const {data: {session}} = await supabase.auth.getSession()
     return{
         'Content-type': 'application/json',
-        ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}`} : {})
     }
 }
 
@@ -39,6 +35,7 @@ export async function calculateAndSave (trips: any[]) {
     const response = await fetch(`${API}/api/carbon/calculate`, {
         method: 'POST',
         headers,
+        credentials: 'include',
         body: JSON.stringify({ trips }),
     })
     if (!response.ok)
@@ -51,7 +48,7 @@ export async function calculateAndSave (trips: any[]) {
 export async function fetchHistory(): Promise<CarbonEntry[]> {
 
     const headers = await getAuthHeaders()
-    const response = await fetch(`${API}/api/carbon/history`, {headers})
+    const response = await fetch(`${API}/api/carbon/history`, { headers, credentials: 'include' })
     if (!response.ok)
         throw new Error(`Failed to fetch history`)
     return response.json()
@@ -61,7 +58,7 @@ export async function fetchHistory(): Promise<CarbonEntry[]> {
 export async function fetchSummary(): Promise<CarbonSummary> {
 
     const headers = await getAuthHeaders()
-    const response = await fetch(`${API}/api/carbon/summary`, {headers})
+    const response = await fetch(`${API}/api/carbon/summary`, { headers, credentials: 'include' })
     if (!response.ok)
         throw new Error(`Failed to fetch summary`)
     return response.json()
@@ -74,8 +71,8 @@ export async function deleteEntry(id: string) {
     const response = await fetch(`${API}/api/carbon/entries/${id}`, {
         method: 'DELETE',
         headers,
+        credentials: 'include',
     })
     if (!response.ok) throw new Error(`Failed to delete entry`)
     return response.json()
 }
-

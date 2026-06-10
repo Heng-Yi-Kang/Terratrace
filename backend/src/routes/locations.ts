@@ -1,5 +1,5 @@
 import { Request, Response, Router } from 'express'
-import { supabase } from '../utils/supabase'
+import { query } from '../utils/db'
 
 const router = Router()
 
@@ -62,16 +62,8 @@ export const mapDbLocationToPlace = (row: DatabaseLocation) => {
 // Fetch all locations
 router.get('/', async (_req: Request, res: Response) => {
   try {
-    const { data, error } = await supabase
-      .from('locations')
-      .select('*')
-
-    if (error) {
-      console.error('Error fetching locations from Supabase:', error)
-      return res.status(500).json({ error: 'Failed to retrieve destinations.' })
-    }
-
-    const places = (data ?? []).map(mapDbLocationToPlace)
+    const { rows } = await query<DatabaseLocation>('select * from locations order by name asc')
+    const places = rows.map(mapDbLocationToPlace)
     return res.status(200).json(places)
   } catch (error) {
     console.error('Unexpected error in locations route:', error)
@@ -91,30 +83,23 @@ router.get('/recommendations', async (req: Request, res: Response) => {
   }
 
   try {
-    // We fetch matching rows
-    let query = supabase.from('locations').select('*')
-
-    // Handle DB lowercase vs uppercase
     const categoryLower = category.toLowerCase()
-    query = query.in('category', [categoryLower, category])
-
+    const conditions = ['lower(category) = $1']
+    const values: unknown[] = [categoryLower]
     if (city) {
-      query = query.eq('city', city)
+      values.push(city)
+      conditions.push(`city = $${values.length}`)
     }
-
     if (excludeId) {
-      query = query.neq('public_id', excludeId)
+      values.push(excludeId)
+      conditions.push(`public_id <> $${values.length}`)
     }
 
-    const { data, error } = await query
-
-    if (error) {
-      console.error('Error fetching recommendations from Supabase:', error)
-      return res.status(500).json({ error: 'Failed to retrieve recommendations.' })
-    }
-
-    // Map and shuffle/randomize results
-    const places = (data ?? []).map(mapDbLocationToPlace)
+    const { rows } = await query<DatabaseLocation>(
+      `select * from locations where ${conditions.join(' and ')}`,
+      values,
+    )
+    const places = rows.map(mapDbLocationToPlace)
     const shuffled = [...places].sort(() => 0.5 - Math.random())
     const recommendations = shuffled.slice(0, 4)
 
@@ -131,16 +116,8 @@ router.get('/:publicId', async (req: Request, res: Response) => {
   const { publicId } = req.params
 
   try {
-    const { data, error } = await supabase
-      .from('locations')
-      .select('*')
-      .eq('public_id', publicId)
-      .maybeSingle()
-
-    if (error) {
-      console.error(`Error fetching location ${publicId} from Supabase:`, error)
-      return res.status(500).json({ error: 'Failed to retrieve destination details.' })
-    }
+    const { rows } = await query<DatabaseLocation>('select * from locations where public_id = $1 limit 1', [publicId])
+    const data = rows[0]
 
     if (!data) {
       return res.status(404).json({ error: 'Destination not found.' })

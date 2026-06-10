@@ -1,6 +1,4 @@
-import { cookies } from "next/headers";
 import { Place } from "../../components/PlaceCard";
-import { createClient, supabaseConnectionState } from "@/utils/supabase/server"
 import Image from "next/image";
 
 type Props = {

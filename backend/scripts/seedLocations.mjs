@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import pg from "pg";
 import { createApi } from "unsplash-js";
 import { GoogleGenAI } from "@google/genai";
 import fetch from "node-fetch";
@@ -8,10 +8,13 @@ import "dotenv/config";
 const fsqKey = process.env.FOURSQUARE_API_KEY;
 const unsplashKey = process.env.UNSPLASH_ACCESS_KEY;
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseService = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+    console.error("Missing required environment variable: DATABASE_URL");
+    process.exit(1);
+}
 
-const supabase = createClient(supabaseUrl, supabaseService);
+const pool = new pg.Pool({ connectionString: databaseUrl });
 const gemini = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const unsplash = createApi({ accessKey: unsplashKey, });
 const nanoid = customAlphabet("23456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ", 6);
@@ -221,17 +224,55 @@ async function seed() {
                     foursquare_id: place.fsq_place_id,
                 };
 
-                const { error } = await supabase.from("locations").upsert(row, {
-                    onConflict: "foursquare_id",  // prevents duplicates if you re-run
-                });
+                await pool.query(
+                    `insert into locations (
+                        name, public_id, category, city, country, address, lat, lng,
+                        eco_certs, eco_score, eco_tags, description, image_url, image_thumb, foursquare_id
+                    ) values (
+                        $1, $2, $3, $4, $5, $6, $7, $8,
+                        $9, $10, $11, $12, $13, $14, $15
+                    )
+                    on conflict (foursquare_id) do update set
+                        name = excluded.name,
+                        category = excluded.category,
+                        city = excluded.city,
+                        country = excluded.country,
+                        address = excluded.address,
+                        lat = excluded.lat,
+                        lng = excluded.lng,
+                        eco_certs = excluded.eco_certs,
+                        eco_score = excluded.eco_score,
+                        eco_tags = excluded.eco_tags,
+                        description = excluded.description,
+                        image_url = excluded.image_url,
+                        image_thumb = excluded.image_thumb,
+                        updated_at = now()`,
+                    [
+                        row.name,
+                        row.public_id,
+                        row.category,
+                        row.city,
+                        row.country,
+                        row.address,
+                        row.lat,
+                        row.lng,
+                        row.eco_certs,
+                        row.eco_score,
+                        row.eco_tags,
+                        row.description,
+                        row.image_url,
+                        row.image_thumb,
+                        row.foursquare_id,
+                    ],
+                );
 
-                if (error) console.error(`ERROR: ${place.name}:`, error.message);
-                else console.log(`SUCCESS: ${category.type}: ${place.name}`);
+                console.log(`SUCCESS: ${category.type}: ${place.name}`);
             }
         }
     }
 
     console.log("\nFINISHED: Seeding complete!");
+    await pool.end();
 }
 
 seed();

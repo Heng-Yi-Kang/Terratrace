@@ -3,7 +3,7 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const { createApi } = require('unsplash-js');
-const { createClient } = require('@supabase/supabase-js');
+const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
 const axios = require('axios');
 
@@ -16,11 +16,10 @@ function getRequiredEnv(name) {
     return value;
 }
 
-const supabaseUrl = getRequiredEnv('NEXT_PUBLIC_SUPABASE_URL');
-const supabaseKey = getRequiredEnv('SUPABASE_SERVICE_ROLE_KEY');
+const databaseUrl = getRequiredEnv('DATABASE_URL');
 const unsplashAccessKey = getRequiredEnv('NEXT_UNSPLASH_ACCESS_KEY');
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+const pool = new Pool({ connectionString: databaseUrl });
 
 const api = createApi({
     accessKey: unsplashAccessKey,
@@ -236,18 +235,36 @@ async function seedDatabase() {
                     };
                 }))).filter(loc => loc.lat && loc.long); // Ensure we have valid coordinates
 
-        // 3. Insert into Supabase
-        console.log('Inserting into Supabase locations table...');
-        const { data, error } = await supabase
-            .from('locations')
-            .insert(formattedLocations)
-            .select();
-
-        if (error) {
-            console.error('Error inserting data:', error);
-        } else {
-            console.log(`Successfully inserted ${data.length} records!`);
+        console.log('Inserting into local Postgres locations table...');
+        for (const loc of formattedLocations) {
+            await pool.query(
+                `insert into locations (
+                    name, category, city, lat, long, eco_certs, image_url, ex_booking_url, public_id
+                 ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                 on conflict (public_id) do update set
+                    name = excluded.name,
+                    category = excluded.category,
+                    city = excluded.city,
+                    lat = excluded.lat,
+                    long = excluded.long,
+                    eco_certs = excluded.eco_certs,
+                    image_url = excluded.image_url,
+                    ex_booking_url = excluded.ex_booking_url,
+                    updated_at = now()`,
+                [
+                    loc.name,
+                    loc.category,
+                    loc.city,
+                    loc.lat,
+                    loc.long,
+                    loc.eco_certs,
+                    loc.image_url,
+                    loc.ex_booking_url,
+                    loc.public_id,
+                ],
+            );
         }
+        console.log(`Successfully inserted ${formattedLocations.length} records!`);
 
     } catch (error) {
         if (axios.isAxiosError(error)) {
@@ -264,6 +281,8 @@ async function seedDatabase() {
             console.error('Unknown error object:', error);
         }
         process.exitCode = 1;
+    } finally {
+        await pool.end();
     }
 }
 

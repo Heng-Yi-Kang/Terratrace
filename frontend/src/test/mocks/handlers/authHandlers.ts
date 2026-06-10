@@ -1,37 +1,44 @@
 import { http, HttpResponse } from 'msw'
 
-const BASE_URL = 'https://placeholder.supabase.co'
+const API_URL = 'http://localhost:3001'
 
 export const authHandlers = [
-  http.post(`${BASE_URL}/auth/v1/token?action=signin`, async ({ request }) => {
+  http.post(`${API_URL}/api/auth/login`, async ({ request }) => {
     const body = (await request.json()) as any
     const { email, password } = body
 
     if (email === 'valid@test.com' && password === 'password123') {
       return HttpResponse.json({
-        id: 'user-123',
-        email: 'valid@test.com',
-        role: 'authenticated',
-        user_metadata: { role: 'user', username: 'testuser' },
-        session: {
-          access_token: 'mock-access-token',
-          refresh_token: 'mock-refresh-token',
-          expires_in: 3600,
+        data: {
+          user: {
+            id: 'user-123',
+            email: 'valid@test.com',
+            role: 'user',
+            user_metadata: { role: 'user', username: 'testuser' },
+          },
+          session: { user: { id: 'user-123' } },
         },
+        error: null,
       })
     }
 
     return HttpResponse.json(
-      { error: 'Invalid login credentials', error_code: 'invalid_credentials' },
-      { status: 400 }
+      { error: { message: 'Invalid login credentials' } },
+      { status: 401 }
     )
   }),
 
-  http.get(`${BASE_URL}/auth/v1/user`, () => {
+  http.get(`${API_URL}/api/auth/me`, () => {
     return HttpResponse.json({
-      id: 'user-123',
-      email: 'valid@test.com',
-      user_metadata: { role: 'user', username: 'testuser' },
+      data: {
+        user: {
+          id: 'user-123',
+          email: 'valid@test.com',
+          role: 'user',
+          user_metadata: { role: 'user', username: 'testuser' },
+        },
+      },
+      error: null,
     })
   }),
 ]

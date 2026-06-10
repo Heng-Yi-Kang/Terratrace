@@ -11,20 +11,6 @@ vi.mock('./useUser', () => ({
   useUser: vi.fn(),
 }))
 
-vi.mock('@/utils/supabase/client', () => ({
-  supabase: {
-    auth: {
-      getSession: vi.fn().mockResolvedValue({
-        data: {
-          session: {
-            access_token: 'mock-token',
-          },
-        },
-      }),
-    },
-  },
-}))
-
 describe('useFavourites Hooks', () => {
   let queryClient: QueryClient
   const wrapper = ({ children }: { children: React.ReactNode }) => (
