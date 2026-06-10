@@ -6,33 +6,34 @@ import Chart from '@/app/carbonFootprint/component/doughnutChart'
 import {useRef, useEffect, useState} from 'react'
 import {useInView} from 'framer-motion'
 
-function useCountUp (value: number, decimals:number = 2) {
-   const ref = useRef<HTMLDivElement>(null)
+function useCountUp<T extends HTMLElement> (value: number, decimals:number = 2) {
+  const ref = useRef<T>(null)
   const isInView = useInView(ref, { once: true, amount: 0.5 })
   const [displayValue, setDisplayValue] = useState(0)
-  const hasAnimated = useRef(false)
 
   useEffect(() => {
-    if (!isInView || hasAnimated.current) return
-    hasAnimated.current = true
+    if (!isInView) return
 
     const duration = 1500
     const startTime = performance.now()
+    let animationFrame = 0
 
     const animate = (currentTime: number) => {
       const elapsed = currentTime - startTime
       const progress = Math.min(elapsed / duration, 1)
       const easeOut = 1 - Math.pow(1 - progress, 3)
-      setDisplayValue(Math.floor(value * easeOut))
+      setDisplayValue(value * easeOut)
 
       if (progress < 1) {
-        requestAnimationFrame(animate)
+        animationFrame = requestAnimationFrame(animate)
       } else {
         setDisplayValue(value)
       }
     }
 
-    requestAnimationFrame(animate)
+    animationFrame = requestAnimationFrame(animate)
+
+    return () => cancelAnimationFrame(animationFrame)
   }, [isInView, value])
 
   return {ref, display: displayValue.toFixed(decimals)}
@@ -55,8 +56,9 @@ const getHighestSource = (result: CarbonResult) => {
 }
 
 export const ImpactInsights = ({ result }: { result: CarbonResult | null }) => {
-  const {ref: totalRef, display: totalDisplay} = useCountUp(result?.total ?? 0,2)
-  const {ref: treesRef, display: treesDisplay} = useCountUp(Math.round((result?.total ?? 0)/ 22), 0)
+  const {ref: totalRef, display: totalDisplay} = useCountUp<HTMLParagraphElement>(result?.total ?? 0,2)
+  const treesToAbsorb = result?.total ? Math.max(1, Math.ceil(result.total / 22)) : 0
+  const {ref: treesRef, display: treesDisplay} = useCountUp<HTMLDivElement>(treesToAbsorb, 0)
 
   if (!result) {
     return (
