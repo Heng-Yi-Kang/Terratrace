@@ -6,7 +6,7 @@ if [[ -z "${SUPABASE_DATABASE_URL:-}" ]]; then
   exit 1
 fi
 
-DATABASE_URL="${DATABASE_URL:-postgresql://terratrace:terratrace@localhost:5432/terratrace}"
+DATABASE_URL="${DATABASE_URL:-postgresql://terratrace:terratrace@localhost:5433/terratrace}"
 NETWORK="${DOCKER_NETWORK:-host}"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT

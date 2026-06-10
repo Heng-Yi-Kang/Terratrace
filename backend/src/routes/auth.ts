@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express'
+import { Router, Request, Response, NextFunction } from 'express'
 import { query } from '../utils/db'
 import {
   DbUser,
@@ -15,6 +15,13 @@ import { requireAuth, AuthRequest } from '../middleware/auth'
 const router = Router()
 
 const userColumns = 'id, email, password_hash, username, role, created_at, updated_at'
+type AsyncRoute = (req: Request, res: Response, next: NextFunction) => Promise<unknown>
+
+function asyncHandler(handler: AsyncRoute) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    Promise.resolve(handler(req, res, next)).catch(next)
+  }
+}
 
 async function findUserByEmail(email: string): Promise<DbUser | null> {
   const result = await query<DbUser>(
@@ -44,7 +51,7 @@ function sendSession(res: Response, user: DbUser) {
   })
 }
 
-router.post('/login', async (req: Request, res: Response) => {
+router.post('/login', asyncHandler(async (req: Request, res: Response) => {
   const email = String(req.body?.email || '').trim().toLowerCase()
   const password = String(req.body?.password || '')
 
@@ -58,9 +65,9 @@ router.post('/login', async (req: Request, res: Response) => {
   }
 
   return sendSession(res, user)
-})
+}))
 
-router.post('/signup', async (req: Request, res: Response) => {
+router.post('/signup', asyncHandler(async (req: Request, res: Response) => {
   const email = String(req.body?.email || '').trim().toLowerCase()
   const password = String(req.body?.password || '')
   const username = String(req.body?.username || '').trim() || null
@@ -91,19 +98,19 @@ router.post('/signup', async (req: Request, res: Response) => {
     console.error('Signup error:', error)
     return res.status(500).json({ error: { message: 'Failed to create account' } })
   }
-})
+}))
 
 router.post('/logout', (_req: Request, res: Response) => {
   clearSessionCookie(res)
   return res.status(200).json({ error: null })
 })
 
-router.get('/me', requireAuth, async (req: AuthRequest, res: Response) => {
+router.get('/me', requireAuth, asyncHandler(async (req: AuthRequest, res: Response) => {
   const user = await findUserById(req.user!.id)
   return res.status(200).json({ data: { user: user ? toSessionUser(user) : null }, error: null })
-})
+}))
 
-router.patch('/me', requireAuth, async (req: AuthRequest, res: Response) => {
+router.patch('/me', requireAuth, asyncHandler(async (req: AuthRequest, res: Response) => {
   const username = String(req.body?.username || '').trim()
   if (!username) {
     return res.status(400).json({ error: { message: 'Username cannot be empty' } })
@@ -124,9 +131,9 @@ router.patch('/me', requireAuth, async (req: AuthRequest, res: Response) => {
   const token = signSession(result.rows[0])
   setSessionCookie(res, token)
   return res.status(200).json({ data: { user: toSessionUser(result.rows[0]) }, error: null })
-})
+}))
 
-router.patch('/password', requireAuth, async (req: AuthRequest, res: Response) => {
+router.patch('/password', requireAuth, asyncHandler(async (req: AuthRequest, res: Response) => {
   const currentPassword = String(req.body?.currentPassword || '')
   const newPassword = String(req.body?.newPassword || '')
 
@@ -149,6 +156,6 @@ router.patch('/password', requireAuth, async (req: AuthRequest, res: Response) =
   ])
 
   return res.status(200).json({ success: true, error: null })
-})
+}))
 
 export default router

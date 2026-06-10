@@ -121,7 +121,7 @@ Terratrace uses a minimal, lightweight state management approach:
 Terratrace now uses plain PostgreSQL, not Supabase at runtime. The Docker Compose database uses:
 
 ```bash
-DATABASE_URL=postgresql://terratrace:terratrace@localhost:5432/terratrace
+DATABASE_URL=postgresql://terratrace:terratrace@localhost:5433/terratrace
 ```
 
 To import once from hosted Supabase, provide `SUPABASE_DATABASE_URL` and run:
