@@ -20,13 +20,6 @@ type DashboardTab = 'overview' | 'trips' | 'carbon' | 'saved' | 'profile' | 'ana
 
 const SAVED_TRIPS_KEY = 'terratrace_saved_trips'
 
-const mockTrips = [
-  { id: 1, ecoScore: 92, status: 'upcoming' },
-  { id: 2, ecoScore: 88, status: 'upcoming' },
-  { id: 3, ecoScore: 95, status: 'completed' },
-  { id: 4, ecoScore: 76, status: 'completed' },
-]
-
 function calculateCarbonSaved(trips: { ecoScore: number }[]): number {
   const avgEcoScore = trips.length > 0
     ? trips.reduce((sum, t) => sum + t.ecoScore, 0) / trips.length
@@ -96,9 +89,8 @@ export default function UserSidebar() {
         savedTrips = []
       }
     }
-    const allTrips = [...mockTrips, ...savedTrips]
-    setTotalTrips(allTrips.length)
-    setCarbonSaved(calculateCarbonSaved(allTrips))
+    setTotalTrips(savedTrips.length)
+    setCarbonSaved(calculateCarbonSaved(savedTrips))
   }, [])
 
   const getActiveTab = (): DashboardTab => {

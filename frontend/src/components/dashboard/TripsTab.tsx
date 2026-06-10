@@ -2,44 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import SmartRecommendationSection from '@/components/smart-recommendation-section'
-import type { Trip, SavedTripFromRecommendation, TripStatus, EcoScoreFilter } from '@/types/trip'
+import type { SavedTripFromRecommendation, TripStatus, EcoScoreFilter } from '@/types/trip'
 
 const SAVED_TRIPS_KEY = 'terratrace_saved_trips'
-
-const mockTrips: Trip[] = [
-  {
-    id: 1,
-    destination: 'Copenhagen, Denmark',
-    dates: 'May 15 - May 22, 2026',
-    ecoScore: 92,
-    status: 'upcoming',
-    imageColor: 'bg-emerald-500',
-  },
-  {
-    id: 2,
-    destination: 'Amsterdam, Netherlands',
-    dates: 'April 5 - April 10, 2026',
-    ecoScore: 88,
-    status: 'upcoming',
-    imageColor: 'bg-cyan-500',
-  },
-  {
-    id: 3,
-    destination: 'Vienna, Austria',
-    dates: 'Feb 20 - Feb 27, 2026',
-    ecoScore: 95,
-    status: 'completed',
-    imageColor: 'bg-teal-500',
-  },
-  {
-    id: 4,
-    destination: 'Barcelona, Spain',
-    dates: 'Jan 10 - Jan 15, 2026',
-    ecoScore: 76,
-    status: 'completed',
-    imageColor: 'bg-green-600',
-  },
-]
 
 export default function TripsTab() {
   const [statusFilter, setStatusFilter] = useState<TripStatus>('all')
@@ -64,9 +29,7 @@ export default function TripsTab() {
     localStorage.setItem(SAVED_TRIPS_KEY, JSON.stringify(updated))
   }
 
-  const allTrips: Trip[] = [...mockTrips, ...savedTrips]
-
-  const filteredTrips = allTrips.filter((trip) => {
+  const filteredTrips = savedTrips.filter((trip) => {
     if (statusFilter !== 'all' && trip.status !== statusFilter) return false
     if (ecoFilter === 'high' && trip.ecoScore < 90) return false
     if (ecoFilter === 'medium' && (trip.ecoScore >= 90 || trip.ecoScore < 70)) return false

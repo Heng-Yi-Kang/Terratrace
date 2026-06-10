@@ -7,14 +7,7 @@ import { useUser } from '@/hooks/useUser'
 
 const SAVED_TRIPS_KEY = 'terratrace_saved_trips'
 
-const mockTrips = [
-  { id: 1, destination: 'Copenhagen, Denmark', dates: 'May 15 - May 22, 2026', ecoScore: 92, status: 'upcoming', imageColor: 'bg-emerald-500', savedFromRecommendation: false },
-  { id: 2, destination: 'Amsterdam, Netherlands', dates: 'April 5 - April 10, 2026', ecoScore: 88, status: 'upcoming', imageColor: 'bg-cyan-500', savedFromRecommendation: false },
-  { id: 3, destination: 'Vienna, Austria', dates: 'Feb 20 - Feb 27, 2026', ecoScore: 95, status: 'completed', imageColor: 'bg-teal-500', savedFromRecommendation: false },
-  { id: 4, destination: 'Barcelona, Spain', dates: 'Jan 10 - Jan 15, 2026', ecoScore: 76, status: 'completed', imageColor: 'bg-green-600', savedFromRecommendation: false },
-]
-
-type SavedTrip = { id: number; destination?: string; ecoScore: number; status: string; savedFromRecommendation?: boolean }
+type SavedTrip = { id: string; destination?: string; ecoScore: number; status: string; savedFromRecommendation?: boolean }
 
 function calculateCarbonSaved(trips: { ecoScore: number }[]): number {
   const avgEcoScore = trips.length > 0
@@ -24,13 +17,6 @@ function calculateCarbonSaved(trips: { ecoScore: number }[]): number {
   const carbonPerTrip = 50
   return Math.round(trips.length * carbonPerTrip * ((avgEcoScore - baselineScore) / 50))
 }
-
-const recentActivity = [
-  { id: 1, text: 'Saved "Green Valley Hotel" to favorites', time: '2 hours ago' },
-  { id: 2, text: 'Planned trip to Copenhagen', time: '1 day ago' },
-  { id: 3, text: 'Achieved "Eco Traveler" badge', time: '3 days ago' },
-  { id: 4, text: 'Booked eco-friendly transport to Oslo', time: '1 week ago' },
-]
 
 export default function OverviewTab() {
   const [totalTrips, setTotalTrips] = useState(0)
@@ -50,17 +36,16 @@ export default function OverviewTab() {
         savedTrips = []
       }
     }
-    const allTrips = [...mockTrips, ...savedTrips]
-    setTotalTrips(allTrips.length)
-    setCarbonSaved(calculateCarbonSaved(allTrips))
-    setPlacesVisited(allTrips.filter(t => t.status === 'completed').length)
+    setTotalTrips(savedTrips.length)
+    setCarbonSaved(calculateCarbonSaved(savedTrips))
+    setPlacesVisited(savedTrips.filter(t => t.status === 'completed').length)
   }, [])
 
   const stats = [
     {
       title: 'Total Trips',
       value: totalTrips,
-      subtitle: '+3 this month',
+      subtitle: 'Saved trips',
       color: 'primary' as const,
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -81,8 +66,8 @@ export default function OverviewTab() {
     },
     {
       title: 'Places Visited',
-      value: placesVisited || 34,
-      subtitle: 'Across 8 countries',
+      value: placesVisited,
+      subtitle: 'Completed trips',
       color: 'cyan' as const,
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -93,8 +78,8 @@ export default function OverviewTab() {
     },
     {
       title: 'CO₂ Offset',
-      value: '512 kg',
-      subtitle: 'Via tree planting',
+      value: '0 kg',
+      subtitle: 'No offset data yet',
       color: 'cta' as const,
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,17 +128,7 @@ export default function OverviewTab() {
         {/* Recent Activity */}
         <div className="bg-white/80 backdrop-blur-md rounded-organic p-6 shadow-organic">
           <h2 className="font-sans font-semibold text-xl text-text mb-4">Recent Activity</h2>
-          <ul className="space-y-4">
-            {recentActivity.map((activity) => (
-              <li key={activity.id} className="flex items-start gap-3">
-                <div className="w-2 h-2 mt-2 rounded-full bg-cyan-primary" />
-                <div>
-                  <p className="font-sans text-text">{activity.text}</p>
-                  <p className="font-sans text-sm text-text/50">{activity.time}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <p className="font-sans text-text/60">No recent activity yet.</p>
         </div>
 
         {/* Eco Tips */}

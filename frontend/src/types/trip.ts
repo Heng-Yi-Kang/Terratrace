@@ -28,14 +28,4 @@ export interface SavedTripFromRecommendation {
   createdAt: string
 }
 
-export interface MockTrip {
-  id: number
-  destination: string
-  dates: string
-  ecoScore: number
-  status: TripStatus
-  imageColor: string
-  savedFromRecommendation?: false
-}
-
-export type Trip = MockTrip | SavedTripFromRecommendation
+export type Trip = SavedTripFromRecommendation

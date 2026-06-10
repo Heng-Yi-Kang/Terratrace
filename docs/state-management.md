@@ -125,17 +125,16 @@ const SAVED_TRIPS_KEY = 'terratrace_saved_trips'
 useEffect(() => {
   if (typeof window === 'undefined') return
   const stored = localStorage.getItem(SAVED_TRIPS_KEY)
-  let savedTrips: { id: number; ecoScore: number; status: string }[] = []
+  let savedTrips: { id: string; ecoScore: number; status: string }[] = []
   if (stored) {
     try {
-      savedTrips = JSON.parse(stored) as { id: number; ecoScore: number; status: string }[]
+      savedTrips = JSON.parse(stored) as { id: string; ecoScore: number; status: string }[]
     } catch {
       savedTrips = []
     }
   }
-  const allTrips = [...mockTrips, ...savedTrips]
-  setTotalTrips(allTrips.length)
-  setCarbonSaved(calculateCarbonSaved(allTrips))
+  setTotalTrips(savedTrips.length)
+  setCarbonSaved(calculateCarbonSaved(savedTrips))
 }, [])
 ```
 
