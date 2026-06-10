@@ -6,7 +6,7 @@ type Option<T extends string> = {
 type selectOptionsProps<T extends string> = {
     options: Option<T>[];
     selected: T;
-    setSelected: React.Dispatch<React.SetStateAction<T>>;
+    setSelected: (value: T) => void;
     placeholder?: string;
 }
 
@@ -19,7 +19,7 @@ export default function SelectOptions<T extends string>({ options, selected, set
         <select
             value={selected}
             onChange={(e) => setSelected(e.target.value as T)}
-            className={`px-4 py-2 rounded-md border w-full 
+            className={`w-full border border-gray-200 rounded-md cursor-pointer p-3 hover:border-primary
             ${selected === "" ? "text-primary-200" : "text-text"}
             border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary`}
         >
