@@ -1,7 +1,6 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/utils/supabase/client'
 
 export type Place = {
   id: string
@@ -13,29 +12,20 @@ export type Place = {
   ecoCerts: string[]
   bookingUrl?: string
   imageUrl?: string
+  publicId: string
 }
 
 export function useLocations() {
   return useQuery({
     queryKey: ['locations'],
     queryFn: async (): Promise<Place[]> => {
-      const { data, error } = await supabase
-        .from('locations')
-        .select('id,name,category,city,lat,long,eco_certs,image_url,ex_booking_url')
-
-      if (error) throw error
-
-      return (data ?? []).map((row: { id: number; name?: string; category: string; city?: string; lat: number; long: number; eco_certs?: string[]; ex_booking_url?: string; image_url?: string }) => ({
-        id: String(row.id),
-        name: row.name ?? 'Unnamed',
-        category: row.category as 'Transport' | 'Dining' | 'Accommodation',
-        city: row.city ?? undefined,
-        lat: row.lat,
-        long: row.long,
-        ecoCerts: Array.isArray(row.eco_certs) ? row.eco_certs : [],
-        bookingUrl: row.ex_booking_url ?? undefined,
-        imageUrl: row.image_url ?? undefined,
-      }))
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL
+      if (!baseUrl) throw new Error('NEXT_PUBLIC_API_BASE_URL is not configured')
+      const response = await fetch(`${baseUrl}/api/locations`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch destinations from backend')
+      }
+      return response.json()
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   })

@@ -49,3 +49,5 @@ coverage/
 .agents/
 .guides/
 skills-lock.json
+
+.antigravity/
