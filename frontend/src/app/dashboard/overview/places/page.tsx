@@ -1,9 +1,9 @@
-import EcoDirectoryClient from "./components/EcoDirectoryClient";
+import PlacesClient from "./components/PlacesClient";
 import { HydrationBoundary, QueryClient, dehydrate } from "@tanstack/react-query";
 
-export default async function EcoDirectoryPage() {
+export default async function DashboardPlacesPage() {
     const queryClient = new QueryClient();
-    
+
     try {
         await queryClient.prefetchQuery({
             queryKey: ['locations'],
@@ -22,7 +22,7 @@ export default async function EcoDirectoryPage() {
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <EcoDirectoryClient />
+            <PlacesClient />
         </HydrationBoundary>
     );
 }

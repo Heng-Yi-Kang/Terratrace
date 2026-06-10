@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 
 type Category = 'all' | 'Accommodation' | 'Dining' | 'Transport'
 
@@ -142,9 +143,12 @@ export default function SavedTab() {
           </svg>
           <h3 className="font-sans font-semibold text-xl text-text mt-4">No saved places yet</h3>
           <p className="font-sans text-text/60 mt-2">Browse our eco-directory and save your favorite places!</p>
-          <button className="mt-6 px-6 py-3 bg-primary text-white rounded-xl font-sans font-medium hover:bg-primary/90 transition-colors duration-200 cursor-pointer">
+          <Link 
+            href="/dashboard/overview/places"
+            className="inline-block mt-6 px-6 py-3 bg-primary text-white rounded-xl font-sans font-medium hover:bg-primary/90 transition-colors duration-200 cursor-pointer"
+          >
             Explore Eco Directory
-          </button>
+          </Link>
         </div>
       )}
     </div>
