@@ -3,7 +3,7 @@ import { supabase } from '../utils/supabase'
 
 const router = Router()
 
-interface DatabaseLocation {
+export interface DatabaseLocation {
   id: string | number
   name?: string | null
   category?: string | null
@@ -23,7 +23,7 @@ interface DatabaseLocation {
 }
 
 // Helper to map and sanitize database location rows to frontend Place objects
-const mapDbLocationToPlace = (row: DatabaseLocation) => {
+export const mapDbLocationToPlace = (row: DatabaseLocation) => {
   // Normalize category names (handle lowercase/uppercase variations)
   let category: 'Accommodation' | 'Dining' | 'Transport' = 'Accommodation'
   if (row.category) {

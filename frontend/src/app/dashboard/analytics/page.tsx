@@ -424,7 +424,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
+            {([
               {
                 title: "Monthly Report",
                 description: "Detailed breakdown of your travels this month",
@@ -439,7 +439,7 @@ export default function DashboardPage() {
                 action: "Download PDF",
                 type: "annual"
               },
-            ].map((report) => (
+            ] as const).map((report) => (
               <div key={report.title} className="bg-white/80 backdrop-blur-sm rounded-organic border border-white/20 shadow-organic p-8 hover:shadow-organic-lg transition-shadow duration-300">
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center text-white">{report.icon}</div>
