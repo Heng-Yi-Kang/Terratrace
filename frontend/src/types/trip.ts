@@ -1,5 +1,8 @@
 export type TripStatus = 'upcoming' | 'completed' | 'all'
 export type EcoScoreFilter = 'all' | 'high' | 'medium'
+export type PersistedTripStatus = Exclude<TripStatus, 'all'>
+export type TripSource = 'manual' | 'recommendation' | 'local-import'
+export type DayPart = 'morning' | 'afternoon' | 'evening' | 'flexible'
 
 export interface RecommendationItem {
   candidateId: string
@@ -28,4 +31,38 @@ export interface SavedTripFromRecommendation {
   createdAt: string
 }
 
-export type Trip = SavedTripFromRecommendation
+export interface TripItem {
+  id?: string
+  tripId?: string
+  tripDate: string
+  dayPart: DayPart
+  title: string
+  category: string
+  estimatedCost?: number | null
+  rationale?: string | null
+  weatherAlternative?: string | null
+  communityImpact?: string | null
+  sortOrder: number
+}
+
+export interface Trip {
+  id: string
+  destination: string
+  startDate: string
+  endDate: string
+  budget?: number | null
+  interests: string[]
+  ecoScore: number
+  status: PersistedTripStatus
+  source: TripSource
+  sourceRequestId?: string | null
+  weatherCondition?: string | null
+  totalEstimatedCost?: number | null
+  createdAt: string
+  updatedAt: string
+  items: TripItem[]
+}
+
+export type TripPayload = Omit<Trip, 'id' | 'createdAt' | 'updatedAt' | 'items'> & {
+  items: TripItem[]
+}

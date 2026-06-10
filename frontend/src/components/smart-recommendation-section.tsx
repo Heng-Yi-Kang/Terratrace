@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 import { FormEvent, useMemo, useState } from 'react'
+import type { TripPayload } from '@/types/trip'
+import { recommendationTripToPayload } from '@/hooks/useTrips'
 
 type Interest = 'nature' | 'culture' | 'food' | 'adventure' | 'wellness' | 'history' | 'shopping'
 
@@ -102,9 +104,10 @@ const Navbar = () => (
 
 interface SmartRecommendationSectionProps {
   hideNavbar?: boolean
+  onSaveTrip?: (trip: TripPayload) => Promise<void> | void
 }
 
-export default function SmartRecommendationSection({ hideNavbar = false }: SmartRecommendationSectionProps) {
+export default function SmartRecommendationSection({ hideNavbar = false, onSaveTrip }: SmartRecommendationSectionProps) {
   const [city, setCity] = useState('Kuala Lumpur')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
@@ -112,6 +115,7 @@ export default function SmartRecommendationSection({ hideNavbar = false }: Smart
   const [interests, setInterests] = useState<Interest[]>(['nature', 'food'])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [saveStatus, setSaveStatus] = useState('')
   const [result, setResult] = useState<SmartRecommendationResponse | null>(null)
 
   const toggleInterest = (interest: Interest) => {
@@ -174,12 +178,43 @@ export default function SmartRecommendationSection({ hideNavbar = false }: Smart
       }
 
       setResult(data)
+      setSaveStatus('')
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unable to generate recommendations right now.'
       setError(message)
       setResult(null)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const deriveEcoScore = (data: SmartRecommendationResponse) => {
+    if (data.shortlistedCandidates.length === 0) return 75
+    const average = data.shortlistedCandidates.reduce((sum, candidate) => sum + candidate.scoreBreakdown.total, 0) / data.shortlistedCandidates.length
+    return Math.max(0, Math.min(100, Math.round(average * 100)))
+  }
+
+  const handleSaveTrip = async () => {
+    if (!result || !onSaveTrip) return
+
+    const destination = `${result.weather.cityName}${result.weather.country ? `, ${result.weather.country}` : ''}`
+
+    try {
+      await onSaveTrip(recommendationTripToPayload({
+        destination,
+        startDate,
+        endDate,
+        budget: Number(budget),
+        interests,
+        ecoScore: deriveEcoScore(result),
+        requestId: result.requestId,
+        weatherCondition: result.weather.condition,
+        totalEstimatedCost: result.plan.totalEstimatedCost,
+        recommendations: result.plan.recommendations,
+      }))
+      setSaveStatus('Trip saved to your itinerary.')
+    } catch (err) {
+      setSaveStatus(err instanceof Error ? err.message : 'Unable to save trip.')
     }
   }
 
@@ -326,6 +361,18 @@ export default function SmartRecommendationSection({ hideNavbar = false }: Smart
                   ))}
                 </div>
               </div>
+              {onSaveTrip && (
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleSaveTrip}
+                    className="inline-flex items-center justify-center px-5 py-3 rounded-xl bg-cta text-white font-semibold hover:bg-cta/90 transition-colors duration-200 cursor-pointer"
+                  >
+                    Save as Trip
+                  </button>
+                  {saveStatus && <p className="text-sm text-text/70">{saveStatus}</p>}
+                </div>
+              )}
             </div>
           )}
         </div>

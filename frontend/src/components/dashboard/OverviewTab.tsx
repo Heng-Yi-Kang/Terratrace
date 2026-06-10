@@ -1,13 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import StatCard from './StatCard'
 import { useUser } from '@/hooks/useUser'
-
-const SAVED_TRIPS_KEY = 'terratrace_saved_trips'
-
-type SavedTrip = { id: string; destination?: string; ecoScore: number; status: string; savedFromRecommendation?: boolean }
+import { useImportLocalTrips, useTrips } from '@/hooks/useTrips'
 
 function calculateCarbonSaved(trips: { ecoScore: number }[]): number {
   const avgEcoScore = trips.length > 0
@@ -19,27 +15,14 @@ function calculateCarbonSaved(trips: { ecoScore: number }[]): number {
 }
 
 export default function OverviewTab() {
-  const [totalTrips, setTotalTrips] = useState(0)
-  const [carbonSaved, setCarbonSaved] = useState(0)
-  const [placesVisited, setPlacesVisited] = useState(0)
-  const { data: user } = useUser()
-  const username = user?.user_metadata?.username || ''
+  useImportLocalTrips()
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const stored = localStorage.getItem(SAVED_TRIPS_KEY)
-    let savedTrips: SavedTrip[] = []
-    if (stored) {
-      try {
-        savedTrips = JSON.parse(stored) as SavedTrip[]
-      } catch {
-        savedTrips = []
-      }
-    }
-    setTotalTrips(savedTrips.length)
-    setCarbonSaved(calculateCarbonSaved(savedTrips))
-    setPlacesVisited(savedTrips.filter(t => t.status === 'completed').length)
-  }, [])
+  const { data: user } = useUser()
+  const { data: savedTrips = [] } = useTrips()
+  const username = user?.user_metadata?.username || ''
+  const totalTrips = savedTrips.length
+  const carbonSaved = calculateCarbonSaved(savedTrips)
+  const placesVisited = savedTrips.filter(t => t.status === 'completed').length
 
   const stats = [
     {

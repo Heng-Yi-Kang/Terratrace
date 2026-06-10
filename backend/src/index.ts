@@ -10,6 +10,7 @@ import locationsRoutes from './routes/locations'
 import favouritesRoutes from './routes/favourites'
 import authRoutes from './routes/auth'
 import todosRoutes from './routes/todos'
+import tripsRoutes from './routes/trips'
 import { requireAuth } from './middleware/auth'
 import { query } from './utils/db'
 import { clearSessionCookie } from './utils/auth'
@@ -46,6 +47,7 @@ app.use('/api/carbon', carbonRoutes)
 app.use('/api/locations', locationsRoutes)
 app.use('/api/favourites', favouritesRoutes)
 app.use('/api/todos', todosRoutes)
+app.use('/api/trips', tripsRoutes)
 
 // Delete user account
 app.delete('/api/user/account', requireAuth, async (req: Request, res: Response) => {

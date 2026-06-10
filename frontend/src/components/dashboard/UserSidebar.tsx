@@ -15,10 +15,9 @@ import {
 } from 'lucide-react'
 import { signOut } from '@/utils/supabase/auth'
 import { useUser } from '@/hooks/useUser'
+import { useImportLocalTrips, useTrips } from '@/hooks/useTrips'
 
 type DashboardTab = 'overview' | 'trips' | 'carbon' | 'saved' | 'profile' | 'analytics' | 'community'
-
-const SAVED_TRIPS_KEY = 'terratrace_saved_trips'
 
 function calculateCarbonSaved(trips: { ecoScore: number }[]): number {
   const avgEcoScore = trips.length > 0
@@ -71,27 +70,14 @@ export default function UserSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const [isSigningOut, setIsSigningOut] = useState(false)
-  const [totalTrips, setTotalTrips] = useState(0)
-  const [carbonSaved, setCarbonSaved] = useState(0)
   const { data: user } = useUser()
+  const { data: savedTrips = [] } = useTrips()
+  useImportLocalTrips()
 
   const userEmail = user?.email || ''
   const username = user?.user_metadata?.username || ''
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const stored = localStorage.getItem(SAVED_TRIPS_KEY)
-    let savedTrips: { id: number; ecoScore: number; status: string }[] = []
-    if (stored) {
-      try {
-        savedTrips = JSON.parse(stored) as { id: number; ecoScore: number; status: string }[]
-      } catch {
-        savedTrips = []
-      }
-    }
-    setTotalTrips(savedTrips.length)
-    setCarbonSaved(calculateCarbonSaved(savedTrips))
-  }, [])
+  const totalTrips = savedTrips.length
+  const carbonSaved = calculateCarbonSaved(savedTrips)
 
   const getActiveTab = (): DashboardTab => {
     const match = pathname.match(/\/dashboard\/(\w+)/)
