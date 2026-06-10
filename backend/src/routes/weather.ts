@@ -44,8 +44,9 @@ router.get('/forecast', async (req: Request, res: Response) => {
   const timeout = setTimeout(() => controller.abort(), 15000)
 
   try {
-    // 1. Geocoding via Open-Meteo
+        // 1. Geocoding via Open-Meteo
     const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`, { signal: controller.signal })
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     const geoData: any = await geoRes.json()
     
     if (!geoRes.ok || !geoData.results || geoData.results.length === 0) {
@@ -58,6 +59,7 @@ router.get('/forecast', async (req: Request, res: Response) => {
     const url = `https://ensemble-api.open-meteo.com/v1/ensemble?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max&timezone=auto&models=gfs_seamless&forecast_days=35`
     
     const weatherRes = await fetch(url, { signal: controller.signal })
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     const weatherData: any = await weatherRes.json()
 
     if (!weatherRes.ok) {

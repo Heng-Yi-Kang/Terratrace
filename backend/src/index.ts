@@ -6,6 +6,9 @@ import weatherRoutes from './routes/weather'
 import smartRecommendationRoutes from './routes/smart-recommendation'
 import ecoRouteRoutes from './routes/eco-route'
 import carbonRoutes from './routes/carbon'
+import locationsRoutes from './routes/locations'
+import favouritesRoutes from './routes/favourites'
+import { requireAuth } from './middleware/auth'
 
 // Load environment variables
 dotenv.config()
@@ -35,36 +38,21 @@ app.use('/api/weather', weatherRoutes)
 app.use('/api/recommendations', smartRecommendationRoutes)
 app.use('/api/eco-route', ecoRouteRoutes)
 app.use('/api/carbon', carbonRoutes)
+app.use('/api/locations', locationsRoutes)
+app.use('/api/favourites', favouritesRoutes)
 
 // Delete user account
-app.delete('/api/user/account', async (req: Request, res: Response) => {
+app.delete('/api/user/account', requireAuth, async (req: Request, res: Response) => {
   try {
     if (!supabaseUrl || !supabaseServiceKey) {
       res.status(500).json({ error: 'Supabase not configured' })
       return
     }
 
-    // Get authorization header
-    const authHeader = req.headers.authorization
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      res.status(401).json({ error: 'Missing or invalid authorization header' })
-      return
-    }
-
-    const token = authHeader.substring(7)
-
-    // Verify the token and get user ID
-    const adminClient = createClient(supabaseUrl, supabaseServiceKey)
-    const { data: userData, error: authError } = await adminClient.auth.getUser(token)
-
-    if (authError || !userData?.user) {
-      res.status(401).json({ error: 'Invalid or expired token' })
-      return
-    }
-
-    const userId = userData.user.id
+    const userId = (req as any).user.id
 
     // Delete user using admin client
+    const adminClient = createClient(supabaseUrl, supabaseServiceKey)
     const { error: deleteError } = await adminClient.auth.admin.deleteUser(userId)
 
     if (deleteError) {
