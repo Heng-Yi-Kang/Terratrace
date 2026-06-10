@@ -2,6 +2,7 @@
 
 Source feature list: `docs/WIF2003 Project Job Distribution Occ3-Team04.pdf`  
 Review date: 2026-06-10
+Recent commits reviewed: `0879396` (`feat: implement carbon tracking system with dashboard, history and API integration`) and `e7dff1e` (`Merge branch 'main' into carbon-footprint-2`)
 
 ## Status Legend
 
@@ -13,8 +14,8 @@ Review date: 2026-06-10
 
 | Status | Count |
 | --- | ---: |
-| Implemented | 11 |
-| Partially implemented | 11 |
+| Implemented | 12 |
+| Partially implemented | 10 |
 | Not found | 0 |
 
 ## Feature Matrix
@@ -31,16 +32,16 @@ Review date: 2026-06-10
 | 8 | Profile Management | Change password | Implemented | Profile tab validates current/new password fields, re-authenticates with the current password, then calls `supabase.auth.updateUser({ password })` through `useChangePassword()`. |
 | 9 | Eco-friendly Directory Module | Sustainable Directory | Implemented | Directory UI fetches locations from backend through `useLocations()`; backend `GET /api/locations` maps Supabase `locations` rows into accommodation, dining, and transport place cards. |
 | 10 | Eco-friendly Directory Module | Geo-Specific Search | Partially implemented | Directory search filters by name, city, category, and eco certificates client-side in `EcoDirectoryClient`. It supports city/town text search, but not a dedicated geo search API, radius search, map search, or coordinate filtering. |
-| 11 | Eco-friendly Directory Module | Favorites System | Partially implemented | Saved sections/routes exist (`frontend/src/app/dashboard/saved/page.tsx`, `SavedTab`), and trips are saved to localStorage, but no durable favorites/bookmark implementation for directory places was found. |
+| 11 | Eco-friendly Directory Module | Favorites System | Implemented | Saved places are managed through `SavedTab` and place-card heart actions; signed-in users use authenticated `GET/POST/DELETE /api/favourites` routes backed by Supabase `user_favourites`, while guest favourites are kept in localStorage and synced after login by `useSyncFavourites()`. |
 | 12 | Green Itinerary Module | Itinerary Creator | Partially implemented | `TripsTab` lets users view/filter trips and includes smart recommendation UI; recommendation-derived trips can be stored in localStorage. No date-specific itinerary builder, schedule editor, or persisted itinerary model/API was found. |
 | 13 | Green Itinerary Module | Smart Recommendations | Implemented | Frontend form posts city, dates, budget, and interests to `POST /api/recommendations/smart`; backend scores search candidates using eco evidence, interest fit, weather fit, and budget fit, then uses Gemini when configured with deterministic fallback. |
 | 14 | Green Itinerary Module | Weather Integration | Implemented | `WeatherForecastSection` calls `GET /api/weather/forecast`; backend uses Open-Meteo geocoding and 35-day ensemble weather data and returns forecast cards filtered by selected dates. Weather context is also used by smart recommendations. |
-| 15 | Carbon Footprint Module | Emission Calculator | Implemented | `frontend/src/app/carbonFootprint/page.tsx` calculates emissions for flights, cars, lodging, rail, bus, and taxi using type/class multipliers. This exceeds the documented flights, car travel, and lodging scope. |
-| 16 | Carbon Footprint Module | Impact Insights | Implemented | Carbon page shows total emissions, trees/year equivalent, and category breakdown percentages after calculation. Analytics dashboard also visualizes saved carbon using `calculateCarbonSaved()`. |
-| 17 | Carbon Footprint Module | Offset Integration | Implemented | Carbon page shows offset suggestions, estimated tree count, personalized reduction tips based on the largest emission source, and external carbon-credit links such as Climate Impact X, Gold Standard, and Cool Effect. |
+| 15 | Carbon Footprint Module | Emission Calculator | Implemented | Carbon calculator UI now posts trip inputs to `POST /api/carbon/calculate`; backend `backend/src/utils/carbonCalculator.ts` calculates flights, cars, hotels, rail, bus, and taxi and saves authenticated calculations to Supabase `carbon_entries`. |
+| 16 | Carbon Footprint Module | Impact Insights | Implemented | Carbon result sections show total emissions, tree-equivalent impact, category breakdowns, and largest-source guidance. The dashboard carbon tab also reads `GET /api/carbon/summary` to display persisted total footprint, calculation count, average per calculation, and period charts. |
+| 17 | Carbon Footprint Module | Offset Integration | Implemented | Carbon page shows estimated tree offsets, personalized reduction tips based on the largest emission source, and external carbon-credit links such as Climate Impact X, Gold Standard, and Cool Effect. |
 | 18 | Community Impact Module | Eco-Reviews & Ratings | Partially implemented | Community page displays review cards with ratings, locations, practices, helpful counts, and verification flags, but all data is static in `CommunityClient`; no create/edit/rate persistence or API was found. |
 | 19 | Community Impact Module | Community Challenges | Partially implemented | Community page shows static challenges, badges, progress, leaderboard, and points. There is no backend persistence, challenge enrollment, task completion, or badge-award logic. |
-| 20 | Analytics and Reporting Module | Personal Impact Dashboard | Partially implemented | Analytics page shows carbon saved, trips logged, tree equivalent, transport comparison bars, and trip table, but values are based on hard-coded trip data rather than user trip history from Supabase/API. |
+| 20 | Analytics and Reporting Module | Personal Impact Dashboard | Partially implemented | Carbon dashboard metrics are now connected to saved `carbon_entries` through `GET /api/carbon/summary`, but the separate analytics page still uses hard-coded trip data for carbon saved, trips logged, tree equivalent, transport comparison bars, and trip table. |
 | 21 | Analytics and Reporting Module | Sustainability Reports | Partially implemented | Analytics page can generate monthly and annual PDF files with `jsPDF` and `jspdf-autotable`, but reports use hard-coded trip data rather than actual user/trip/carbon records. |
 | 22 | Analytics and Reporting Module | Goal Setting | Partially implemented | Analytics page displays an annual carbon budget, monthly usage progress, remaining budget, and alert states, but the budget is hard-coded and cannot be user-set or persisted. |
 
@@ -50,11 +51,12 @@ These are not separate rows in the PDF feature table, but they support or extend
 
 - Eco route planning is implemented through `frontend/src/components/eco-route-planner-section.tsx` and `backend/src/routes/eco-route.ts`, including geocoding, current-location support, walking/cycling/driving route comparisons, OpenRouteService ETAs, and CO2 estimates.
 - Directory details and related place recommendations are implemented through `GET /api/locations/:publicId` and `GET /api/locations/recommendations`.
+- Carbon tracking history is implemented through `GET /api/carbon/history`, `GET /api/carbon/summary`, `DELETE /api/carbon/entries/:id`, `frontend/src/app/carbonFootprint/history/page.tsx`, and `frontend/src/app/dashboard/carbonHistory/page.tsx`.
 - Admin pages exist for dashboard, destinations, users, and analytics under `frontend/src/app/admin`, protected by role-aware middleware.
 
 ## Main Gaps
 
-- Several user-specific features are not persisted beyond Supabase Auth metadata or browser localStorage.
+- Several user-specific features are not persisted beyond Supabase Auth metadata or browser localStorage, though favourites and carbon calculation records now have Supabase-backed persistence for authenticated users.
 - Community reviews/challenges are static display data and do not yet support real user contribution workflows.
-- Analytics, reports, and goal-setting are functional UI prototypes, but they are not connected to real trip/carbon data.
+- Analytics reports and goal-setting are functional UI prototypes, but they are not fully connected to real trip/carbon data.
 - Account deletion removes the Supabase Auth user, but no explicit cleanup of associated application data was found.
