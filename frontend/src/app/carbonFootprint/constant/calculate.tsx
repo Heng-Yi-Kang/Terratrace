@@ -6,9 +6,8 @@ export function calculate(trip: Trip){
     switch(trip.type){
 
         case 'flight': {
-            const flightHaul = trip.distanceKm < 3700 ? 'short' : 'long'
 
-            return trip.distanceKm * m.FlightMultiplier[flightHaul][trip.flightClass]
+            return trip.distanceKm * m.FlightMultiplier[trip.flightClass]
             *(trip.isReturn? 2 : 1)
         }
 

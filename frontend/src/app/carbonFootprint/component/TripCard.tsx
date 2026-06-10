@@ -83,8 +83,8 @@ export function TripCard({ trip, index, onUpdate, onRemove, onSwitchType }: Prop
                                 setSelected={(v) => onUpdate({ flightClass: v })}
                                 options={[
                                     { value: 'economy', label: 'Economy' },
-                                    { value: 'business', label: 'business' },
-                                    { value: 'first', label: 'first' },
+                                    { value: 'business', label: 'Business' },
+                                    { value: 'first', label: 'First' },
                                 ]}
                             />
                         </div>

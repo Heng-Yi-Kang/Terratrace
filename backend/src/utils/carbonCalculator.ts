@@ -1,15 +1,8 @@
 
 const FlightMultiplier = {
-  short: {
-    economy: 0.12576,
-    business: 0.18863,
-    first: 0.12576, 
-  },
-  long: {
-    economy: 0.11704,
-    business: 0.33940,
-    first: 0.46814,
-  }
+    economy: 0.10916,
+    business: 0.31656,
+    first: 0.43663,
 };
 
 const CarMultiplier = {
@@ -115,9 +108,8 @@ function calculate(trip: TripInput): number {
   switch(trip.type){
 
         case 'flight': {
-            const flightHaul = trip.distanceKm < 3700 ? 'short' : 'long'
 
-            return trip.distanceKm * FlightMultiplier[flightHaul][trip.flightClass]
+            return trip.distanceKm * FlightMultiplier[trip.flightClass]
             *(trip.isReturn? 2 : 1)
         }
 

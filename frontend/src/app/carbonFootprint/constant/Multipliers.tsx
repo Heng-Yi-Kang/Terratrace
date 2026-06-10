@@ -1,14 +1,7 @@
 export const FlightMultiplier = {
-  short: {
-    economy: 0.12576,
-    business: 0.18863,
-    first: 0.12576, 
-  },
-  long: {
-    economy: 0.11704,
-    business: 0.33940,
-    first: 0.46814,
-  }
+    economy: 0.10916,
+    business: 0.31656,
+    first: 0.43663,
 };
 
 export const CarMultiplier = {
