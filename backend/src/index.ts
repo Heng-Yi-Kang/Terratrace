@@ -11,9 +11,7 @@ import favouritesRoutes from './routes/favourites'
 import authRoutes from './routes/auth'
 import todosRoutes from './routes/todos'
 import tripsRoutes from './routes/trips'
-import { requireAuth } from './middleware/auth'
-import { query } from './utils/db'
-import { clearSessionCookie } from './utils/auth'
+import userRoutes from './routes/user'
 
 // Load environment variables
 dotenv.config()
@@ -48,20 +46,7 @@ app.use('/api/locations', locationsRoutes)
 app.use('/api/favourites', favouritesRoutes)
 app.use('/api/todos', todosRoutes)
 app.use('/api/trips', tripsRoutes)
-
-// Delete user account
-app.delete('/api/user/account', requireAuth, async (req: Request, res: Response) => {
-  try {
-    const userId = (req as any).user.id
-    await query('delete from users where id = $1', [userId])
-    clearSessionCookie(res)
-
-    res.status(200).json({ success: true, message: 'Account deleted successfully' })
-  } catch (error) {
-    console.error('Delete account error:', error)
-    res.status(500).json({ error: 'Something went wrong!' })
-  }
-})
+app.use('/api/user', userRoutes)
 
 // 404 handler
 app.use((_req: Request, res: Response) => {
