@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { createClient } from '@/utils/supabase/client';
 import PageHeader from './PageHeader';
 import TabSwitcher from './TabSwitcher';
 import ReviewsSection from './ReviewsSection';
@@ -98,6 +99,16 @@ const LEADERS: Leader[] = [
 
 export default function CommunityClient() {
   const [tab, setTab] = useState<Tab>('reviews');
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    if (!supabase) return;
+    void (async () => {
+      const result = await supabase.auth.getUser();
+      setUserId(result.data.user?.id ?? null);
+    })();
+  }, []);
 
   return (
     <main className="min-h-screen bg-emerald-50">
@@ -106,7 +117,7 @@ export default function CommunityClient() {
         <div className="mx-auto max-w-6xl">
           <TabSwitcher active={tab} onChange={setTab} />
           {tab === 'reviews' ? (
-            <ReviewsSection />
+            <ReviewsSection userId={userId} />
           ) : (
             <ChallengesSection
               challenges={CHALLENGES}

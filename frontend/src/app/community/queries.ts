@@ -72,28 +72,16 @@ export async function fetchReviews(): Promise<Review[]> {
   const supabase = createClient();
   if (!supabase) return [];
 
-  // Try with profiles join first; fall back without it if the table is absent.
-  let result = await supabase
+  const { data, error } = await supabase
     .from('eco_reviews')
     .select(`
-      id, rating, title, body, practices, verified, created_at, helpful_count,
-      locations ( name, city, country, category ),
-      profiles ( full_name )
+      id, rating, title, body, practices, verified, created_at, helpful_count, user_id,
+      locations ( name, city, country, category )
     `)
     .order('created_at', { ascending: false });
 
-  if (result.error) {
-    result = await supabase
-      .from('eco_reviews')
-      .select(`
-        id, rating, title, body, practices, verified, created_at, helpful_count,
-        locations ( name, city, country, category )
-      `)
-      .order('created_at', { ascending: false });
-  }
-
-  if (result.error || !result.data) return [];
-  return (result.data as ReviewRow[]).map(mapRow);
+  if (error || !data) return [];
+  return (data as ReviewRow[]).map(mapRow);
 }
 
 export async function toggleHelpful(

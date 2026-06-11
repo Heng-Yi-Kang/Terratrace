@@ -5,17 +5,15 @@ import { FilterIcon, PencilIcon } from './Icons';
 import type { Review } from './types';
 import ReviewCard from './ReviewCard';
 import { fetchReviews } from '../queries';
-import { createClient } from '@/utils/supabase/client';
 import WriteReviewModal from '../write-review-modal';
 
 const FILTERS = ['All', 'Eco-Lodge', 'Boutique Hotel', 'Tour Operator', 'Restaurant'];
 
-export default function ReviewsSection() {
+export default function ReviewsSection({ userId }: { userId: string | null }) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('All');
   const [modalOpen, setModalOpen] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
 
   const loadReviews = useCallback(() => {
     setLoading(true);
@@ -27,15 +25,6 @@ export default function ReviewsSection() {
   useEffect(() => {
     loadReviews();
   }, [loadReviews]);
-
-  useEffect(() => {
-    const supabase = createClient();
-    if (!supabase) return;
-    void (async () => {
-      const result = await supabase.auth.getUser();
-      setUserId(result.data.user?.id ?? null);
-    })();
-  }, []);
 
   const filtered = filter === 'All' ? reviews : reviews.filter(r => r.category === filter);
 
