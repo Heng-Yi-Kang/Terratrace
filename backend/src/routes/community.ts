@@ -377,17 +377,36 @@ router.get('/leaderboard', optionalAuth, async (req: OptionalAuthRequest, res: R
 
   try {
     const { rows } = await query(
-      `with scores as (
+      `with challenge_scores as (
+         select
+           cp.user_id,
+           coalesce(sum(case when cp.completed_at is not null then c.points else 0 end), 0)::int as points
+         from community_challenge_progress cp
+         left join community_challenges c on c.id = cp.challenge_id
+         group by cp.user_id
+       ),
+       badge_scores as (
+         select user_id, count(distinct badge_id)::int as badges
+         from community_user_badges
+         group by user_id
+       ),
+       active_users as (
+         select user_id from challenge_scores
+         union
+         select user_id from badge_scores
+         union
+         select $1::uuid as user_id where $1::uuid is not null
+       ),
+       scores as (
          select
            u.id,
-           coalesce(u.username, split_part(u.email, '@', 1)) as name,
-           coalesce(sum(case when cp.completed_at is not null then c.points else 0 end), 0)::int as points,
-           count(distinct ub.badge_id)::int as badges
-         from users u
-         left join community_challenge_progress cp on cp.user_id = u.id
-         left join community_challenges c on c.id = cp.challenge_id
-         left join community_user_badges ub on ub.user_id = u.id
-         group by u.id, u.username, u.email
+           coalesce(nullif(u.username, ''), split_part(u.email, '@', 1)) as name,
+           coalesce(cs.points, 0)::int as points,
+           coalesce(bs.badges, 0)::int as badges
+         from active_users au
+         join users u on u.id = au.user_id
+         left join challenge_scores cs on cs.user_id = u.id
+         left join badge_scores bs on bs.user_id = u.id
        ),
        ranked as (
          select *, rank() over (order by points desc, badges desc, name asc) as rank

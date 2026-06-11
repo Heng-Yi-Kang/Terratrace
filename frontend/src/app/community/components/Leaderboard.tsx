@@ -18,6 +18,12 @@ export default function Leaderboard({ leaders }: LeaderboardProps) {
       </div>
 
       <div className="flex flex-col gap-2">
+        {leaders.length === 0 && (
+          <div className="rounded-xl border border-emerald-100 bg-emerald-50/40 px-3.5 py-4 text-sm text-emerald-900/60">
+            No leaderboard entries yet.
+          </div>
+        )}
+
         {leaders.map(l => {
           const isPodium = l.rank <= 3;
           return (
@@ -47,10 +53,6 @@ export default function Leaderboard({ leaders }: LeaderboardProps) {
           );
         })}
       </div>
-
-      <button className="mt-4 w-full rounded-lg border border-emerald-200 bg-transparent py-2.5 font-semibold text-sm text-emerald-600 transition-all duration-200 cursor-pointer hover:bg-emerald-50">
-        View Full Leaderboard
-      </button>
     </div>
   );
 }
