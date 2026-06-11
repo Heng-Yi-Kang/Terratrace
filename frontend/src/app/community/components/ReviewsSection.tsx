@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FilterIcon, PencilIcon } from './Icons';
 import type { Review } from './types';
 import ReviewCard from './ReviewCard';
 import { fetchReviews } from '../queries';
+import { createClient } from '@/utils/supabase/client';
+import WriteReviewModal from '../write-review-modal';
 
 const FILTERS = ['All', 'Eco-Lodge', 'Boutique Hotel', 'Tour Operator', 'Restaurant'];
 
@@ -12,11 +14,27 @@ export default function ReviewsSection() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('All');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadReviews = useCallback(() => {
+    setLoading(true);
     fetchReviews()
       .then(setReviews)
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    loadReviews();
+  }, [loadReviews]);
+
+  useEffect(() => {
+    const supabase = createClient();
+    if (!supabase) return;
+    void (async () => {
+      const result = await supabase.auth.getUser();
+      setUserId(result.data.user?.id ?? null);
+    })();
   }, []);
 
   const filtered = filter === 'All' ? reviews : reviews.filter(r => r.category === filter);
@@ -54,7 +72,18 @@ export default function ReviewsSection() {
           ))}
         </div>
 
-        <button className="inline-flex items-center gap-2 rounded-lg bg-amber-400 px-5 py-2.5 font-semibold text-sm text-white shadow-md transition-all duration-200 cursor-pointer hover:bg-amber-500 hover:shadow-lg">
+        <button
+          onClick={() => setModalOpen(true)}
+          disabled={!userId}
+          title={userId ? 'Write a review' : 'Sign in to write a review'}
+          className="inline-flex items-center gap-2 rounded-lg bg-amber-400 px-5 py-2.5 font-semibold text-sm shadow-md transition-all duration-200 hover:bg-amber-500 hover:shadow-lg"
+          style={{
+            color: '#064E3B',
+            ...(!userId
+              ? { opacity: 0.55, cursor: 'not-allowed' }
+              : { cursor: 'pointer' }),
+          }}
+        >
           <PencilIcon className="h-4 w-4" />
           Write a Review
         </button>
@@ -71,6 +100,13 @@ export default function ReviewsSection() {
           No reviews in this category yet. Be the first to write one!
         </div>
       )}
+
+      <WriteReviewModal
+        open={modalOpen}
+        userId={userId}
+        onClose={() => setModalOpen(false)}
+        onSubmitted={loadReviews}
+      />
     </div>
   );
 }
