@@ -28,6 +28,16 @@ describe('AuthForm', () => {
       expect(mockOnSubmit).not.toHaveBeenCalled()
     })
 
+    it('shows an error when password is shorter than 6 characters', async () => {
+      render(<AuthForm mode="login" onSubmit={mockOnSubmit} />)
+      await userEvent.type(screen.getByLabelText(/email/i), 'test@example.com')
+      await userEvent.type(screen.getByLabelText(/password/i), '12345')
+      await userEvent.click(screen.getByRole('button', { name: /log in/i }))
+
+      expect(await screen.findByText(/password must be at least 6 characters/i)).toBeInTheDocument()
+      expect(mockOnSubmit).not.toHaveBeenCalled()
+    })
+
     it('calls onSubmit with email and password on valid submit', async () => {
       render(<AuthForm mode="login" onSubmit={mockOnSubmit} />)
       await userEvent.type(screen.getByLabelText(/email/i), 'test@example.com')
@@ -73,6 +83,19 @@ describe('AuthForm', () => {
       await userEvent.type(screen.getByLabelText(/confirm password/i), 'differentpass')
       await userEvent.click(screen.getByRole('button', { name: /sign up/i }))
       expect(mockOnSubmit).not.toHaveBeenCalled()
+      expect(await screen.findByText(/passwords do not match/i)).toBeInTheDocument()
+    })
+
+    it('calls onSubmit with username and role on valid signup', async () => {
+      render(<AuthForm mode="signup" onSubmit={mockOnSubmit} />)
+      await userEvent.type(screen.getByLabelText(/username/i), 'traveler')
+      await userEvent.type(screen.getByLabelText(/email/i), 'new@example.com')
+      await userEvent.type(screen.getByLabelText(/^password$/i), 'password123')
+      await userEvent.type(screen.getByLabelText(/confirm password/i), 'password123')
+      await userEvent.selectOptions(screen.getByLabelText(/account type/i), 'admin')
+      await userEvent.click(screen.getByRole('button', { name: /sign up/i }))
+
+      expect(mockOnSubmit).toHaveBeenCalledWith('new@example.com', 'password123', 'traveler', 'admin')
     })
   })
 })
