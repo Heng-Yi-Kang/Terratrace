@@ -1,7 +1,7 @@
 export type Tab = 'reviews' | 'challenges';
 
 export type Review = {
-  id: number;
+  id: string;
   location: string;
   city: string;
   country: string;

@@ -1,19 +1,36 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FilterIcon, PencilIcon } from './Icons';
 import type { Review } from './types';
 import ReviewCard from './ReviewCard';
-
-interface ReviewsSectionProps {
-  reviews: Review[];
-}
+import { fetchReviews } from '../queries';
 
 const FILTERS = ['All', 'Eco-Lodge', 'Boutique Hotel', 'Tour Operator', 'Restaurant'];
 
-export default function ReviewsSection({ reviews }: ReviewsSectionProps) {
+export default function ReviewsSection() {
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('All');
+
+  useEffect(() => {
+    fetchReviews()
+      .then(setReviews)
+      .finally(() => setLoading(false));
+  }, []);
+
   const filtered = filter === 'All' ? reviews : reviews.filter(r => r.category === filter);
+
+  if (loading) {
+    return (
+      <div
+        className="py-16 text-center font-medium"
+        style={{ color: '#064E3B', opacity: 0.5 }}
+      >
+        Loading reviews…
+      </div>
+    );
+  }
 
   return (
     <div>

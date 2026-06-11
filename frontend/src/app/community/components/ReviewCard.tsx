@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { StarIcon, MapPinIcon, LeafIcon, ThumbsUpIcon, CheckBadgeIcon } from './Icons';
 import { tokens } from '../tokens';
 import type { Review } from './types';
+import { toggleHelpful } from '../queries';
+import { createClient } from '@/utils/supabase/client';
 
 interface ReviewCardProps {
   review: Review;
@@ -93,7 +95,16 @@ export default function ReviewCard({ review }: ReviewCardProps) {
         </div>
 
         <button
-          onClick={() => { setMarked(!marked); setHelpful(h => marked ? h - 1 : h + 1); }}
+          onClick={async () => {
+            const next = !marked;
+            setMarked(next);
+            setHelpful(h => next ? h + 1 : h - 1);
+            const supabase = createClient();
+            const userId = supabase
+              ? (await supabase.auth.getUser()).data.user?.id
+              : undefined;
+            if (userId) await toggleHelpful(review.id, userId, next);
+          }}
           className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer ${
             marked
               ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'

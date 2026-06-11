@@ -7,80 +7,9 @@ import ReviewsSection from './ReviewsSection';
 import ChallengesSection from './ChallengesSection';
 import { LeafIcon, BoltIcon, MapPinIcon, FireIcon, PencilIcon, GlobeIcon } from './Icons';
 import { tokens } from '../tokens';
-import type { Tab, Review, Challenge, EarnedBadge, Leader } from './types';
+import type { Tab, Challenge, EarnedBadge, Leader } from './types';
 
 // ─── Static Data ──────────────────────────────────────────────────────────────
-
-const REVIEWS: Review[] = [
-  {
-    id: 1,
-    location: 'Selva Verde Lodge',
-    city: 'Sarapiquí',
-    country: 'Costa Rica',
-    category: 'Eco-Lodge',
-    rating: 5,
-    reviewer: 'Priya Sharma',
-    reviewerInitials: 'PS',
-    date: '3 days ago',
-    title: 'Genuinely sustainable, not just greenwashed',
-    body: 'Solar panels powering everything, on-site composting, rainwater harvesting visible across the property. Staff are mostly locals and they actively run reforestation programs guests can join.',
-    practices: ['Solar Energy', 'Local Hiring', 'Reforestation', 'Zero Waste'],
-    helpful: 142,
-    verified: true,
-    color: tokens.cta,
-  },
-  {
-    id: 2,
-    location: 'Kyoto Bamboo Inn',
-    city: 'Arashiyama',
-    country: 'Japan',
-    category: 'Boutique Hotel',
-    rating: 4,
-    reviewer: 'Marcus Weber',
-    reviewerInitials: 'MW',
-    date: '1 week ago',
-    title: 'Strong on materials, weaker on energy',
-    body: 'Beautiful traditional construction with sustainable bamboo and reclaimed wood. Locally-sourced food was excellent. Half-star deduction — energy mix is still mostly grid, no visible renewables.',
-    practices: ['Local Food', 'Sustainable Materials', 'Water Conservation'],
-    helpful: 89,
-    verified: true,
-    color: tokens.primary,
-  },
-  {
-    id: 3,
-    location: 'Atlas Mountain Trek Co.',
-    city: 'Imlil',
-    country: 'Morocco',
-    category: 'Tour Operator',
-    rating: 5,
-    reviewer: 'Emma Rodriguez',
-    reviewerInitials: 'ER',
-    date: '2 weeks ago',
-    title: 'Pack-in pack-out is non-negotiable for them',
-    body: 'Guides actively educate every group on Leave No Trace. They contract directly with Berber families and a large share of fees goes back into village schools. Refreshing to see structural impact.',
-    practices: ['Leave No Trace', 'Community Investment', 'Fair Wages'],
-    helpful: 203,
-    verified: true,
-    color: tokens.secondary,
-  },
-  {
-    id: 4,
-    location: 'Floating Reed Restaurant',
-    city: 'Puno',
-    country: 'Peru',
-    category: 'Restaurant',
-    rating: 4,
-    reviewer: 'James Okafor',
-    reviewerInitials: 'JO',
-    date: '3 weeks ago',
-    title: 'Hyper-local sourcing done right',
-    body: "Everything on the menu was caught or grown within a few kilometers of Lake Titicaca. Owned and run by a Uros family. The only reason it isn't five stars is the single-use plastic for takeaway.",
-    practices: ['Hyper-Local Food', 'Indigenous-Owned', 'Cultural Heritage'],
-    helpful: 67,
-    verified: false,
-    color: tokens.cta,
-  },
-];
 
 const CHALLENGES: Challenge[] = [
   {
@@ -177,7 +106,7 @@ export default function CommunityClient() {
         <div className="mx-auto max-w-6xl">
           <TabSwitcher active={tab} onChange={setTab} />
           {tab === 'reviews' ? (
-            <ReviewsSection reviews={REVIEWS} />
+            <ReviewsSection />
           ) : (
             <ChallengesSection
               challenges={CHALLENGES}
