@@ -89,7 +89,7 @@ describe('useCommunity hooks', () => {
         HttpResponse.json([{ id: 'badge-1', name: 'Carbon Crusher', icon: 'leaf', color: '#059669', earned: false }]),
       ),
       http.get(`${API}/api/community/leaderboard`, () =>
-        HttpResponse.json([{ rank: 1, name: 'Traveler', points: 500, badges: 1, you: true }]),
+        HttpResponse.json([{ id: 'user-1', rank: 1, name: 'Traveler', points: 500, badges: 1, you: true }]),
       ),
     )
   })

@@ -398,7 +398,7 @@ router.get('/leaderboard', optionalAuth, async (req: OptionalAuthRequest, res: R
          union
          select * from ranked where id = $1::uuid
        )
-       select rank::int, name, points, badges, id = $1::uuid as you
+       select id, rank::int, name, points, badges, id = $1::uuid as you
        from selected
        order by rank asc, name asc`,
       [viewerId],

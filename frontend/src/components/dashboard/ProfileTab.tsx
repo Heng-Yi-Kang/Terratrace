@@ -3,6 +3,12 @@
 import { useState } from 'react'
 import { signOut } from '@/utils/supabase/auth'
 import { useUser, useUpdateUser, useDeleteAccount, useChangePassword } from '@/hooks/useUser'
+import PasswordField from '@/components/shared/PasswordField'
+
+const profilePasswordInputClass =
+  'w-full px-4 py-3 rounded-xl border border-text/20 font-sans text-text focus:outline-none focus:border-cyan-primary focus:ring-2 focus:ring-cyan-primary/20 transition-all duration-200'
+
+const profilePasswordLabelClass = 'block font-sans font-medium text-text mb-2'
 
 export default function ProfileTab() {
   const { data: user } = useUser()
@@ -264,35 +270,38 @@ export default function ProfileTab() {
                 )}
 
                 <div>
-                  <label className="block font-sans font-medium text-text mb-2">Current Password</label>
-                  <input
-                    type="password"
+                  <PasswordField
+                    id="currentPassword"
+                    label="Current Password"
                     value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-text/20 font-sans text-text focus:outline-none focus:border-cyan-primary focus:ring-2 focus:ring-cyan-primary/20 transition-all duration-200"
+                    onChange={setCurrentPassword}
                     placeholder="Enter current password"
+                    labelClassName={profilePasswordLabelClass}
+                    inputClassName={profilePasswordInputClass}
                   />
                 </div>
 
                 <div>
-                  <label className="block font-sans font-medium text-text mb-2">New Password</label>
-                  <input
-                    type="password"
+                  <PasswordField
+                    id="newPassword"
+                    label="New Password"
                     value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-text/20 font-sans text-text focus:outline-none focus:border-cyan-primary focus:ring-2 focus:ring-cyan-primary/20 transition-all duration-200"
+                    onChange={setNewPassword}
                     placeholder="Enter new password (min 6 characters)"
+                    labelClassName={profilePasswordLabelClass}
+                    inputClassName={profilePasswordInputClass}
                   />
                 </div>
 
                 <div>
-                  <label className="block font-sans font-medium text-text mb-2">Confirm New Password</label>
-                  <input
-                    type="password"
+                  <PasswordField
+                    id="confirmNewPassword"
+                    label="Confirm New Password"
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-text/20 font-sans text-text focus:outline-none focus:border-cyan-primary focus:ring-2 focus:ring-cyan-primary/20 transition-all duration-200"
+                    onChange={setConfirmPassword}
                     placeholder="Confirm new password"
+                    labelClassName={profilePasswordLabelClass}
+                    inputClassName={profilePasswordInputClass}
                   />
                 </div>
 

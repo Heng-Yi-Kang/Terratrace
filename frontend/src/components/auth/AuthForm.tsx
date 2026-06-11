@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import PasswordField from '@/components/shared/PasswordField'
 
 interface AuthFormProps {
   mode: 'login' | 'signup'
@@ -102,15 +103,11 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
         </motion.div>
 
         <motion.div variants={fadeInUp}>
-          <label htmlFor="password" className="block text-sm font-medium text-text mb-2">
-            Password
-          </label>
-          <input
+          <PasswordField
             id="password"
-            type="password"
+            label="Password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-text/20 bg-white/80 text-text placeholder-text/40 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-200"
+            onChange={setPassword}
             placeholder="••••••••"
             required
           />
@@ -119,15 +116,11 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
         {mode === 'signup' && (
           <>
             <motion.div variants={fadeInUp}>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-text mb-2">
-                Confirm Password
-              </label>
-              <input
+              <PasswordField
                 id="confirmPassword"
-                type="password"
+                label="Confirm Password"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-text/20 bg-white/80 text-text placeholder-text/40 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-200"
+                onChange={setConfirmPassword}
                 placeholder="••••••••"
                 required
               />

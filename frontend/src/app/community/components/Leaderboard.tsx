@@ -22,7 +22,7 @@ export default function Leaderboard({ leaders }: LeaderboardProps) {
           const isPodium = l.rank <= 3;
           return (
             <div
-              key={l.rank}
+              key={l.id}
               className={`flex items-center gap-3.5 rounded-xl px-3.5 py-3 ${
                 l.you ? 'border border-emerald-200/50 bg-emerald-50/50' : 'border border-transparent'
               }`}

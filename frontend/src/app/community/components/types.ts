@@ -52,6 +52,7 @@ export type EarnedBadge = {
 };
 
 export type Leader = {
+  id: string;
   rank: number;
   name: string;
   points: number;

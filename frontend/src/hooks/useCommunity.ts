@@ -56,6 +56,7 @@ export type CommunityBadge = {
 }
 
 export type CommunityLeader = {
+  id: string
   rank: number
   name: string
   points: number

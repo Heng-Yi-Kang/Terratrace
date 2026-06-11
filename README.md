@@ -115,7 +115,15 @@ docker compose version
    npm install
    ```
 
-5. Start development servers:
+5. Seed the Eco Directory from Supabase:
+
+   ```bash
+   npm run db:seed:locations:from-supabase
+   ```
+
+   This copies hosted Supabase `locations` rows into local Postgres. It requires `NEXT_PUBLIC_SUPABASE_URL` plus either `SUPABASE_SERVICE_ROLE_KEY` or `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in `backend/.env`. The script is safe to rerun because it upserts by `public_id`.
+
+6. Start development servers:
    ```bash
    npm run dev
    ```
@@ -150,6 +158,7 @@ docker compose version
 | `docker compose down` | Stop local Postgres without deleting data |
 | `docker compose down -v` | Stop Postgres and delete the local database volume |
 | `npm run db:apply-schema` | Re-apply `db/init/001_schema.sql` to the running database |
+| `npm run db:seed:locations:from-supabase` | Seed local `locations` from hosted Supabase |
 
 ## Available Scripts
 
@@ -161,14 +170,15 @@ docker compose version
 | `npm run build` | Build both workspaces |
 | `npm run start` | Start backend in production |
 | `npm run lint` | Lint all workspaces |
+| `npm run db:seed:locations:from-supabase` | Import/update Eco Directory locations from Supabase |
 
 ## Environment Variables
 
 | File | Variables |
 |------|-----------|
-| `.env` (root) | `NEXT_PUBLIC_API_BASE_URL`, `JWT_SECRET`, `SESSION_COOKIE_NAME` |
-| `frontend/.env.local` | `NEXT_PUBLIC_API_BASE_URL`, `JWT_SECRET`, `SESSION_COOKIE_NAME` |
-| `backend/.env` | `PORT`, `NODE_ENV`, `CORS_ORIGIN`, `DATABASE_URL`, `JWT_SECRET`, `SESSION_COOKIE_NAME` |
+| `.env` (root) | `NEXT_PUBLIC_API_BASE_URL`, `JWT_SECRET`, `SESSION_COOKIE_NAME`, optional Supabase public values |
+| `frontend/.env.local` | `NEXT_PUBLIC_API_BASE_URL`, `JWT_SECRET`, `SESSION_COOKIE_NAME`, optional Supabase public values |
+| `backend/.env` | `PORT`, `NODE_ENV`, `CORS_ORIGIN`, `DATABASE_URL`, `JWT_SECRET`, `SESSION_COOKIE_NAME`, optional Supabase seed/import values |
 
 ## Local Database
 
@@ -178,7 +188,24 @@ Terratrace now uses plain PostgreSQL, not Supabase at runtime. The Docker Compos
 DATABASE_URL=postgresql://terratrace:terratrace@localhost:5433/terratrace
 ```
 
-To import once from hosted Supabase, provide `SUPABASE_DATABASE_URL` and run:
+For first-time Eco Directory content, seed `locations` from hosted Supabase:
+
+```bash
+npm run db:seed:locations:from-supabase
+```
+
+Required `backend/.env` values:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_publishable_key
+# Recommended if table policies block anonymous reads:
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
+
+The locations seed imports only the directory rows and is idempotent.
+
+To perform a broader one-time migration from hosted Supabase, provide `SUPABASE_DATABASE_URL` and run:
 
 ```bash
 bash db/migrate-from-supabase.sh

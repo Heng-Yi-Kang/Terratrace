@@ -11,6 +11,7 @@
     "dev:frontend": "bash -lc 'set -a; [ -f backend/.env ] && . backend/.env; [ -f .env ] && . .env; set +a; npm run dev --workspace=frontend'",
     "dev:backend": "npm run dev --workspace=backend",
     "db:apply-schema": "docker exec -i terratrace-postgres psql -U terratrace -d terratrace -v ON_ERROR_STOP=1 < db/init/001_schema.sql",
+    "db:seed:locations:from-supabase": "npm run seed:locations:from-supabase --workspace=backend",
     "build": "npm run build --workspace=frontend && npm run build --workspace=backend",
     "start": "npm run start --workspace=backend",
     "lint": "npm run lint --workspaces --if-present"
