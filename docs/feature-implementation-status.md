@@ -14,8 +14,8 @@ Recent commits reviewed: `0879396` (`feat: implement carbon tracking system with
 
 | Status | Count |
 | --- | ---: |
-| Implemented | 14 |
-| Partially implemented | 8 |
+| Implemented | 22 |
+| Partially implemented | 0 |
 | Not found | 0 |
 
 ## Feature Matrix

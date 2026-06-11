@@ -49,6 +49,17 @@ Suite: `auth and profile integration`
 | `IT-PROFILE-003 clears the session cookie on logout` | Logout API cookie clearing. |
 | `IT-PROFILE-004 deletes the account row and rejects the old session afterward` | Account deletion and stale session rejection. |
 
+### `backend/src/routes/eco-directory.integration.test.ts`
+
+Suite: `eco-friendly directory integration`
+
+| Test | Coverage |
+| --- | --- |
+| `IT-DIR-001 lists sustainable directory locations from PostgreSQL through the API` | Locations API list endpoint, PostgreSQL seeded location rows, and public place mapping. |
+| `IT-DIR-002 applies geo-specific search filters and exposes city options` | Query, city, category filtering, invalid category rejection, and cities endpoint. |
+| `IT-DIR-003 returns detail and same-category recommendation data for place pages` | Location detail lookup, missing public ID handling, and same-category recommendation endpoint. |
+| `IT-DIR-004 persists authenticated favourites and returns mapped saved places` | Signup session cookie, favourites create/list/delete APIs, duplicate handling, and `user_favourites` persistence. |
+
 ## Frontend Tests
 
 ### `frontend/src/utils/locationFilters.test.ts`
@@ -136,6 +147,14 @@ Suite: `ProfileTab`
 | `shows password change errors from the API` | Password change API error display. |
 | `keeps delete disabled until DELETE is confirmed` | Delete confirmation guard. |
 
+### `frontend/src/components/dashboard/UserSidebar.test.tsx`
+
+Suite: `UserSidebar`
+
+| Test | Coverage |
+| --- | --- |
+| `signs out and redirects to login when Sign Out is clicked` | Logout sidebar click calls the auth helper, redirects to `/login`, and refreshes the router. |
+
 ### `frontend/src/hooks/useFavourites.test.tsx`
 
 Suite: `useFavourites Hooks`
@@ -179,6 +198,18 @@ Suite: `useCommunity hooks`
 | `creates a review and invalidates review/challenge data` | Review creation and cache invalidation. |
 | `toggles helpful votes` | Helpful vote mutation behavior. |
 | `joins challenges and updates progress` | Challenge join and progress update behavior. |
+
+### `frontend/src/app/dashboard/analytics/page.test.tsx`
+
+Suite: `analytics dashboard page`
+
+| Test | Coverage |
+| --- | --- |
+| `renders empty states and disables report buttons when there are no records` | Empty analytics state and disabled PDF controls. |
+| `renders real impact metrics, breakdown rows, and detailed entries` | Personal impact dashboard metrics, category comparison, and calculation log rendering. |
+| `generates a monthly PDF from current-month data when records exist` | Monthly sustainability report generation through mocked `jsPDF`. |
+| `shows the no-goal setup form and saves a new annual goal` | Carbon budget goal setup form and `PUT /api/analytics/goal` request. |
+| `renders saved-goal progress and alert state` | Saved annual budget progress display and high-usage alert state. |
 
 ## Related Test Documentation
 

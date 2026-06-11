@@ -44,10 +44,13 @@ function parseLegacyDateRange(dates: string): { startDate: string; endDate: stri
   const [, startMonth, startDay, maybeEndMonth, endDay, yearValue] = match
   const year = Number(yearValue || currentYear)
   const endMonth = maybeEndMonth || startMonth
-  const start = new Date(`${startMonth} ${startDay}, ${year}`)
-  const end = new Date(`${endMonth} ${endDay}, ${year}`)
+  const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+  const startMonthIndex = months.indexOf(startMonth.toLowerCase())
+  const endMonthIndex = months.indexOf(endMonth.toLowerCase())
+  const start = new Date(Date.UTC(year, startMonthIndex, Number(startDay)))
+  const end = new Date(Date.UTC(year, endMonthIndex, Number(endDay)))
 
-  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+  if (startMonthIndex === -1 || endMonthIndex === -1 || Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
     const today = new Date().toISOString().slice(0, 10)
     return { startDate: today, endDate: today }
   }

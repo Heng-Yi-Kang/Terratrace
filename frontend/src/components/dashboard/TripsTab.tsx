@@ -627,7 +627,7 @@ export default function TripsTab() {
 
                 <div className="mt-4 space-y-3">
                   {form.items.map((item, index) => (
-                    <div key={`${index}-${item.id || item.title}`} className="rounded-xl border border-text/10 bg-white p-4">
+                    <div key={item.id || `new-item-${index}`} className="rounded-xl border border-text/10 bg-white p-4">
                       <div className="grid md:grid-cols-[1fr_150px_150px_auto] gap-3">
                         <input
                           value={item.title}
