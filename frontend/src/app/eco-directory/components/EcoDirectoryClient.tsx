@@ -1,10 +1,12 @@
 "use client"
-import { useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import SearchBar from "./SearchBar"
 import PlaceCard from "./PlaceCard"
 import CountCard from "./CountCard"
 import { SVGProps } from "react"
-import { useLocations } from "@/hooks/useLocations"
+import { useLocationCities, useLocations } from "@/hooks/useLocations"
+import { LocationCategory, LocationFilters } from "@/utils/locationFilters"
 
 const HotelIcon = (props: SVGProps<SVGSVGElement>) => {
     return (
@@ -44,9 +46,29 @@ const TransportIcon = (props: SVGProps<SVGSVGElement>) => {
     )
 }
 
-export default function EcoDirectoryClient() {
-    const { data: places = [], isLoading, error } = useLocations()
-    const [query, setQuery] = useState('')
+type CategoryFilter = 'all' | LocationCategory
+
+type Props = {
+    initialFilters?: LocationFilters
+}
+
+function readCategory(value: string | null): CategoryFilter {
+    return value === 'Accommodation' || value === 'Dining' || value === 'Transport' ? value : 'all'
+}
+
+export default function EcoDirectoryClient({ initialFilters = {} }: Props) {
+    const router = useRouter()
+    const pathname = usePathname()
+    const searchParams = useSearchParams()
+    const query = searchParams.get('q') ?? initialFilters.q ?? ''
+    const city = searchParams.get('city') ?? initialFilters.city ?? ''
+    const category = readCategory(searchParams.get('category') ?? String(initialFilters.category ?? 'all'))
+    const locationFilters = useMemo(
+        () => ({ q: query, city, category }),
+        [query, city, category],
+    )
+    const { data: places = [], isLoading, error } = useLocations(locationFilters)
+    const { data: cities = [] } = useLocationCities()
     const [page, setPage] = useState(0)
     const catalogRef = useRef<HTMLDivElement>(null)
     const itemsPerPage = 8
@@ -63,25 +85,14 @@ export default function EcoDirectoryClient() {
         place.category === "Transport"
     ).length
 
-    const filteredPlaces = useMemo(() => {
-        const search = query.trim().toLowerCase()
-        if (!search) return places
-
-        return places.filter((place) => {
-            const searchable = [
-                place.name,
-                place.city ?? "",
-                place.category,
-                ...place.ecoCerts,
-            ]
-            return searchable.some((v) => v.toLowerCase().includes(search))
-        })
-    }, [places, query])
+    useEffect(() => {
+        setPage(0)
+    }, [query, city, category])
 
     const paginatedPlaces = useMemo(() => {
         const startingPlace = page * itemsPerPage
-        return filteredPlaces.slice(startingPlace, startingPlace + itemsPerPage)
-    }, [filteredPlaces, page])
+        return places.slice(startingPlace, startingPlace + itemsPerPage)
+    }, [places, page])
 
     if (isLoading) {
         return (
@@ -101,7 +112,22 @@ export default function EcoDirectoryClient() {
         )
     }
 
-    const totalPages = Math.ceil(filteredPlaces.length / itemsPerPage)
+    const totalPages = Math.ceil(places.length / itemsPerPage)
+
+    const updateFilters = (next: Partial<Record<'q' | 'city' | 'category', string>>) => {
+        const params = new URLSearchParams(searchParams.toString())
+
+        Object.entries(next).forEach(([key, value]) => {
+            if (value && value !== 'all') {
+                params.set(key, value)
+            } else {
+                params.delete(key)
+            }
+        })
+
+        const nextUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname
+        router.replace(nextUrl, { scroll: false })
+    }
 
     const scrollToCatalog = () => {
         catalogRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -113,12 +139,33 @@ export default function EcoDirectoryClient() {
     }
 
     const handleSearch = (searchQuery: string) => {
-        setQuery(searchQuery)
-        setPage(0)
+        updateFilters({ q: searchQuery })
         setTimeout(() => {
             scrollToCatalog()
         }, 0)
     }
+
+    const handleCityChange = (nextCity: string) => {
+        updateFilters({ city: nextCity })
+    }
+
+    const handleCategoryChange = (nextCategory: CategoryFilter) => {
+        updateFilters({ category: nextCategory })
+    }
+
+    const handleClearFilters = () => {
+        router.replace(pathname, { scroll: false })
+        setTimeout(scrollToCatalog, 0)
+    }
+
+    const categories: { id: CategoryFilter; label: string }[] = [
+        { id: 'all', label: 'All Places' },
+        { id: 'Accommodation', label: 'Accommodation' },
+        { id: 'Dining', label: 'Dining' },
+        { id: 'Transport', label: 'Transport' },
+    ]
+
+    const hasActiveFilters = Boolean(query || city || category !== 'all')
 
     return (
         <main className="min-h-screen">
@@ -129,7 +176,48 @@ export default function EcoDirectoryClient() {
                 <div className="relative z-10 mx-auto w-full max-w-4xl">
                     <h1 className="font-heading font-bold text-3xl md:text-4xl lg:text-5xl text-center text-text">Let&apos;s find our</h1>
                     <h1 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl text-center text-primary mt-2 mb-10">Next Destination.</h1>
-                    <SearchBar value={query} onChange={setQuery} onSubmit={handleSearch} />
+                    <SearchBar value={query} onSubmit={handleSearch} placeholder="Search by name, city, category, or certification" />
+
+                    <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
+                        <label className="sr-only" htmlFor="eco-directory-city">City or town</label>
+                        <select
+                            id="eco-directory-city"
+                            value={city}
+                            onChange={(event) => handleCityChange(event.target.value)}
+                            className="min-h-12 w-full rounded-full border border-primary/30 bg-white px-5 py-3 font-heading text-[#164E63] shadow-sm outline-none transition-all duration-200 focus:border-[#0891B2] focus:ring-2 focus:ring-[#22D3EE]/40"
+                        >
+                            <option value="">All cities and towns</option>
+                            {cities.map((cityName) => (
+                                <option key={cityName} value={cityName}>{cityName}</option>
+                            ))}
+                        </select>
+                        {hasActiveFilters && (
+                            <button
+                                type="button"
+                                onClick={handleClearFilters}
+                                className="min-h-12 rounded-full border border-secondary/40 bg-white px-5 py-3 font-heading font-semibold text-[#164E63] shadow-sm transition-colors duration-200 hover:bg-[#ECFEFF]"
+                            >
+                                Clear filters
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap justify-center gap-2">
+                        {categories.map((cat) => (
+                            <button
+                                key={cat.id}
+                                type="button"
+                                onClick={() => handleCategoryChange(cat.id)}
+                                className={`rounded-full px-4 py-2 font-heading text-sm font-semibold transition-all duration-200 ${
+                                    category === cat.id
+                                        ? 'bg-primary text-white shadow-sm'
+                                        : 'bg-white text-[#164E63]/75 border border-primary/20 hover:text-[#164E63]'
+                                }`}
+                            >
+                                {cat.label}
+                            </button>
+                        ))}
+                    </div>
 
                     <div className="grid gap-3 lg:grid-cols-3 sm:grid-cols-1  mt-10 w-11/12 mx-auto">
                         <CountCard Icon={HotelIcon} count={accommodationCount} name="Accommodations" />
@@ -155,6 +243,22 @@ export default function EcoDirectoryClient() {
                             <PlaceCard key={place.id} place={place} />
                         ))}
                     </div>
+
+                    {paginatedPlaces.length === 0 && (
+                        <div className="rounded-2xl border border-secondary/20 bg-white/70 p-10 text-center shadow-sm">
+                            <h3 className="font-heading text-xl font-bold text-text">No eco destinations found</h3>
+                            <p className="mt-2 text-text/70">Try another city, category, or search term.</p>
+                            {hasActiveFilters && (
+                                <button
+                                    type="button"
+                                    onClick={handleClearFilters}
+                                    className="mt-5 rounded-full bg-primary px-5 py-3 font-heading font-semibold text-white transition-colors duration-200 hover:bg-primary/90"
+                                >
+                                    Clear filters
+                                </button>
+                            )}
+                        </div>
+                    )}
 
                     {totalPages > 1 && (
                         <div className="flex justify-center gap-2 mt-8">

@@ -3,6 +3,8 @@ import { query } from '../utils/db'
 
 const router = Router()
 
+const VALID_CATEGORIES = new Set(['accommodation', 'dining', 'transport'])
+
 export interface DatabaseLocation {
   id: string | number
   name?: string | null
@@ -59,14 +61,68 @@ export const mapDbLocationToPlace = (row: DatabaseLocation) => {
 }
 
 // GET /api/locations
-// Fetch all locations
-router.get('/', async (_req: Request, res: Response) => {
+// Fetch locations, optionally filtered by text query, city, and category.
+router.get('/', async (req: Request, res: Response) => {
   try {
-    const { rows } = await query<DatabaseLocation>('select * from locations order by name asc')
+    const search = typeof req.query.q === 'string' ? req.query.q.trim() : ''
+    const city = typeof req.query.city === 'string' ? req.query.city.trim() : ''
+    const category = typeof req.query.category === 'string' ? req.query.category.trim().toLowerCase() : ''
+
+    if (category && !VALID_CATEGORIES.has(category)) {
+      return res.status(400).json({ error: 'Category must be Accommodation, Dining, or Transport.' })
+    }
+
+    const conditions: string[] = []
+    const values: unknown[] = []
+
+    if (search) {
+      values.push(`%${search.toLowerCase()}%`)
+      const param = `$${values.length}`
+      conditions.push(`(
+        lower(coalesce(name, '')) like ${param}
+        or lower(coalesce(city, '')) like ${param}
+        or lower(coalesce(category, '')) like ${param}
+        or exists (
+          select 1
+          from unnest(coalesce(eco_certs, '{}') || coalesce(eco_tags, '{}')) as tag
+          where lower(tag) like ${param}
+        )
+      )`)
+    }
+
+    if (city) {
+      values.push(city.toLowerCase())
+      conditions.push(`lower(city) = $${values.length}`)
+    }
+
+    if (category) {
+      values.push(category)
+      conditions.push(`lower(category) = $${values.length}`)
+    }
+
+    const whereClause = conditions.length > 0 ? ` where ${conditions.join(' and ')}` : ''
+    const { rows } = await query<DatabaseLocation>(`select * from locations${whereClause} order by name asc`, values)
     const places = rows.map(mapDbLocationToPlace)
     return res.status(200).json(places)
   } catch (error) {
     console.error('Unexpected error in locations route:', error)
+    return res.status(500).json({ error: 'An unexpected error occurred.' })
+  }
+})
+
+// GET /api/locations/cities
+// Fetch known cities for geo-specific directory filtering.
+router.get('/cities', async (_req: Request, res: Response) => {
+  try {
+    const { rows } = await query<{ city: string }>(
+      `select distinct city
+       from locations
+       where city is not null and btrim(city) <> ''
+       order by city asc`,
+    )
+    return res.status(200).json(rows.map((row) => row.city))
+  } catch (error) {
+    console.error('Unexpected error in location cities route:', error)
     return res.status(500).json({ error: 'An unexpected error occurred.' })
   }
 })

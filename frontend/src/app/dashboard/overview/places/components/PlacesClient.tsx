@@ -1,17 +1,36 @@
 "use client"
 
-import { useMemo, useState } from "react"
-import { useLocations } from "@/hooks/useLocations"
+import { useEffect, useMemo, useState } from "react"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useLocationCities, useLocations } from "@/hooks/useLocations"
 import StatCard from "@/components/dashboard/StatCard"
 import PlaceCard from "./PlaceCard"
 import { Home, Utensils, Bike, Search, X, ChevronLeft, ChevronRight } from "lucide-react"
+import { LocationCategory, LocationFilters } from "@/utils/locationFilters"
 
-type CategoryFilter = 'all' | 'Accommodation' | 'Dining' | 'Transport'
+type CategoryFilter = 'all' | LocationCategory
 
-export default function PlacesClient() {
-    const { data: places = [], isLoading, error } = useLocations()
-    const [query, setQuery] = useState('')
-    const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all')
+type Props = {
+    initialFilters?: LocationFilters
+}
+
+function readCategory(value: string | null): CategoryFilter {
+    return value === 'Accommodation' || value === 'Dining' || value === 'Transport' ? value : 'all'
+}
+
+export default function PlacesClient({ initialFilters = {} }: Props) {
+    const router = useRouter()
+    const pathname = usePathname()
+    const searchParams = useSearchParams()
+    const query = searchParams.get('q') ?? initialFilters.q ?? ''
+    const city = searchParams.get('city') ?? initialFilters.city ?? ''
+    const categoryFilter = readCategory(searchParams.get('category') ?? String(initialFilters.category ?? 'all'))
+    const filters = useMemo(
+        () => ({ q: query, city, category: categoryFilter }),
+        [query, city, categoryFilter],
+    )
+    const { data: places = [], isLoading, error } = useLocations(filters)
+    const { data: cities = [] } = useLocationCities()
     const [page, setPage] = useState(0)
     const itemsPerPage = 8
 
@@ -28,48 +47,47 @@ export default function PlacesClient() {
         places.filter(p => p.category === "Transport").length, 
     [places])
 
-    // Filter places based on search query and category tab
-    const filteredPlaces = useMemo(() => {
-        let results = places
-
-        // 1. Category Filter
-        if (categoryFilter !== 'all') {
-            results = results.filter(p => p.category === categoryFilter)
-        }
-
-        // 2. Search Query
-        const search = query.trim().toLowerCase()
-        if (search) {
-            results = results.filter(place => {
-                const searchable = [
-                    place.name,
-                    place.city ?? "",
-                    place.category,
-                    ...(place.ecoCerts ?? [])
-                ]
-                return searchable.some(v => v.toLowerCase().includes(search))
-            })
-        }
-
-        return results
-    }, [places, categoryFilter, query])
+    useEffect(() => {
+        setPage(0)
+    }, [query, city, categoryFilter])
 
     // Paginate filtered results
     const paginatedPlaces = useMemo(() => {
         const startingPlace = page * itemsPerPage
-        return filteredPlaces.slice(startingPlace, startingPlace + itemsPerPage)
-    }, [filteredPlaces, page])
+        return places.slice(startingPlace, startingPlace + itemsPerPage)
+    }, [places, page])
 
-    const totalPages = Math.ceil(filteredPlaces.length / itemsPerPage)
+    const totalPages = Math.ceil(places.length / itemsPerPage)
+
+    const updateFilters = (next: Partial<Record<'q' | 'city' | 'category', string>>) => {
+        const params = new URLSearchParams(searchParams.toString())
+
+        Object.entries(next).forEach(([key, value]) => {
+            if (value && value !== 'all') {
+                params.set(key, value)
+            } else {
+                params.delete(key)
+            }
+        })
+
+        const nextUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname
+        router.replace(nextUrl, { scroll: false })
+    }
 
     const handleCategoryChange = (cat: CategoryFilter) => {
-        setCategoryFilter(cat)
-        setPage(0)
+        updateFilters({ category: cat })
     }
 
     const handleSearchChange = (val: string) => {
-        setQuery(val)
-        setPage(0)
+        updateFilters({ q: val })
+    }
+
+    const handleCityChange = (val: string) => {
+        updateFilters({ city: val })
+    }
+
+    const handleClearFilters = () => {
+        router.replace(pathname, { scroll: false })
     }
 
     const handlePageChange = (nextPage: number) => {
@@ -104,6 +122,8 @@ export default function PlacesClient() {
         { id: 'Transport', label: 'Transport', count: transportCount },
     ]
 
+    const hasActiveFilters = Boolean(query || city || categoryFilter !== 'all')
+
     return (
         <div className="space-y-8">
             {/* Header */}
@@ -137,21 +157,45 @@ export default function PlacesClient() {
             {/* Search and Filters Layout (Stacked for SaaS consistency) */}
             <div className="space-y-4 bg-white/40 backdrop-blur-md rounded-organic p-5 border border-cyan-700/5 shadow-sm">
                 {/* Search Bar Input */}
-                <div className="relative">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text/40" />
-                    <input
-                        type="text"
-                        value={query}
-                        onChange={(e) => handleSearchChange(e.target.value)}
-                        placeholder="Search by name, city, certification..."
-                        className="w-full pl-12 pr-12 py-3 rounded-xl border border-cyan-700/10 bg-white/90 text-text placeholder-text/40 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 transition-all font-sans"
-                    />
-                    {query && (
+                <div className="grid gap-3 lg:grid-cols-[1fr_16rem_auto]">
+                    <div className="relative">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text/40" />
+                        <input
+                            type="text"
+                            value={query}
+                            onChange={(e) => handleSearchChange(e.target.value)}
+                            placeholder="Search by name, city, certification..."
+                            className="w-full pl-12 pr-12 py-3 rounded-xl border border-cyan-700/10 bg-white/90 text-text placeholder-text/40 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 transition-all font-sans"
+                        />
+                        {query && (
+                            <button
+                                type="button"
+                                onClick={() => handleSearchChange('')}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-black/5 rounded-full text-text/40 hover:text-text cursor-pointer transition-colors"
+                                aria-label="Clear search"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        )}
+                    </div>
+                    <select
+                        value={city}
+                        onChange={(event) => handleCityChange(event.target.value)}
+                        className="w-full rounded-xl border border-cyan-700/10 bg-white/90 px-4 py-3 font-sans text-text outline-none transition-all focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50"
+                        aria-label="Filter by city or town"
+                    >
+                        <option value="">All cities and towns</option>
+                        {cities.map((cityName) => (
+                            <option key={cityName} value={cityName}>{cityName}</option>
+                        ))}
+                    </select>
+                    {hasActiveFilters && (
                         <button
-                            onClick={() => handleSearchChange('')}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-black/5 rounded-full text-text/40 hover:text-text cursor-pointer transition-colors"
+                            type="button"
+                            onClick={handleClearFilters}
+                            className="rounded-xl border border-cyan-700/10 bg-white/90 px-4 py-3 font-sans text-sm font-semibold text-text/70 transition-colors hover:text-text"
                         >
-                            <X className="w-4 h-4" />
+                            Clear
                         </button>
                     )}
                 </div>
@@ -186,6 +230,15 @@ export default function PlacesClient() {
                     <Search className="w-12 h-12 mx-auto text-text/20 mb-3" />
                     <h3 className="font-sans font-semibold text-lg text-text">No places match your search</h3>
                     <p className="font-sans text-text/60 mt-1">Try tweaking your query or switching categories.</p>
+                    {hasActiveFilters && (
+                        <button
+                            type="button"
+                            onClick={handleClearFilters}
+                            className="mt-5 rounded-xl bg-primary px-4 py-2 font-sans text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+                        >
+                            Clear filters
+                        </button>
+                    )}
                 </div>
             )}
 
