@@ -90,6 +90,7 @@ create table if not exists trips (
 create table if not exists trip_items (
   id uuid primary key default gen_random_uuid(),
   trip_id uuid not null references trips(id) on delete cascade,
+  location_id uuid references locations(id) on delete set null,
   trip_date date not null,
   day_part text not null default 'flexible' check (day_part in ('morning', 'afternoon', 'evening', 'flexible')),
   title text not null,
@@ -101,6 +102,23 @@ create table if not exists trip_items (
   sort_order integer not null default 0,
   created_at timestamptz not null default now()
 );
+
+alter table trip_items
+  add column if not exists location_id uuid;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'trip_items_location_id_fkey'
+      and conrelid = 'trip_items'::regclass
+  ) then
+    alter table trip_items
+      add constraint trip_items_location_id_fkey
+      foreign key (location_id) references locations(id) on delete set null;
+  end if;
+end $$;
 
 create table if not exists community_reviews (
   id uuid primary key default gen_random_uuid(),
@@ -179,6 +197,7 @@ create index if not exists carbon_entries_user_created_idx on carbon_entries (us
 create index if not exists todos_user_inserted_idx on todos (user_id, inserted_at desc);
 create index if not exists trips_user_start_idx on trips (user_id, start_date desc);
 create index if not exists trip_items_trip_sort_idx on trip_items (trip_id, trip_date, sort_order);
+create index if not exists trip_items_location_id_idx on trip_items (location_id);
 create index if not exists community_reviews_created_idx on community_reviews (created_at desc);
 create index if not exists community_reviews_category_idx on community_reviews (lower(category));
 create index if not exists community_reviews_user_idx on community_reviews (user_id, created_at desc);

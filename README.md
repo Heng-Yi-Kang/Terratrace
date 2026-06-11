@@ -5,14 +5,15 @@ An eco-friendly travel planning application that helps users plan sustainable jo
 ## Tech Stack
 
 ### Frontend
-- **Next.js 14** (App Router)
-- **React 18**
+- **Next.js 15** (App Router)
+- **React 19**
 - **TypeScript**
 - **Tailwind CSS**
-- **Supabase** for authentication and database
+- **JWT session cookies** for authentication state
 
 ### Backend
 - **Express.js** (TypeScript)
+- **PostgreSQL** for application data
 - **CORS** enabled
 - **dotenv** for environment variables
 
@@ -34,7 +35,7 @@ terratrace/
 │   ├── src/
 │   │   ├── app/             # App Router pages and layouts
 │   │   ├── components/      # React components
-│   │   ├── utils/           # Utility functions (Supabase clients, helpers)
+│   │   ├── utils/           # Utility functions and API helpers
 │   │   └── middleware.ts    # Route protection middleware
 │   └── public/              # Static assets
 ├── backend/                 # Express.js API server
@@ -50,7 +51,7 @@ terratrace/
 
 Terratrace uses a minimal, lightweight state management approach:
 
-- **Supabase** as the primary source of truth for auth and data
+- **PostgreSQL-backed API data** as the primary source of truth
 - **Local React state** (`useState`, `useEffect`) for UI state
 - **Middleware** for route protection and auth guards
 - **No Redux, Zustand, or Context API** — see [`docs/state-management.md`](docs/state-management.md) for details
@@ -61,41 +62,94 @@ Terratrace uses a minimal, lightweight state management approach:
 
 - Node.js 18+
 - npm 9+
+- Docker Desktop on Windows/macOS, or Docker Engine with the Compose plugin on Linux
+- Git for Windows or WSL on Windows if you want to use the root `npm run dev` script, because it invokes `bash`
 
-### Installation
+Verify the tools are available:
 
-1. Copy environment files:
+```bash
+node --version
+npm --version
+docker --version
+docker compose version
+```
+
+### Installation and Local Setup
+
+1. Copy environment files.
+
+   macOS/Linux:
+
    ```bash
    cp .env.example .env
    cp backend/.env.example backend/.env
    cp frontend/.env.example frontend/.env.local
    ```
 
-2. Install dependencies:
-   ```bash
-   npm install
+   Windows PowerShell:
+
+   ```powershell
+   Copy-Item .env.example .env
+   Copy-Item backend/.env.example backend/.env
+   Copy-Item frontend/.env.example frontend/.env.local
    ```
 
-3. Start development servers:
-   ```bash
-   npm run dev
+2. Update `backend/.env` so Docker Postgres uses the exposed host port:
+
+   ```env
+   DATABASE_URL=postgresql://terratrace:terratrace@localhost:5433/terratrace
    ```
 
-   Start local Postgres first:
+   Keep `JWT_SECRET` and `SESSION_COOKIE_NAME` the same in `.env`, `backend/.env`, and `frontend/.env.local`.
+
+3. Start local Postgres with Docker:
 
    ```bash
    docker compose up -d postgres
    ```
 
-   Then start the app:
+   The first startup creates the `terratrace` database and runs SQL files from `db/init`.
 
+4. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+5. Start development servers:
    ```bash
    npm run dev
+   ```
+
+   On Windows without `bash`, open two PowerShell terminals instead:
+
+   ```powershell
+   npm run dev --workspace=backend
+   ```
+
+   ```powershell
+   npm run dev --workspace=frontend
    ```
 
    This starts both:
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:3001
+
+### Platform Notes
+
+- **Windows**: Run the commands in PowerShell from the repository root. Docker Desktop must be running before `docker compose up -d postgres`. If `npm run dev` fails because `bash` is missing, use Git Bash, WSL, or the two-terminal workspace commands above.
+- **macOS**: Docker Desktop must be running before starting Postgres.
+- **Linux**: Start Docker first, for example `sudo systemctl start docker`. If your user is not in the `docker` group, run Docker commands with `sudo` or configure Docker permissions.
+
+### Database Commands
+
+| Command | Description |
+|---------|-------------|
+| `docker compose up -d postgres` | Start local Postgres |
+| `docker compose ps` | Check container status |
+| `docker compose logs postgres` | View Postgres logs |
+| `docker compose down` | Stop local Postgres without deleting data |
+| `docker compose down -v` | Stop Postgres and delete the local database volume |
+| `npm run db:apply-schema` | Re-apply `db/init/001_schema.sql` to the running database |
 
 ## Available Scripts
 

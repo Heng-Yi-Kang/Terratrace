@@ -34,6 +34,7 @@ export interface SavedTripFromRecommendation {
 export interface TripItem {
   id?: string
   tripId?: string
+  locationId?: string | null
   tripDate: string
   dayPart: DayPart
   title: string
@@ -43,6 +44,12 @@ export interface TripItem {
   weatherAlternative?: string | null
   communityImpact?: string | null
   sortOrder: number
+  place?: {
+    publicId: string
+    name?: string | null
+    category?: string | null
+    city?: string | null
+  } | null
 }
 
 export interface Trip {

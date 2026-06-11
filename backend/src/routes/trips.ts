@@ -16,6 +16,7 @@ const validSources: TripSource[] = ['manual', 'recommendation', 'local-import']
 type QueryRunner = (text: string, params?: unknown[]) => Promise<any>
 
 type TripItemInput = {
+  locationId?: string | null
   tripDate?: string
   dayPart?: DayPart
   title?: string
@@ -63,6 +64,17 @@ const normalizeNumber = (value: unknown, fallback: number | null = null) => {
   return Number.isFinite(number) ? number : fallback
 }
 
+const isUuid = (value: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+
+const normalizeLocationId = (value: unknown) => {
+  if (value === null || value === undefined || value === '') return null
+  const locationId = normalizeText(value)
+  if (!isUuid(locationId)) {
+    throw new Error('Each linked itinerary item needs a valid locationId')
+  }
+  return locationId
+}
+
 const normalizeItems = (rawItems: unknown, startDate: string, endDate: string): TripItemInput[] => {
   if (!Array.isArray(rawItems)) return []
 
@@ -79,6 +91,7 @@ const normalizeItems = (rawItems: unknown, startDate: string, endDate: string): 
     }
 
     return {
+      locationId: normalizeLocationId(input.locationId),
       tripDate,
       dayPart,
       title,
@@ -136,6 +149,7 @@ const mapTripRows = (rows: any[]) => {
       trips.get(row.id).items.push({
         id: row.item_id,
         tripId: row.id,
+        locationId: row.location_id,
         tripDate: row.trip_date,
         dayPart: row.day_part,
         title: row.item_title,
@@ -145,6 +159,12 @@ const mapTripRows = (rows: any[]) => {
         weatherAlternative: row.weather_alternative,
         communityImpact: row.community_impact,
         sortOrder: row.sort_order,
+        place: row.location_public_id ? {
+          publicId: row.location_public_id,
+          name: row.location_name,
+          category: row.location_category,
+          city: row.location_city,
+        } : null,
       })
     }
   }
@@ -172,6 +192,7 @@ const fetchTrips = async (userId: string, tripId?: string) => {
        t.created_at,
        t.updated_at,
        i.id as item_id,
+       i.location_id,
        i.trip_date::text,
        i.day_part,
        i.title as item_title,
@@ -180,9 +201,14 @@ const fetchTrips = async (userId: string, tripId?: string) => {
        i.rationale,
        i.weather_alternative,
        i.community_impact,
-       i.sort_order
+       i.sort_order,
+       l.public_id as location_public_id,
+       l.name as location_name,
+       l.category as location_category,
+       l.city as location_city
      from trips t
      left join trip_items i on i.trip_id = t.id
+     left join locations l on l.id = i.location_id
      where t.user_id = $1 ${filter}
      order by t.start_date desc, t.created_at desc, i.trip_date asc, i.sort_order asc`,
     params,
@@ -220,9 +246,17 @@ const replaceTripItems = async (tripId: string, items: TripItemInput[], run: Que
   await run('delete from trip_items where trip_id = $1', [tripId])
 
   for (const item of items) {
+    if (item.locationId) {
+      const { rows } = await run('select id from locations where id = $1 limit 1', [item.locationId])
+      if (!rows[0]) {
+        throw new Error('Each linked itinerary item needs a valid locationId')
+      }
+    }
+
     await run(
       `insert into trip_items (
          trip_id,
+         location_id,
          trip_date,
          day_part,
          title,
@@ -233,9 +267,10 @@ const replaceTripItems = async (tripId: string, items: TripItemInput[], run: Que
          community_impact,
          sort_order
        )
-       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
       [
         tripId,
+        item.locationId,
         item.tripDate,
         item.dayPart,
         item.title,

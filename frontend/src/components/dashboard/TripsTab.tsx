@@ -1,8 +1,11 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { CalendarDays, Edit3, Plus, Save, Trash2, X } from 'lucide-react'
+import Link from 'next/link'
+import { CalendarDays, Edit3, ExternalLink, MapPin, Plus, Save, Search, Trash2, X } from 'lucide-react'
 import SmartRecommendationSection from '@/components/smart-recommendation-section'
+import { useFavourites } from '@/hooks/useFavourites'
+import { Place, useLocations } from '@/hooks/useLocations'
 import {
   useCreateTrip,
   useDeleteTrip,
@@ -28,6 +31,14 @@ type TripForm = {
 const dayParts: DayPart[] = ['morning', 'afternoon', 'evening', 'flexible']
 
 const today = () => new Date().toISOString().slice(0, 10)
+
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
 
 const emptyForm = (): TripForm => {
   const date = today()
@@ -98,11 +109,17 @@ function normalizeForm(form: TripForm, source: TripPayload['source'] = 'manual')
     items: form.items
       .filter((item) => item.title.trim())
       .map((item, index) => ({
-        ...item,
+        id: item.id,
+        tripId: item.tripId,
+        locationId: item.locationId ?? null,
         tripDate: item.tripDate || form.startDate,
+        dayPart: item.dayPart,
         title: item.title.trim(),
         category: item.category.trim() || 'activity',
         estimatedCost: item.estimatedCost === undefined || item.estimatedCost === null ? null : Number(item.estimatedCost),
+        rationale: item.rationale,
+        weatherAlternative: item.weatherAlternative,
+        communityImpact: item.communityImpact,
         sortOrder: index,
       })),
   }
@@ -118,6 +135,12 @@ export default function TripsTab() {
   useImportLocalTrips()
 
   const { data: trips = [], isLoading, isError, error } = useTrips()
+  const { data: savedPlaces = [], isLoading: savedPlacesLoading } = useFavourites()
+  const [placePickerMode, setPlacePickerMode] = useState<'saved' | 'search'>('saved')
+  const [placeSearch, setPlaceSearch] = useState('')
+  const { data: directoryPlaces = [], isLoading: directoryPlacesLoading } = useLocations(
+    placePickerMode === 'search' ? { q: placeSearch } : {},
+  )
   const createTrip = useCreateTrip()
   const updateTrip = useUpdateTrip()
   const deleteTrip = useDeleteTrip()
@@ -127,6 +150,8 @@ export default function TripsTab() {
   const [editingTripId, setEditingTripId] = useState<string | null>(null)
   const [form, setForm] = useState<TripForm>(emptyForm)
   const [formError, setFormError] = useState('')
+  const [placePickerDate, setPlacePickerDate] = useState(form.startDate)
+  const [placePickerDayPart, setPlacePickerDayPart] = useState<DayPart>('flexible')
 
   const filteredTrips = trips.filter((trip) => {
     if (statusFilter !== 'all' && trip.status !== statusFilter) return false
@@ -149,16 +174,22 @@ export default function TripsTab() {
   }, [trips])
 
   const startCreate = () => {
+    const nextForm = emptyForm()
     setEditingTripId('new')
     setSelectedTripId(null)
-    setForm(emptyForm())
+    setForm(nextForm)
+    setPlacePickerDate(nextForm.startDate)
+    setPlacePickerDayPart('flexible')
     setFormError('')
   }
 
   const startEdit = (trip: Trip) => {
+    const nextForm = formFromTrip(trip)
     setEditingTripId(trip.id)
     setSelectedTripId(trip.id)
-    setForm(formFromTrip(trip))
+    setForm(nextForm)
+    setPlacePickerDate(nextForm.startDate)
+    setPlacePickerDayPart('flexible')
     setFormError('')
   }
 
@@ -167,6 +198,11 @@ export default function TripsTab() {
     setForm(emptyForm())
     setFormError('')
   }
+
+  const currentFormDates = useMemo(() => dateRange(form.startDate, form.endDate), [form.startDate, form.endDate])
+  const selectedPlaceDate = currentFormDates.includes(placePickerDate) ? placePickerDate : currentFormDates[0]
+  const placeOptions = placePickerMode === 'saved' ? savedPlaces : directoryPlaces
+  const placePickerLoading = placePickerMode === 'saved' ? savedPlacesLoading : directoryPlacesLoading
 
   const addItem = () => {
     setForm((current) => ({
@@ -199,6 +235,33 @@ export default function TripsTab() {
     setForm((current) => ({
       ...current,
       items: current.items.filter((_, itemIndex) => itemIndex !== index),
+    }))
+  }
+
+  const addPlaceItem = (place: Place) => {
+    setForm((current) => ({
+      ...current,
+      items: [
+        ...current.items,
+        {
+          locationId: place.id,
+          tripDate: selectedPlaceDate,
+          dayPart: placePickerDayPart,
+          title: place.name,
+          category: place.category,
+          estimatedCost: null,
+          rationale: place.city ? `Sustainable ${place.category.toLowerCase()} option in ${place.city}.` : `Sustainable ${place.category.toLowerCase()} option.`,
+          weatherAlternative: '',
+          communityImpact: place.ecoCerts.length > 0 ? place.ecoCerts.join(', ') : '',
+          sortOrder: current.items.length,
+          place: {
+            publicId: place.publicId,
+            name: place.name,
+            category: place.category,
+            city: place.city,
+          },
+        },
+      ],
     }))
   }
 
@@ -470,6 +533,98 @@ export default function TripsTab() {
                   </button>
                 </div>
 
+                <div className="mt-4 rounded-xl border border-text/10 bg-white p-4">
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                    <div>
+                      <p className="font-sans font-semibold text-text">Add a green place</p>
+                      <p className="text-sm text-text/60">Choose when it belongs in this trip, then add a saved place or search the directory.</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-[150px_150px_auto]">
+                      <select
+                        value={selectedPlaceDate}
+                        onChange={(event) => setPlacePickerDate(event.target.value)}
+                        className="px-3 py-2 rounded-lg border border-text/20 text-text focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        aria-label="Place itinerary date"
+                      >
+                        {currentFormDates.map((date) => (
+                          <option key={date} value={date}>{formatShortDate(date)}</option>
+                        ))}
+                      </select>
+                      <select
+                        value={placePickerDayPart}
+                        onChange={(event) => setPlacePickerDayPart(event.target.value as DayPart)}
+                        className="px-3 py-2 rounded-lg border border-text/20 text-text focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        aria-label="Place itinerary day part"
+                      >
+                        {dayParts.map((part) => <option key={part} value={part}>{part}</option>)}
+                      </select>
+                      <div className="col-span-2 flex rounded-lg bg-background p-1 sm:col-span-1">
+                        {(['saved', 'search'] as const).map((mode) => (
+                          <button
+                            key={mode}
+                            onClick={() => setPlacePickerMode(mode)}
+                            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors cursor-pointer ${
+                              placePickerMode === mode ? 'bg-primary text-white' : 'text-text/60 hover:text-text'
+                            }`}
+                          >
+                            {mode === 'saved' ? 'Saved' : 'Search'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {placePickerMode === 'search' && (
+                    <label className="mt-3 flex items-center gap-2 rounded-lg border border-text/20 px-3 py-2">
+                      <Search className="w-4 h-4 text-text/45" />
+                      <input
+                        value={placeSearch}
+                        onChange={(event) => setPlaceSearch(event.target.value)}
+                        placeholder="Search places, cities, categories, or certifications"
+                        className="w-full bg-transparent text-sm text-text focus:outline-none"
+                      />
+                    </label>
+                  )}
+
+                  <div className="mt-3 grid gap-2 md:grid-cols-2">
+                    {placePickerLoading ? (
+                      <p className="text-sm text-text/60">Loading places...</p>
+                    ) : placeOptions.length > 0 ? (
+                      placeOptions.slice(0, 8).map((place) => (
+                        <button
+                          key={place.id}
+                          onClick={() => addPlaceItem(place)}
+                          className="flex items-center justify-between gap-3 rounded-lg border border-text/10 bg-background/60 px-3 py-2 text-left hover:border-primary/40 hover:bg-primary/5 transition-colors cursor-pointer"
+                        >
+                          <span className="min-w-0">
+                            <span className="block truncate text-sm font-semibold text-text">{place.name}</span>
+                            <span className="mt-0.5 flex items-center gap-1 text-xs text-text/55">
+                              <MapPin className="w-3 h-3 shrink-0" />
+                              <span className="truncate">{[place.category, place.city].filter(Boolean).join(' · ')}</span>
+                            </span>
+                          </span>
+                          <Plus className="w-4 h-4 shrink-0 text-primary" />
+                        </button>
+                      ))
+                    ) : (
+                      <div className="md:col-span-2 rounded-lg border border-dashed border-text/20 bg-background/40 p-4 text-sm text-text/60">
+                        {placePickerMode === 'saved' ? (
+                          <span>
+                            No saved places yet.{' '}
+                            <button
+                              onClick={() => setPlacePickerMode('search')}
+                              className="font-semibold text-primary hover:text-primary/80 cursor-pointer"
+                            >
+                              Search the full directory
+                            </button>
+                            .
+                          </span>
+                        ) : 'No directory places match this search.'}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <div className="mt-4 space-y-3">
                   {form.items.map((item, index) => (
                     <div key={`${index}-${item.id || item.title}`} className="rounded-xl border border-text/10 bg-white p-4">
@@ -611,6 +766,15 @@ export default function TripsTab() {
                                   )}
                                 </div>
                                 {item.rationale && <p className="mt-2 text-sm text-text/70">{item.rationale}</p>}
+                                {item.place?.publicId && (
+                                  <Link
+                                    href={`/eco-directory/${encodeURIComponent(`${slugify(item.place.name || item.title)}~${item.place.publicId}`)}`}
+                                    className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:text-primary/80"
+                                  >
+                                    View place
+                                    <ExternalLink className="w-3.5 h-3.5" />
+                                  </Link>
+                                )}
                               </article>
                             ))}
                           </div>
