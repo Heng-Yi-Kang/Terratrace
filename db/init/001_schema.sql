@@ -59,6 +59,16 @@ create table if not exists carbon_entries (
   created_at timestamptz not null default now()
 );
 
+create table if not exists carbon_budget_goals (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references users(id) on delete cascade,
+  year integer not null check (year >= 2000 and year <= 2100),
+  annual_budget_kg numeric not null check (annual_budget_kg > 0),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (user_id, year)
+);
+
 create table if not exists todos (
   id bigserial primary key,
   user_id uuid not null references users(id) on delete cascade,
@@ -194,6 +204,7 @@ create table if not exists community_user_badges (
 create index if not exists locations_category_city_idx on locations (lower(category), city);
 create index if not exists user_favourites_user_id_idx on user_favourites (user_id);
 create index if not exists carbon_entries_user_created_idx on carbon_entries (user_id, created_at desc);
+create index if not exists carbon_budget_goals_user_year_idx on carbon_budget_goals (user_id, year);
 create index if not exists todos_user_inserted_idx on todos (user_id, inserted_at desc);
 create index if not exists trips_user_start_idx on trips (user_id, start_date desc);
 create index if not exists trip_items_trip_sort_idx on trip_items (trip_id, trip_date, sort_order);

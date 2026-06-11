@@ -107,7 +107,11 @@ router.post('/logout', (_req: Request, res: Response) => {
 
 router.get('/me', requireAuth, asyncHandler(async (req: AuthRequest, res: Response) => {
   const user = await findUserById(req.user!.id)
-  return res.status(200).json({ data: { user: user ? toSessionUser(user) : null }, error: null })
+  if (!user) {
+    return res.status(404).json({ error: { message: 'User not found' } })
+  }
+
+  return res.status(200).json({ data: { user: toSessionUser(user) }, error: null })
 }))
 
 router.patch('/me', requireAuth, asyncHandler(async (req: AuthRequest, res: Response) => {

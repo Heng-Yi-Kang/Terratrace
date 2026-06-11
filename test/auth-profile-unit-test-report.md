@@ -154,3 +154,90 @@ All documented authentication and profile unit tests passed in the current works
 - Page tests mock auth utilities and Next.js navigation, so they validate page behavior around successful and failed auth responses rather than the real backend implementation.
 - Hook tests mock `@/utils/supabase/auth`, so they validate React Query behavior and error propagation in isolation.
 - Backend middleware tests mock Express request and response objects, so they validate middleware decision logic without starting the Express server.
+
+## 8. Eco Friendly Directory Unit Test Addendum
+
+| Item | Details |
+| --- | --- |
+| Module Covered | Eco Friendly Directory |
+| Report Date | 2026-06-11 |
+| Test Runner | Vitest v4.1.5 |
+| Test Environment | jsdom with React Testing Library |
+| Source Requirement | `docs/REQUIREMENTS.md`, Unit Testing section |
+
+### 8.1 Unit Test Execution Summary
+
+| Test Suite | Command Executed | Test Files | Tests | Actual Result |
+| --- | --- | ---: | ---: | --- |
+| Eco directory targeted unit tests | `npm run test --workspace=frontend -- locationFilters SearchBar PlaceCard EcoDirectoryClient` | 4 passed / 4 | 14 passed / 14 | Passed |
+| Full frontend regression unit run | `npm run test --workspace=frontend` | 11 passed / 11 | 52 passed / 52 | Passed |
+
+Observed frontend runner notes:
+
+- Vitest reported `localStorage is not available because --localstorage-file was not provided`.
+- jsdom reported `Not implemented: Window's scrollTo() method` during the full frontend run.
+- These messages did not fail the test run and did not affect the tested assertions.
+
+### 8.2 Isolation And Mocking Strategy
+
+| Unit Under Test | Isolation Method |
+| --- | --- |
+| `locationFilters` utility functions | Tested directly with controlled filter inputs and search-param records. No network calls are used. |
+| `SearchBar` | Rendered directly with mocked `onSubmit` and `onChange` callbacks. User input is simulated with React Testing Library. |
+| `PlaceCard` | Rendered directly with a fixed `Place` object. `CardImage` is mocked so image optimization does not affect card assertions. |
+| `EcoDirectoryClient` | `next/navigation`, `useLocations`, `useLocationCities`, and `PlaceCard` are mocked so directory UI logic is tested without backend, router, or database access. |
+
+### 8.3 Detailed Unit Test Cases
+
+| Test Case ID | Category | Module/Feature | Scenario | Input / Precondition | Expected Result | Actual Result | Status | Evidence |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| UT-ECO-001 | Unit | `locationFilters` | Normalize empty filters | `q='  '`, `city='  '`, `category='all'` | Returns empty query, city, and category values. | Returned `{ q: '', city: '', category: '' }`. | Pass | Targeted Vitest run |
+| UT-ECO-002 | Unit | `locationFilters` | Build API URL with valid filters | Base URL `http://localhost:3001`, query `solar cafe`, city `Kuala Lumpur`, category `Dining` | URL includes encoded `q`, `city`, and `category` parameters. | URL matched `http://localhost:3001/api/locations?q=solar+cafe&city=Kuala+Lumpur&category=Dining`. | Pass | Targeted Vitest run |
+| UT-ECO-003 | Unit | `locationFilters` | Omit blank filter parameters | Base URL with `category='all'` | URL has no query string. | URL matched `http://localhost:3001/api/locations`. | Pass | Targeted Vitest run |
+| UT-ECO-004 | Unit | `locationFilters` | Reject unsupported URL category | Search params include `category='Invalid'` | Category falls back to `all`. | Returned category `all`. | Pass | Targeted Vitest run |
+| UT-ECO-005 | Unit | `SearchBar` | Submit trimmed query | Type `  green hotel  ` and click Search. | `onSubmit` receives `green hotel`. | Callback received trimmed query. | Pass | Targeted Vitest run |
+| UT-ECO-006 | Unit | `SearchBar` | Debounced change callback | Type `  cafe  ` with `debounceMs=10`. | `onChange` receives `cafe`. | Callback received trimmed query after debounce. | Pass | Targeted Vitest run |
+| UT-ECO-007 | Unit | `SearchBar` | Clear active search | Render with value `Penang`, click Clear search. | Input clears; `onSubmit('')` and `onChange('')` are called. | Input cleared and both handlers received empty string. | Pass | Targeted Vitest run |
+| UT-ECO-008 | Unit | `PlaceCard` | Render place details | Fixed place `Solar Forest Retreat`, city `Ipoh`, category `Accommodation`, certs `Green Key` and `Solar Powered`. | Place name, city, category, and certifications are visible. | All expected details rendered. | Pass | Targeted Vitest run |
+| UT-ECO-009 | Unit | `PlaceCard` | Generate detail link | Place name `Solar Forest Retreat`, public ID `pub-123`. | Link points to `/eco-directory/solar-forest-retreat~pub-123`. | Link `href` matched expected encoded route. | Pass | Targeted Vitest run |
+| UT-ECO-010 | Unit | `EcoDirectoryClient` | Render mocked directory data | Mock 9 places: 3 accommodations, 3 dining, 3 transport. | Count cards show 3 each, first 8 places render, page indicator shows page 1 of 2. | Counts, first page, and pagination indicator matched. | Pass | Targeted Vitest run |
+| UT-ECO-011 | Unit | `EcoDirectoryClient` | Paginate catalog | Mock 9 places and click Next. | Ninth place appears and page indicator changes to page 2 of 2. | `Compost Kitchen` appeared and page indicator updated. | Pass | Targeted Vitest run |
+| UT-ECO-012 | Unit | `EcoDirectoryClient` | Update URL filters | Search `cafe`, select `Penang`, click `Dining`. | Router `replace` receives expected query URLs. | Router received `/eco-directory?q=cafe`, `/eco-directory?city=Penang`, and `/eco-directory?category=Dining`. | Pass | Targeted Vitest run |
+| UT-ECO-013 | Unit | `EcoDirectoryClient` | Loading and error states | Mock loading, then mock `Error('Network unavailable')`. | Loading message appears; error message appears on failed load. | Both states rendered as expected. | Pass | Targeted Vitest run |
+| UT-ECO-014 | Unit | `EcoDirectoryClient` | Empty result and clear filters | Query string `q=unknown`, mocked empty places. | Empty-state text appears; Clear filters routes back to `/eco-directory`. | Empty state rendered and router cleared filters. | Pass | Targeted Vitest run |
+
+### 8.4 Actual Command Output Evidence
+
+Eco directory targeted unit run:
+
+```text
+> frontend@0.1.0 test
+> vitest run locationFilters SearchBar PlaceCard EcoDirectoryClient
+
+Test Files  4 passed (4)
+     Tests  14 passed (14)
+  Duration  1.01s
+```
+
+Full frontend regression unit run:
+
+```text
+> frontend@0.1.0 test
+> vitest run
+
+Test Files  11 passed (11)
+     Tests  52 passed (52)
+  Duration  2.33s
+```
+
+### 8.5 Eco Directory Unit Test Result
+
+All documented Eco Friendly Directory unit tests passed in the current workspace.
+
+| Metric | Result |
+| --- | ---: |
+| Eco directory test files executed | 4 |
+| Eco directory unit tests executed | 14 |
+| Passed | 14 |
+| Failed | 0 |
+| Pass rate | 100% |
