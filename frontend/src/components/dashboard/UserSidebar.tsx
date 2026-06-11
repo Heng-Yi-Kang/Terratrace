@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   LayoutDashboard,
   Plane,
@@ -69,6 +70,7 @@ const navItems = [
 export default function UserSidebar() {
   const pathname = usePathname()
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [isSigningOut, setIsSigningOut] = useState(false)
   const { data: user } = useUser()
   const { data: savedTrips = [] } = useTrips()
@@ -106,6 +108,7 @@ export default function UserSidebar() {
     if (error) {
       console.error('Sign out error:', error)
     }
+    queryClient.clear()
     router.push('/login')
     router.refresh()
   }

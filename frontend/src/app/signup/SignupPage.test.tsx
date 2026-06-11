@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor, cleanup } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactNode } from 'react'
 import SignupPage from './page'
 import * as auth from '@/utils/supabase/auth'
 
@@ -16,6 +18,13 @@ vi.mock('@/utils/supabase/auth', () => ({
   getRedirectPath: vi.fn(),
 }))
 
+function renderWithQueryClient(ui: ReactNode, queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })) {
+  return {
+    queryClient,
+    ...render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>),
+  }
+}
+
 describe('SignupPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -26,10 +35,13 @@ describe('SignupPage', () => {
   })
 
   it('creates an account and navigates to the role-aware redirect path', async () => {
-    vi.mocked(auth.signUp).mockResolvedValue({ data: { user: null }, error: null })
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const clearSpy = vi.spyOn(queryClient, 'clear')
+    const user = { id: 'user-2', email: 'admin@example.com', role: 'admin', user_metadata: { role: 'admin', username: 'adminuser' } }
+    vi.mocked(auth.signUp).mockResolvedValue({ data: { user }, error: null })
     vi.mocked(auth.getRedirectPath).mockResolvedValue('/admin/dashboard')
 
-    render(<SignupPage />)
+    renderWithQueryClient(<SignupPage />, queryClient)
     await userEvent.type(screen.getByLabelText(/username/i), 'adminuser')
     await userEvent.type(screen.getByLabelText(/email/i), 'admin@example.com')
     await userEvent.type(screen.getByLabelText(/^password$/i), 'password123')
@@ -39,6 +51,8 @@ describe('SignupPage', () => {
 
     await waitFor(() => {
       expect(auth.signUp).toHaveBeenCalledWith('admin@example.com', 'password123', 'adminuser', 'admin')
+      expect(clearSpy).toHaveBeenCalledOnce()
+      expect(queryClient.getQueryData(['user'])).toEqual(user)
       expect(mockPush).toHaveBeenCalledWith('/admin/dashboard')
       expect(mockRefresh).toHaveBeenCalled()
     })
@@ -50,7 +64,7 @@ describe('SignupPage', () => {
       error: { message: 'An account with this email already exists' },
     })
 
-    render(<SignupPage />)
+    renderWithQueryClient(<SignupPage />)
     await userEvent.type(screen.getByLabelText(/username/i), 'traveler')
     await userEvent.type(screen.getByLabelText(/email/i), 'taken@example.com')
     await userEvent.type(screen.getByLabelText(/^password$/i), 'password123')

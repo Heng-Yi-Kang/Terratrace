@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor, cleanup } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactNode } from 'react'
 import UserSidebar from './UserSidebar'
 import { signOut } from '@/utils/supabase/auth'
 
@@ -31,10 +33,17 @@ vi.mock('@/hooks/useTrips', () => ({
   useImportLocalTrips: vi.fn(),
 }))
 
+function renderWithQueryClient(ui: ReactNode, queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })) {
+  return {
+    queryClient,
+    ...render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>),
+  }
+}
+
 describe('UserSidebar', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(signOut).mockResolvedValue({ error: null })
+    vi.mocked(signOut).mockResolvedValue({ data: {}, error: null })
   })
 
   afterEach(() => {
@@ -42,12 +51,16 @@ describe('UserSidebar', () => {
   })
 
   it('signs out and redirects to login when Sign Out is clicked', async () => {
-    render(<UserSidebar />)
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const clearSpy = vi.spyOn(queryClient, 'clear')
+
+    renderWithQueryClient(<UserSidebar />, queryClient)
 
     await userEvent.click(screen.getByRole('button', { name: /sign out/i }))
 
     await waitFor(() => {
       expect(signOut).toHaveBeenCalledOnce()
+      expect(clearSpy).toHaveBeenCalledOnce()
       expect(mockPush).toHaveBeenCalledWith('/login')
       expect(mockRefresh).toHaveBeenCalledOnce()
     })

@@ -54,6 +54,17 @@ export async function middleware(request: NextRequest) {
   const token = request.cookies.get(cookieName)?.value;
   const user = token ? await verifyJwt(token) : null;
 
+  if (pathname === '/eco-directory' || pathname.startsWith('/eco-directory/')) {
+    if (!user) {
+      const redirectUrl = new URL('/login', request.url);
+      redirectUrl.searchParams.set('redirectTo', `${pathname}${request.nextUrl.search}`);
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    const dashboardPath = pathname.replace('/eco-directory', '/dashboard/overview/places');
+    return NextResponse.redirect(new URL(dashboardPath + request.nextUrl.search, request.url));
+  }
+
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
 

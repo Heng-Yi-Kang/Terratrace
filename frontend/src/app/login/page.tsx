@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useQueryClient } from '@tanstack/react-query'
 import AuthForm from '@/components/auth/AuthForm'
 import { signIn, getRedirectPath } from '@/utils/supabase/auth'
 import { motion } from 'framer-motion'
@@ -23,11 +24,16 @@ const staggerContainer = {
 
 export default function LoginPage() {
   const router = useRouter()
+  const queryClient = useQueryClient()
 
   const handleLogin = async (email: string, password: string) => {
-    const { error } = await signIn(email, password)
+    const { data, error } = await signIn(email, password)
     if (error) {
       throw new Error(error.message)
+    }
+    queryClient.clear()
+    if (data?.user) {
+      queryClient.setQueryData(['user'], data.user)
     }
     const redirectPath = await getRedirectPath()
     router.push(redirectPath)

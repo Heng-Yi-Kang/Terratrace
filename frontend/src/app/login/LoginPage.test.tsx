@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor, cleanup } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactNode } from 'react'
 import LoginPage from './page'
 import * as supabaseAuth from '@/utils/supabase/auth'
 
@@ -16,6 +18,13 @@ vi.mock('@/utils/supabase/auth', () => ({
   getRedirectPath: vi.fn(),
 }))
 
+function renderWithQueryClient(ui: ReactNode, queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })) {
+  return {
+    queryClient,
+    ...render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>),
+  }
+}
+
 describe('LoginPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -27,15 +36,20 @@ describe('LoginPage', () => {
 
   describe('Success State', () => {
     it('navigates to dashboard on successful login', async () => {
-      vi.mocked(supabaseAuth.signIn).mockResolvedValue({ error: null })
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+      const clearSpy = vi.spyOn(queryClient, 'clear')
+      const user = { id: 'user-2', email: 'valid@test.com', role: 'user', user_metadata: { role: 'user', username: 'valid' } }
+      vi.mocked(supabaseAuth.signIn).mockResolvedValue({ data: { user }, error: null })
       vi.mocked(supabaseAuth.getRedirectPath).mockResolvedValue('/dashboard')
 
-      render(<LoginPage />)
+      renderWithQueryClient(<LoginPage />, queryClient)
       await userEvent.type(screen.getByLabelText(/email/i), 'valid@test.com')
       await userEvent.type(screen.getByLabelText(/password/i), 'password123')
       await userEvent.click(screen.getByRole('button', { name: /log in/i }))
 
       await waitFor(() => {
+        expect(clearSpy).toHaveBeenCalledOnce()
+        expect(queryClient.getQueryData(['user'])).toEqual(user)
         expect(mockPush).toHaveBeenCalledWith('/dashboard')
         expect(mockRefresh).toHaveBeenCalled()
       })
@@ -45,10 +59,11 @@ describe('LoginPage', () => {
   describe('Error State', () => {
     it('displays error message on failed login', async () => {
       vi.mocked(supabaseAuth.signIn).mockResolvedValue({
+        data: null,
         error: { message: 'Invalid login credentials' },
       })
 
-      render(<LoginPage />)
+      renderWithQueryClient(<LoginPage />)
       await userEvent.type(screen.getByLabelText(/email/i), 'invalid@test.com')
       await userEvent.type(screen.getByLabelText(/password/i), 'wrongpassword')
       await userEvent.click(screen.getByRole('button', { name: /log in/i }))
@@ -62,23 +77,23 @@ describe('LoginPage', () => {
 
   describe('Empty/Validation State', () => {
     it('renders login heading', () => {
-      render(<LoginPage />)
+      renderWithQueryClient(<LoginPage />)
       expect(screen.getByRole('heading', { name: /welcome back/i })).toBeInTheDocument()
     })
 
     it('has email and password inputs', () => {
-      render(<LoginPage />)
+      renderWithQueryClient(<LoginPage />)
       expect(screen.getByLabelText(/email/i)).toBeInTheDocument()
       expect(screen.getByLabelText(/password/i)).toBeInTheDocument()
     })
 
     it('has login button', () => {
-      render(<LoginPage />)
+      renderWithQueryClient(<LoginPage />)
       expect(screen.getByRole('button', { name: /log in/i })).toBeInTheDocument()
     })
 
     it('has link to signup page', () => {
-      render(<LoginPage />)
+      renderWithQueryClient(<LoginPage />)
       const signupLink = screen.getByRole('link', { name: /sign up/i })
       expect(signupLink).toHaveAttribute('href', '/signup')
     })

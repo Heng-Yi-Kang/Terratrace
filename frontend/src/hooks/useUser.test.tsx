@@ -57,7 +57,7 @@ describe('useUser hooks', () => {
   })
 
   it('propagates password change API errors', async () => {
-    vi.mocked(auth.changePassword).mockResolvedValue({ error: { message: 'Current password is incorrect' } })
+    vi.mocked(auth.changePassword).mockResolvedValue({ data: null, error: { message: 'Current password is incorrect' } })
 
     const { result } = renderHook(() => useChangePassword(), { wrapper: createWrapper() })
 

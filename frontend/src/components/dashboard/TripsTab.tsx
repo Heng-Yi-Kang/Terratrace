@@ -768,7 +768,7 @@ export default function TripsTab() {
                                 {item.rationale && <p className="mt-2 text-sm text-text/70">{item.rationale}</p>}
                                 {item.place?.publicId && (
                                   <Link
-                                    href={`/eco-directory/${encodeURIComponent(`${slugify(item.place.name || item.title)}~${item.place.publicId}`)}`}
+                                    href={`/dashboard/overview/places/${encodeURIComponent(`${slugify(item.place.name || item.title)}~${item.place.publicId}`)}`}
                                     className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:text-primary/80"
                                   >
                                     View place

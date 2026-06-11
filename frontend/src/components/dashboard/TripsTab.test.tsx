@@ -188,7 +188,7 @@ describe('TripsTab', () => {
     expect(screen.getByText('Stay at a certified eco hotel.')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /view place/i })).toHaveAttribute(
       'href',
-      '/eco-directory/solar-lodge~public-1',
+      '/dashboard/overview/places/solar-lodge~public-1',
     )
   })
 
