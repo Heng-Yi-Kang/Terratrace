@@ -1,15 +1,27 @@
 'use client';
 
 import { LeafIcon } from './Icons';
+import type { CommunitySummary } from '@/hooks/useCommunity';
 
-const stats = [
-  { value: '48,213', label: 'Eco-reviews submitted' },
-  { value: '2,847', label: 'Active challenges' },
-  { value: '186K', label: 'Badges earned' },
-  { value: '92%', label: 'Verified ratings' },
-];
+type PageHeaderProps = {
+  summary?: CommunitySummary;
+};
 
-export default function PageHeader() {
+function formatCount(value = 0) {
+  return new Intl.NumberFormat('en-US', {
+    notation: value >= 100_000 ? 'compact' : 'standard',
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+export default function PageHeader({ summary }: PageHeaderProps) {
+  const stats = [
+    { value: formatCount(summary?.reviewCount), label: 'Eco-reviews submitted' },
+    { value: formatCount(summary?.activeChallengeCount), label: 'Active challenges' },
+    { value: formatCount(summary?.badgesEarnedCount), label: 'Badges earned' },
+    { value: `${summary?.verifiedRatingPercentage ?? 0}%`, label: 'Verified ratings' },
+  ];
+
   return (
     <header className="bg-background px-6 py-12 md:py-16">
       <div className="mx-auto max-w-6xl">

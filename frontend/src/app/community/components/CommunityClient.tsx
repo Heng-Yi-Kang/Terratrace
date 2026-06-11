@@ -36,7 +36,7 @@ export default function CommunityClient() {
 
   return (
     <main className="min-h-screen bg-emerald-50">
-      <PageHeader />
+      <PageHeader summary={summary.data} />
       <section className="px-6 py-12 lg:pb-24">
         <div className="mx-auto max-w-6xl">
           <TabSwitcher active={tab} onChange={setTab} />

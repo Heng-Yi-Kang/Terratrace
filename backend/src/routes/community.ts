@@ -434,16 +434,53 @@ router.get('/summary', optionalAuth, async (req: OptionalAuthRequest, res: Respo
 
   try {
     const { rows } = await query(
-      `select
-         coalesce(sum(case when cp.completed_at is not null then c.points else 0 end), 0)::int as points,
-         count(distinct ub.badge_id)::int as "earnedBadges"
-       from (select $1::uuid as user_id) viewer
-       left join community_challenge_progress cp on cp.user_id = viewer.user_id
-       left join community_challenges c on c.id = cp.challenge_id
-       left join community_user_badges ub on ub.user_id = viewer.user_id`,
+      `with viewer_stats as (
+         select
+           coalesce(sum(case when cp.completed_at is not null then c.points else 0 end), 0)::int as points,
+           count(distinct ub.badge_id)::int as "earnedBadges"
+         from (select $1::uuid as user_id) viewer
+         left join community_challenge_progress cp on cp.user_id = viewer.user_id
+         left join community_challenges c on c.id = cp.challenge_id
+         left join community_user_badges ub on ub.user_id = viewer.user_id
+       ),
+       review_stats as (
+         select
+           count(*)::int as "reviewCount",
+           coalesce(round(100.0 * count(*) filter (where verified) / nullif(count(*), 0)), 0)::int as "verifiedRatingPercentage"
+         from community_reviews
+       ),
+       challenge_stats as (
+         select count(*)::int as "activeChallengeCount"
+         from community_challenges
+         where active = true
+       ),
+       badge_stats as (
+         select count(*)::int as "badgesEarnedCount"
+         from community_user_badges
+       )
+       select
+         viewer_stats.points,
+         viewer_stats."earnedBadges",
+         review_stats."reviewCount",
+         challenge_stats."activeChallengeCount",
+         badge_stats."badgesEarnedCount",
+         review_stats."verifiedRatingPercentage"
+       from viewer_stats
+       cross join review_stats
+       cross join challenge_stats
+       cross join badge_stats`,
       [viewerId],
     )
-    return res.status(200).json(rows[0] || { points: 0, earnedBadges: 0 })
+    return res.status(200).json(
+      rows[0] || {
+        points: 0,
+        earnedBadges: 0,
+        reviewCount: 0,
+        activeChallengeCount: 0,
+        badgesEarnedCount: 0,
+        verifiedRatingPercentage: 0,
+      },
+    )
   } catch (error) {
     console.error('Unexpected error in GET community summary:', error)
     return res.status(500).json({ error: 'An unexpected error occurred' })

@@ -67,6 +67,10 @@ export type CommunityLeader = {
 export type CommunitySummary = {
   points: number
   earnedBadges: number
+  reviewCount: number
+  activeChallengeCount: number
+  badgesEarnedCount: number
+  verifiedRatingPercentage: number
 }
 
 export type ReviewInput = {
@@ -119,6 +123,7 @@ export function useCreateCommunityReview() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['community', 'reviews'] })
       queryClient.invalidateQueries({ queryKey: ['community', 'challenges'] })
+      queryClient.invalidateQueries({ queryKey: ['community', 'summary'] })
     },
   })
 }

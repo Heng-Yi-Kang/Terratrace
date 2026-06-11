@@ -9,6 +9,7 @@ import {
   useCommunityChallenges,
   useCommunityLeaderboard,
   useCommunityReviews,
+  useCommunitySummary,
   useCreateCommunityReview,
   useJoinCommunityChallenge,
   useToggleReviewHelpful,
@@ -91,6 +92,16 @@ describe('useCommunity hooks', () => {
       http.get(`${API}/api/community/leaderboard`, () =>
         HttpResponse.json([{ id: 'user-1', rank: 1, name: 'Traveler', points: 500, badges: 1, you: true }]),
       ),
+      http.get(`${API}/api/community/summary`, () =>
+        HttpResponse.json({
+          points: 500,
+          earnedBadges: 1,
+          reviewCount: 12,
+          activeChallengeCount: 3,
+          badgesEarnedCount: 8,
+          verifiedRatingPercentage: 75,
+        }),
+      ),
     )
   })
 
@@ -99,12 +110,19 @@ describe('useCommunity hooks', () => {
     const { result: challenges } = renderHook(() => useCommunityChallenges(), { wrapper: createWrapper() })
     const { result: badges } = renderHook(() => useCommunityBadges(), { wrapper: createWrapper() })
     const { result: leaders } = renderHook(() => useCommunityLeaderboard(), { wrapper: createWrapper() })
+    const { result: summary } = renderHook(() => useCommunitySummary(), { wrapper: createWrapper() })
 
     await waitFor(() => {
       expect(reviews.current.data?.[0].location).toBe('Eco Lodge')
       expect(challenges.current.data?.[0].title).toBe('Low Carbon Week')
       expect(badges.current.data?.[0].name).toBe('Carbon Crusher')
       expect(leaders.current.data?.[0].you).toBe(true)
+      expect(summary.current.data).toMatchObject({
+        reviewCount: 12,
+        activeChallengeCount: 3,
+        badgesEarnedCount: 8,
+        verifiedRatingPercentage: 75,
+      })
     })
   })
 
@@ -124,6 +142,7 @@ describe('useCommunity hooks', () => {
 
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['community', 'reviews'] })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['community', 'challenges'] })
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['community', 'summary'] })
   })
 
   it('toggles helpful votes', async () => {
