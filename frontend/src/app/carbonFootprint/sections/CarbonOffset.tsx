@@ -2,18 +2,12 @@
 
 import * as icons from '../component/icons';   
 import {CarbonResult} from '../constant/types'
+import { fetchCarbonSuggestions } from '@/utils/carbon';
+import { useEffect, useState } from 'react';
 
+type SuggestionProvider = 'gemini' | 'deterministic-fallback' | 'hardcoded-fallback'
 
-export const CarbonOffset = ({ result }: { result: CarbonResult | null }) => {
-
-  if (!result) return null;
-
-  const trees = Math.round(result.total / 22);
-  const estimatedCost = (result.total * 0.013 * 4.70).toFixed(2); // simple estimate
-
-  let tips: string[] = [];
-
-  const getHighestSource = (result: CarbonResult) => {
+const getHighestSource = (result: CarbonResult) => {
   const sources = [
     { name: "Flight", value: result.flightEmissions },
     { name: "Car", value: result.carEmissions },
@@ -28,46 +22,90 @@ export const CarbonOffset = ({ result }: { result: CarbonResult | null }) => {
   );
 };
 
-  if (getHighestSource(result).name === "Flight") {
-    tips = [
+const fallbackTipsFor = (sourceName: string): string[] => {
+  if (sourceName === "Flight") {
+    return [
       "Consider taking a train or bus for shorter distances.",
       "Choose airlines with better sustainability practices.",
-      "Choose economy class instead of business or first  class."
+      "Choose economy class instead of business or first class."
     ];
-  } else if (getHighestSource(result).name === "Car") {
-    tips = [
+  } else if (sourceName === "Car") {
+    return [
       "Try carpooling or using public transportation.",
       "Walk or bike for short trips instead of driving.",
       "Consider switching to an electric or hybrid vehicle."
     ];
-  } else if (getHighestSource(result).name === "Hotel") {
-    tips = [
+  } else if (sourceName === "Hotel") {
+    return [
       "Look for eco-friendly hotels with sustainability practices.",
       "Minimize energy use by switching off lights and AC when not in use.",
       "Consider staying at accommodations that support local communities."
     ];
   }
-  else if (getHighestSource(result).name === "Rail") {
-    tips = [
+  else if (sourceName === "Rail") {
+    return [
       "Choose trains over flights for shorter distances.",
       "Select coaches with better sustainability practices.",
       "Consider traveling during off-peak hours to reduce energy consumption."
     ];
   }
-  else if (getHighestSource(result).name === "Bus") {
-    tips = [
+  else if (sourceName === "Bus") {
+    return [
       "Opt for buses instead of cars for longer trips.",
       "Choose buses with better fuel efficiency or alternative fuel sources.",
       "Consider carpooling or ride-sharing to reduce the number of vehicles on the road."
     ];
   }
-  else if (getHighestSource(result).name === "Taxi") {
-    tips = [
+  else if (sourceName === "Taxi") {
+    return [
       "Choose rideshare options over individual taxi rides.",
       "Opt for electric or hybrid taxis when available.",
       "Consider using public transportation or walking for short trips."
     ];
   }
+
+  return [
+    "Choose lower-emission transport options where possible.",
+    "Reduce unnecessary travel distance by grouping nearby activities.",
+    "Offset remaining emissions through reputable climate projects.",
+  ];
+}
+
+export const CarbonOffset = ({ result }: { result: CarbonResult | null }) => {
+  const highestSource = result ? getHighestSource(result).name : ''
+  const [tips, setTips] = useState<string[]>(() => fallbackTipsFor(highestSource))
+  const [suggestionProvider, setSuggestionProvider] = useState<SuggestionProvider>('hardcoded-fallback')
+
+  useEffect(() => {
+    if (!result) return
+
+    let ignore = false
+    const fallbackTips = fallbackTipsFor(getHighestSource(result).name)
+    setTips(fallbackTips)
+    setSuggestionProvider('hardcoded-fallback')
+
+    fetchCarbonSuggestions(result)
+      .then((data) => {
+        if (ignore) return
+        setTips(data.suggestions)
+        setSuggestionProvider(data.provider)
+      })
+      .catch(() => {
+        if (ignore) return
+        setTips(fallbackTips)
+        setSuggestionProvider('hardcoded-fallback')
+      })
+
+    return () => {
+      ignore = true
+    }
+  }, [result])
+
+  if (!result) return null;
+
+  const trees = Math.round(result.total / 22);
+  const estimatedCost = (result.total * 0.013 * 4.70).toFixed(2); // simple estimate
+  const providerLabel = suggestionProvider === 'gemini' ? 'AI suggestions' : 'Standard suggestions'
 
   return (
     <section className=" relative overflow-hidden ">
@@ -109,6 +147,7 @@ export const CarbonOffset = ({ result }: { result: CarbonResult | null }) => {
               <p className="text-sm text-text/100 ">
                 Travel smarter by choosing greener options
               </p>
+              <p className="text-xs text-text/60 mt-1">{providerLabel}</p>
 
               <ul className=" text-sm text-text/100 mt-4 space-y-1">
                 {tips.map((tip, index) => (

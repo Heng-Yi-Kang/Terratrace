@@ -3,8 +3,10 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { ImpactInsights } from './ImpactInsights'
 import type { CarbonResult } from '../constant/types'
 
+const inViewState = vi.hoisted(() => ({ value: true }))
+
 vi.mock('framer-motion', () => ({
-  useInView: () => true,
+  useInView: () => inViewState.value,
 }))
 
 vi.mock('@/app/carbonFootprint/component/doughnutChart', () => ({
@@ -28,6 +30,7 @@ const result: CarbonResult = {
 describe('ImpactInsights', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
+    inViewState.value = true
     vi.spyOn(globalThis, 'requestAnimationFrame').mockImplementation((callback) => {
       callback(1500)
       return 1
@@ -55,6 +58,17 @@ describe('ImpactInsights', () => {
     expect(screen.getByTestId('doughnut-chart')).toHaveTextContent('car:63.6')
     expect(screen.getByText('70.00')).toBeInTheDocument()
     expect(screen.getByText('(63.6%)')).toBeInTheDocument()
+  })
+
+  it('shows calculated totals even when the count-up observer has not fired', async () => {
+    inViewState.value = false
+
+    render(<ImpactInsights result={result} />)
+
+    await waitFor(() => {
+      expect(screen.getByText('110.00')).toBeInTheDocument()
+      expect(screen.getByText('5')).toBeInTheDocument()
+    })
   })
 
   it('identifies the highest-impact source and recommendation text', () => {

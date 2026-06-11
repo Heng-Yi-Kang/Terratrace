@@ -12,7 +12,10 @@ function useCountUp<T extends HTMLElement> (value: number, decimals:number = 2) 
   const [displayValue, setDisplayValue] = useState(0)
 
   useEffect(() => {
-    if (!isInView) return
+    if (!isInView) {
+      setDisplayValue(value)
+      return
+    }
 
     const duration = 1500
     const startTime = performance.now()

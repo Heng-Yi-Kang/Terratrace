@@ -1,5 +1,15 @@
 const API = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001'
 
+export type CarbonResult = {
+    total: number
+    flightEmissions: number
+    carEmissions: number
+    hotelEmissions: number
+    railEmissions: number
+    busEmissions: number
+    taxiEmissions: number
+}
+
 export type CarbonEntry = {
     id: string
     created_at: string
@@ -21,6 +31,12 @@ export type CarbonSummary = {
     entries: CarbonEntry[]
 }
 
+export type CarbonSuggestions = {
+    provider: 'gemini' | 'deterministic-fallback' | 'hardcoded-fallback'
+    highestSource: string
+    suggestions: string[]
+}
+
 const numberFromApi = (value: unknown): number => {
     const parsed = Number(value ?? 0)
     return Number.isFinite(parsed) ? parsed : 0
@@ -38,6 +54,19 @@ const normalizeEntry = (entry: any): CarbonEntry => ({
     taxi_emissions: numberFromApi(entry.taxi_emissions),
 })
 
+const valueFromApi = (data: any, camelKey: string, snakeKey: string): number =>
+    numberFromApi(data?.[camelKey] ?? data?.[snakeKey])
+
+const normalizeCarbonResult = (data: any): CarbonResult => ({
+    total: valueFromApi(data, 'total', 'total_emissions'),
+    flightEmissions: valueFromApi(data, 'flightEmissions', 'flight_emissions'),
+    carEmissions: valueFromApi(data, 'carEmissions', 'car_emissions'),
+    hotelEmissions: valueFromApi(data, 'hotelEmissions', 'hotel_emissions'),
+    railEmissions: valueFromApi(data, 'railEmissions', 'rail_emissions'),
+    busEmissions: valueFromApi(data, 'busEmissions', 'bus_emissions'),
+    taxiEmissions: valueFromApi(data, 'taxiEmissions', 'taxi_emissions'),
+})
+
 //authHeaders
 async function getAuthHeaders(): Promise<HeadersInit> {
     return{
@@ -46,7 +75,7 @@ async function getAuthHeaders(): Promise<HeadersInit> {
 }
 
 //calculate + save 
-export async function calculateAndSave (trips: any[]) {
+export async function calculateAndSave (trips: any[]): Promise<CarbonResult> {
 
     const headers = await getAuthHeaders()
     const response = await fetch(`${API}/api/carbon/calculate`, {
@@ -57,8 +86,35 @@ export async function calculateAndSave (trips: any[]) {
     })
     if (!response.ok)
         throw new Error(`Calculation Failed`)
-    return response.json()
+    return normalizeCarbonResult(await response.json())
 
+}
+
+export async function fetchCarbonSuggestions(result: CarbonResult): Promise<CarbonSuggestions> {
+
+    const headers = await getAuthHeaders()
+    const response = await fetch(`${API}/api/carbon/suggestions`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ result }),
+    })
+
+    if (!response.ok)
+        throw new Error(`Failed to fetch carbon suggestions`)
+
+    const data = await response.json()
+    const suggestions = Array.isArray(data.suggestions)
+        ? data.suggestions.map((entry: unknown) => String(entry || '').trim()).filter(Boolean)
+        : []
+
+    if (suggestions.length === 0)
+        throw new Error(`No carbon suggestions returned`)
+
+    return {
+        provider: data.provider === 'gemini' ? 'gemini' : 'deterministic-fallback',
+        highestSource: String(data.highestSource || ''),
+        suggestions,
+    }
 }
 
 //fetch full history
