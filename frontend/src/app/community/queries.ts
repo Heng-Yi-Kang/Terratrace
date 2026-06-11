@@ -276,3 +276,62 @@ export async function fetchLeaderboard(userId: string): Promise<Leader[]> {
 
   return leaders;
 }
+
+// ─── Locations ────────────────────────────────────────────────────────────────
+
+export type LocationOption = {
+  id: string;
+  name: string;
+  category: string;
+  city: string;
+  country: string;
+};
+
+export async function fetchLocations(): Promise<LocationOption[]> {
+  const supabase = createClient();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('locations')
+    .select('id, name, category, city, country')
+    .order('name', { ascending: true });
+
+  if (error || !data) return [];
+  return data as LocationOption[];
+}
+
+// ─── Create Review ────────────────────────────────────────────────────────────
+
+export type NewReview = {
+  locationId: string;
+  userId: string;
+  rating: number;
+  title: string;
+  body: string;
+  practices: string[];
+};
+
+export async function createReview(
+  input: NewReview,
+): Promise<{ ok: boolean; error?: string }> {
+  if (!input.locationId) return { ok: false, error: 'Please select a location.' };
+  if (input.rating < 1 || input.rating > 5) return { ok: false, error: 'Rating must be between 1 and 5.' };
+  if (input.title.trim().length < 3) return { ok: false, error: 'Title must be at least 3 characters.' };
+  if (input.body.trim().length < 10) return { ok: false, error: 'Review must be at least 10 characters.' };
+
+  const supabase = createClient();
+  if (!supabase) return { ok: false, error: 'Supabase is not configured.' };
+
+  const { error } = await supabase.from('eco_reviews').insert({
+    location_id: input.locationId,
+    user_id: input.userId,
+    rating: input.rating,
+    title: input.title.trim(),
+    body: input.body.trim(),
+    practices: input.practices,
+    verified: false,
+  });
+
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
