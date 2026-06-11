@@ -9,11 +9,13 @@ interface ReviewsSectionProps {
   reviews: Review[];
 }
 
-const FILTERS = ['All', 'Eco-Lodge', 'Boutique Hotel', 'Tour Operator', 'Restaurant'];
+const FILTERS = ['All', 'Accommodation', 'Dining', 'Transport'];
 
 export default function ReviewsSection({ reviews }: ReviewsSectionProps) {
   const [filter, setFilter] = useState('All');
-  const filtered = filter === 'All' ? reviews : reviews.filter(r => r.category === filter);
+  const filtered = filter === 'All'
+    ? reviews
+    : reviews.filter(r => r.category.toLowerCase() === filter.toLowerCase());
 
   return (
     <div>

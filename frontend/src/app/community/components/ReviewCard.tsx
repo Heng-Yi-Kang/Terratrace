@@ -39,7 +39,7 @@ export default function ReviewCard({ review }: ReviewCardProps) {
               className="inline-block rounded-full px-3 py-1 text-xs font-semibold"
               style={{ background: `${review.color}1a`, color: review.color }}
             >
-              {review.category}
+              {review.category.charAt(0).toUpperCase() + review.category.slice(1)}
             </span>
           </div>
           <div className="flex items-center gap-1.5 text-emerald-900/60">
