@@ -1,46 +1,54 @@
 export type Tab = 'reviews' | 'challenges';
 
 export type Review = {
-  id: number;
+  id: string;
+  userId?: string | null;
+  locationId?: string | null;
   location: string;
-  city: string;
-  country: string;
+  city?: string | null;
+  country?: string | null;
   category: string;
   rating: number;
   reviewer: string;
   reviewerInitials: string;
-  date: string;
+  createdAt: string;
   title: string;
   body: string;
   practices: string[];
   helpful: number;
   verified: boolean;
   color: string;
+  viewerMarkedHelpful: boolean;
+  viewerCanEdit: boolean;
 };
 
 export type Challenge = {
-  id: number;
+  id: string;
+  slug: string;
   title: string;
   description: string;
   reward: string;
   points: number;
   badge: string;
   badgeColor: string;
-  badgeIcon: React.ReactNode;
+  badgeIcon: string;
   category: 'Active' | 'Featured' | 'Streak';
   progress: number;
   total: number;
   unit: string;
   participants: number;
-  daysLeft: number;
+  daysLeft: number | null;
+  joinedAt?: string | null;
+  completedAt?: string | null;
 };
 
 export type EarnedBadge = {
+  id: string;
   name: string;
-  icon: React.ReactNode;
+  icon: string;
   color: string;
   earned: boolean;
-  date: string;
+  earnedAt?: string | null;
 };
 
 export type Leader = {

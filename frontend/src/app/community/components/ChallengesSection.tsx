@@ -10,9 +10,10 @@ interface ChallengesSectionProps {
   badges: EarnedBadge[];
   leaders: Leader[];
   points: number;
+  isSignedIn: boolean;
 }
 
-export default function ChallengesSection({ challenges, badges, leaders, points }: ChallengesSectionProps) {
+export default function ChallengesSection({ challenges, badges, leaders, points, isSignedIn }: ChallengesSectionProps) {
   return (
     <div>
       <BadgeShelf badges={badges} points={points} />
@@ -22,8 +23,13 @@ export default function ChallengesSection({ challenges, badges, leaders, points 
         <div className="lg:col-span-2">
           <h3 className="mb-4 font-display text-xl font-bold text-emerald-900">Active Challenges</h3>
           <div className="grid gap-5 sm:grid-cols-1 md:grid-cols-2">
-            {challenges.map(c => <ChallengeCard key={c.id} challenge={c} />)}
+            {challenges.map(c => <ChallengeCard key={c.id} challenge={c} isSignedIn={isSignedIn} />)}
           </div>
+          {challenges.length === 0 && (
+            <div className="rounded-xl border border-emerald-100 bg-white p-8 text-center text-sm font-semibold text-emerald-900/50">
+              No active challenges are available yet.
+            </div>
+          )}
         </div>
 
         {/* Sticky leaderboard */}

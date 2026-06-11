@@ -1,11 +1,25 @@
 'use client';
 
-import { BoltIcon, LeafIcon, MapPinIcon, FireIcon } from './Icons';
+import { BoltIcon, LeafIcon, MapPinIcon, FireIcon, GlobeIcon, PencilIcon } from './Icons';
 import type { EarnedBadge } from './types';
 
 interface BadgeShelfProps {
   badges: EarnedBadge[];
   points: number;
+}
+
+function BadgeIcon({ icon }: { icon: string }) {
+  if (icon === 'bolt') return <BoltIcon />;
+  if (icon === 'map-pin') return <MapPinIcon />;
+  if (icon === 'fire') return <FireIcon />;
+  if (icon === 'globe') return <GlobeIcon />;
+  if (icon === 'pencil') return <PencilIcon />;
+  return <LeafIcon />;
+}
+
+function formatEarnedDate(value?: string | null) {
+  if (!value) return '';
+  return new Intl.DateTimeFormat('en', { month: 'short', year: 'numeric' }).format(new Date(value));
 }
 
 export default function BadgeShelf({ badges, points }: BadgeShelfProps) {
@@ -38,7 +52,7 @@ export default function BadgeShelf({ badges, points }: BadgeShelfProps) {
               background: b.earned ? `linear-gradient(135deg, ${b.color}11, ${b.color}06)` : 'rgba(5,150,105,0.04)',
               borderColor: b.earned ? `${b.color}33` : 'rgba(5,150,105,0.08)',
             }}
-            title={b.earned ? `Earned ${b.date}` : 'Not yet earned'}
+            title={b.earned ? `Earned ${formatEarnedDate(b.earnedAt)}` : 'Not yet earned'}
           >
             <div
               className="mx-auto mb-2 flex h-11 w-11 items-center justify-center rounded-xl text-white"
@@ -50,11 +64,11 @@ export default function BadgeShelf({ badges, points }: BadgeShelfProps) {
                 filter: b.earned ? 'none' : 'grayscale(0.5)',
               }}
             >
-              {b.icon}
+              <BadgeIcon icon={b.icon} />
             </div>
             <div className="font-display text-xs font-semibold text-emerald-900">{b.name}</div>
             {b.earned && (
-              <div className="mt-0.5 text-xs text-emerald-900/50">{b.date}</div>
+              <div className="mt-0.5 text-xs text-emerald-900/50">{formatEarnedDate(b.earnedAt)}</div>
             )}
           </div>
         ))}

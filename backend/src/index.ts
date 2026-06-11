@@ -12,6 +12,7 @@ import authRoutes from './routes/auth'
 import todosRoutes from './routes/todos'
 import tripsRoutes from './routes/trips'
 import userRoutes from './routes/user'
+import communityRoutes from './routes/community'
 
 // Load environment variables
 dotenv.config()
@@ -47,6 +48,7 @@ app.use('/api/favourites', favouritesRoutes)
 app.use('/api/todos', todosRoutes)
 app.use('/api/trips', tripsRoutes)
 app.use('/api/user', userRoutes)
+app.use('/api/community', communityRoutes)
 
 // 404 handler
 app.use((_req: Request, res: Response) => {
