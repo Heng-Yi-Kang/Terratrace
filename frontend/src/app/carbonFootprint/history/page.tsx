@@ -5,7 +5,6 @@ import { getCurrentUser } from '@/utils/supabase/auth'
 import { fetchHistory, deleteEntry, type CarbonEntry } from '@/utils/carbon'
 import Link from 'next/link'
 import * as icons from '../component/icons'
-import { StatsCard } from '@/components/dashboard/CarbonTab'
 import { TrashIcon } from 'lucide-react'
 
 const getBadge = (total: number) => {
@@ -33,8 +32,8 @@ export default function HistoryPage() {
                 }
                 const data = await fetchHistory()
                 setRecords(data)
-            } catch {
-                console.log('History error:', error)
+            } catch (err) {
+                console.log('History error:', err)
                 setError('Failed to load history. Please try again.')
             } finally {
                 setLoading(false)
