@@ -94,13 +94,21 @@ docker compose version
    Copy-Item frontend/.env.example frontend/.env.local
    ```
 
-2. Update `backend/.env` so Docker Postgres uses the exposed host port:
+2. Update local environment values.
+
+   For a local Docker database, keep `backend/.env` pointed at the exposed host port:
 
    ```env
    DATABASE_URL=postgresql://terratrace:terratrace@localhost:5433/terratrace
    ```
 
-   Keep `JWT_SECRET` and `SESSION_COOKIE_NAME` the same in `.env`, `backend/.env`, and `frontend/.env.local`.
+   Keep `JWT_SECRET` and `SESSION_COOKIE_NAME` the same in `.env`, `backend/.env`, and `frontend/.env.local`; the backend signs the cookie and the frontend middleware verifies it. Keep `NEXT_PUBLIC_API_BASE_URL=http://localhost:3001` in `.env` and `frontend/.env.local` unless you run the API on another port.
+
+   Optional API-backed features need additional `backend/.env` keys:
+   - Smart recommendations and carbon AI summaries: `GEMINI_API_KEY`
+   - Eco route planner: `OPENROUTESERVICE_API_KEY`
+   - Eco Directory enrichment/seed scripts: `FOURSQUARE_API_KEY`, `UNSPLASH_ACCESS_KEY`
+   - Supabase location import: `NEXT_PUBLIC_SUPABASE_URL` plus either `SUPABASE_SERVICE_ROLE_KEY` or `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 
 3. Start local Postgres with Docker:
 
@@ -174,11 +182,74 @@ docker compose version
 
 ## Environment Variables
 
-| File | Variables |
-|------|-----------|
-| `.env` (root) | `NEXT_PUBLIC_API_BASE_URL`, `JWT_SECRET`, `SESSION_COOKIE_NAME`, optional Supabase public values |
-| `frontend/.env.local` | `NEXT_PUBLIC_API_BASE_URL`, `JWT_SECRET`, `SESSION_COOKIE_NAME`, optional Supabase public values |
-| `backend/.env` | `PORT`, `NODE_ENV`, `CORS_ORIGIN`, `DATABASE_URL`, `JWT_SECRET`, `SESSION_COOKIE_NAME`, optional Supabase seed/import values |
+Copy the examples before running the app:
+
+```bash
+cp .env.example .env
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env.local
+```
+
+On Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+Copy-Item backend/.env.example backend/.env
+Copy-Item frontend/.env.example frontend/.env.local
+```
+
+### Root `.env`
+
+Used by the root development scripts and shared with the frontend process.
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `NEXT_PUBLIC_API_BASE_URL` | Yes | Backend API base URL used by frontend data hooks. Default: `http://localhost:3001`. |
+| `NEXT_PUBLIC_API_URL` | Compatibility | Legacy fallback for auth helpers. Keep it the same as `NEXT_PUBLIC_API_BASE_URL`. |
+| `JWT_SECRET` | Yes | Must match `backend/.env` and `frontend/.env.local`. |
+| `SESSION_COOKIE_NAME` | Yes | Must match `backend/.env` and `frontend/.env.local`. Default: `terratrace_session`. |
+| `NEXT_PUBLIC_SUPABASE_URL` | Optional | Legacy Supabase/API test value; also useful when seeding locations. |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Optional | Public Supabase key for legacy flows and location import fallback. |
+
+### Frontend `frontend/.env.local`
+
+Used by Next.js.
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `NEXT_PUBLIC_API_BASE_URL` | Yes | Backend API base URL. Default: `http://localhost:3001`. |
+| `NEXT_PUBLIC_API_URL` | Compatibility | Legacy fallback for auth helpers. Keep it the same as `NEXT_PUBLIC_API_BASE_URL`. |
+| `JWT_SECRET` | Yes | Must match the backend so middleware can verify session cookies. |
+| `SESSION_COOKIE_NAME` | Yes | Must match the backend cookie name. |
+| `NEXT_PUBLIC_SUPABASE_URL` | Optional | Legacy Supabase auth/API value. |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Optional | Legacy Supabase auth/API value. |
+
+### Backend `backend/.env`
+
+Used by the Express API and backend scripts.
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `PORT` | Yes | API server port. Default: `3001`. |
+| `NODE_ENV` | Yes | Use `development` locally. |
+| `CORS_ORIGIN` | Yes | Frontend origin allowed to send cookies. Default: `http://localhost:3000`. |
+| `DATABASE_URL` | Yes | PostgreSQL connection string. Local Docker default: `postgresql://terratrace:terratrace@localhost:5433/terratrace`. |
+| `LOCAL_DATABASE_URL` | Optional | Overrides `DATABASE_URL` for `backend/scripts/seedLocationsFromSupabase.mjs`; usually keep it the same locally. |
+| `JWT_SECRET` | Yes | Signs auth cookies; must match root and frontend env files. |
+| `JWT_EXPIRES_IN` | Yes | JWT lifetime. Default: `7d`. |
+| `SESSION_COOKIE_NAME` | Yes | Auth cookie name; must match root and frontend env files. |
+| `SUPABASE_DATABASE_URL` | Optional | Hosted Supabase Postgres URL for the one-time migration script. |
+| `NEXT_PUBLIC_SUPABASE_URL` | Optional | Required only for `npm run db:seed:locations:from-supabase`. |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Optional | Public Supabase key for location import fallback. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Optional | Recommended for location import when table policies block public reads. |
+| `GEMINI_API_KEY` | Optional | Enables smart recommendations and AI carbon summaries. |
+| `GEMINI_MODEL` | Optional | Gemini model name. Default: `gemini-1.5-flash` unless overridden. |
+| `SMART_RECO_CACHE_TTL_MS` | Optional | Smart recommendation cache TTL. Default: `900000`. |
+| `SMART_RECO_MAX_RESULTS` | Optional | Smart recommendation result limit. Default: `6`. |
+| `OPENROUTESERVICE_API_KEY` | Optional | Enables the eco route planner endpoint. |
+| `FOURSQUARE_API_KEY` | Optional | Used by location seed/enrichment scripts. |
+| `UNSPLASH_ACCESS_KEY` | Optional | Used by `backend/scripts/seedLocations.mjs`. |
+| `NEXT_UNSPLASH_ACCESS_KEY` | Optional | Used by `backend/scripts/seedOSM.js`. |
 
 ## Local Database
 
@@ -238,6 +309,5 @@ Log in at http://localhost:3000/login after starting the frontend and backend. S
 
 ## Documentation
 
-- [`CLAUDE.md`](CLAUDE.md) — Claude Code development guidance
 - [`docs/database-connection-and-login-credentials.md`](docs/database-connection-and-login-credentials.md) — Local database connection and default login credentials
 - [`docs/state-management.md`](docs/state-management.md) — Frontend state management architecture
