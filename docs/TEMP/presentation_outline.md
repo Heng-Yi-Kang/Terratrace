@@ -1,223 +1,300 @@
 # TerraTrace Presentation Slide Outline
 
-## Slide 1: Title, Features, and Task Distribution
+## Slide 1: Project Overview
 
 **Title:** TerraTrace - Eco-Friendly Travel Planner  
 **Course:** WIF2003 Web Programming, Semester 2 2025/2026  
 **Group:** OCC3 G4
 
-**Core Features:**
-- Profile Management: sign up, login, logout, session management, profile update, password change, account deletion.
-- Eco-Friendly Directory: sustainable destination directory, geo-specific search, favourites system.
-- Green Itinerary: itinerary planner, smart recommendations, weather integration.
-- Carbon Footprint: emission calculator, impact insights, offset integration.
-- Community Impact: eco reviews, ratings, community challenges.
-- Analytics and Reporting: personal impact dashboard, sustainability reports, goal settings.
-
-**Task Distribution:**
-- Heng Yi Kang: General and Profile Management.
-- Yong Yung Kang: Eco-Friendly Directory.
-- Wong Wei Li: Green Itinerary.
-- Nurul Farzana Binti Anuar: Carbon Footprint.
-- Aqil Amani Bin Misni: Community Impact.
-- Nur Alisya Qistina Binti Mohd Hazli: Analytics and Reporting.
-
-**Suggested Visual:** TerraTrace logo or homepage screenshot with a compact feature/team table.
-
-## Slide 2: Project Overview and Objectives
-
 **Main Idea:**
-- TerraTrace is an eco-friendly travel planner web application.
-- It helps users plan sustainable journeys while increasing environmental awareness.
-- The system combines travel planning, green destination discovery, carbon tracking, community engagement, and reporting.
+- Sustainable travel planning.
+- Green destination discovery.
+- Carbon tracking.
+- Community impact.
+- Analytics and reports.
 
 **Objectives:**
-- Help users discover sustainable destinations and travel options.
-- Support itinerary planning with smart recommendations and weather context.
-- Allow users to calculate and monitor travel carbon emissions.
-- Encourage eco-friendly travel behavior through community features.
-- Provide sustainability analytics and reports for personal impact tracking.
+- Find eco-friendly places.
+- Plan greener trips.
+- Track carbon emissions.
+- Encourage sustainable habits.
+- Show personal impact.
 
 **Quality Focus:**
-- Performance efficiency, usability, reliability, security, compatibility, maintainability, and responsive design.
+- Usability.
+- Reliability.
+- Security.
+- Performance.
+- Maintainability.
+- Responsive design.
 
-**Suggested Visual:** Simple system overview diagram showing users connected to directory, itinerary, carbon, community, and analytics modules.
 
-## Slide 3: Frontend Technology and UI/UX Design
+## Slide 2: Features and Task Distribution
 
-**Frontend Stack:**
-- Next.js 15.5 with App Router.
-- React 19 and TypeScript.
-- Tailwind CSS 3.4 for styling.
-- TanStack Query 5 for client/server data flow.
-- Framer Motion, CSS animations, and IntersectionObserver for interactive UI effects.
-- Lucide React icons and jsPDF export for analytics reports.
+| Feature | Main Scope | Person In Charge |
+| --- | --- | --- |
+| General/Profile | Auth, sessions, profile, account settings | Heng Yi Kang |
+| Eco Directory | Places, search, details, favourites | Yong Yung Kang |
+| Green Itinerary | Trips, itinerary, recommendations, weather | Wong Wei Li |
+| Carbon Footprint | Emissions, history, insights, offsets | Nurul Farzana Binti Anuar |
+| Community Impact | Reviews, votes, badges, challenges | Aqil Amani Bin Misni |
+| Analytics/Reports | Dashboard, goals, reports, export | Nur Alisya Qistina Binti Mohd Hazli |
 
-**UI/UX Direction:**
-- Sustainable travel visual identity using emerald/cyan environmental colors.
-- Public landing page with animated hero, route planner, weather section, and scroll reveal content.
-- Auth pages with compact centered cards and motion transitions.
-- Dashboard with sidebar navigation, KPI cards, filters, tables, and workflow tabs.
-- Community page with reviews, challenges, badges, and leaderboard.
+**Suggested Visual:** Feature ownership table with icons.
 
-**Suggested Visual:** Screenshots of landing page, auth page, and dashboard layout.
-
-## Slide 4: Frontend Routing, Authentication, and Data Flow
-
-**Routing Structure:**
-- Public routes: `/`, `/login`, `/signup`, `/smart-recommendation`, `/carbonFootprint`.
-- Protected user routes: `/dashboard`, `/dashboard/overview`, `/dashboard/trips`, `/dashboard/carbon`, `/dashboard/profile`, `/dashboard/analytics`.
-- Admin routes are protected separately with role-aware access.
-
-**Route Guards:**
-- Next.js middleware protects dashboard, admin, and todo routes.
-- JWT is read from the `terratrace_session` cookie.
-- Unauthenticated users are redirected to login with the intended path preserved.
-- Admin-only pages redirect non-admin users to the dashboard.
-
-**Client-Side Data Flow:**
-- React Query caches user, trips, favourites, locations, todos, and community data.
-- Server components are used for redirects and selected prefetch/hydration.
-- Client components handle forms, filters, pagination, local storage migration, and interactive dashboards.
-
-**Suggested Visual:** Route map or flow diagram from login to dashboard features.
-
-## Slide 5: Backend Architecture and Authentication
+## Slide 3: Backend Architecture
 
 **Backend Stack:**
-- Node.js and Express.js API written in TypeScript.
-- PostgreSQL persistence through the `pg` package.
-- No ORM; routes use direct parameterized SQL.
-- Docker Compose runs PostgreSQL 16 locally.
-- Vitest supports backend testing.
+- Node.js.
+- Express.js.
+- TypeScript.
+- PostgreSQL.
+- `pg` package.
+- Vitest testing.
 
-**Application Entry:**
-- `backend/src/index.ts` starts the server.
-- `backend/src/app.ts` builds the Express app with CORS, JSON parsing, cookie parsing, routes, and error handling.
-- `createApp()` supports integration tests without opening a real network listener.
+**Main Files:**
+- `backend/src/index.ts`
+- Starts the server.
+- `backend/src/app.ts`
+- Builds the Express app.
+- `createApp()`
+- Supports integration tests.
+
+**Request Flow:**
+- Browser request.
+- Express middleware.
+- Route handler.
+- Validation and logic.
+- PostgreSQL or external API.
+- JSON response.
+
+**Suggested Visual:** Request lifecycle diagram.
+
+## Slide 4: Authentication and Security
 
 **Authentication:**
-- Local auth is implemented with bcrypt password hashes and JWT sessions.
-- Session cookie defaults to `terratrace_session`.
-- `requireAuth` middleware verifies tokens and attaches the current user.
-- Protected routes scope user-owned data by `req.user.id`.
+- Signup and login.
+- bcrypt password hashes.
+- JWT session cookie.
+- Cookie name: `terratrace_session`.
+- Protected routes use `requireAuth`.
 
-**Suggested Visual:** Backend request lifecycle: frontend request -> Express route -> auth middleware -> PostgreSQL.
+**Route Protection:**
+- Token verified on server.
+- Current user saved in `req.user`.
+- User data scoped by `req.user.id`.
+- Invalid session returns `401`.
+- Admin routes check role.
 
-## Slide 6: Backend Feature Logic and External Integrations
+**Account APIs:**
+- Current user.
+- Profile update.
+- Password change.
+- Logout.
+- Account deletion.
 
-**Server-Side Feature Logic:**
-- Carbon calculator handles flight, car, hotel, rail, bus, and taxi emissions.
-- Analytics computes baselines, saved carbon, tree equivalents, summaries, and goal progress.
-- Trips API stores parent trips and itinerary items in transactions.
-- Locations API supports directory listing, filtering, details, and same-category recommendations.
-- Favourites and todos are authenticated user-owned resources.
-- Community API supports reviews, helpful votes, challenges, badges, leaderboard, and summary statistics.
+**Suggested Visual:** Login -> JWT cookie -> `requireAuth` -> protected API.
+
+## Slide 5: Database Scripting
+
+**Database:**
+- PostgreSQL.
+- Schema: `db/init/001_schema.sql`.
+- Stores users, trips, places, favourites, carbon, community, and analytics data.
+
+**SQL Pattern:**
+- Direct SQL queries.
+- Parameterized inputs.
+- No ORM.
+- Explicit route logic.
+- JSON response mapping.
+
+**Data Integrity:**
+- Foreign keys.
+- Cascade deletes.
+- Unique constraints.
+- Check constraints.
+- Indexes for faster lookup.
+
+**Transactions:**
+- Used for related records.
+- Example: trip + itinerary items.
+- Prevents partial saves.
+
+**Suggested Visual:** Request -> SQL -> tables -> JSON.
+
+## Slide 6: Server-Side Feature APIs
+
+**Core APIs:**
+- Auth and profile.
+- Eco-directory.
+- Favourites.
+- Trips and todos.
+- Carbon calculator.
+- Community features.
+- Analytics and reports.
+
+**Backend Logic:**
+- Validate inputs.
+- Check ownership.
+- Run business rules.
+- Query database.
+- Return status codes.
+- Send structured JSON.
+
+**Examples:**
+- Carbon by transport type.
+- Trip CRUD with itinerary items.
+- Location filters and details.
+- Reviews, votes, and badges.
+- Goal progress and summaries.
+
+**Suggested Visual:** API module map.
+
+## Slide 7: External APIs and Recommendations
 
 **Smart Recommendation Flow:**
-- Validates city, dates, budget, and interests.
-- Uses weather context, search candidates, eco scoring, budget fit, and interest match.
-- Uses Gemini when available and falls back to deterministic recommendations when needed.
+- Validate city.
+- Validate dates.
+- Check budget.
+- Match interests.
+- Add weather context.
+- Score candidates.
+- Return recommendations.
 
-**External Integrations:**
-- Gemini for recommendations and carbon suggestions.
-- DuckDuckGo HTML search for recommendation candidates.
-- Open-Meteo for geocoding and weather forecasts.
-- OpenRouteService and Nominatim for eco-route planning.
-- Foursquare, Unsplash, Supabase, and OpenStreetMap/Overpass for data seeding/import.
+**Scoring Factors:**
+- Eco evidence.
+- Interest match.
+- Weather fit.
+- Budget fit.
 
-**Suggested Visual:** Integration diagram showing backend connected to external APIs.
+**External Services:**
+- Gemini.
+- DuckDuckGo search.
+- Open-Meteo.
+- OpenRouteService.
+- Nominatim.
+- Foursquare.
+- Unsplash.
+- OpenStreetMap/Overpass.
 
-## Slide 7: Database Design
+**Reliability:**
+- Server-side API keys.
+- Normalized provider data.
+- Validated AI output.
+- Fallback recommendations.
 
-**Database Overview:**
-- PostgreSQL is the main persistence layer.
-- Schema is defined in `db/init/001_schema.sql`.
-- Database stores authentication, eco-directory data, favourites, carbon history, trips, todos, analytics goals, and community engagement.
+**Suggested Visual:** Express connected to database and external APIs.
 
-**Main Tables by Domain:**
-- Authentication and profile: `users`.
-- Eco Directory: `locations`, `user_favourites`.
-- Carbon tracking and analytics: `carbon_entries`, `carbon_budget_goals`.
-- Itinerary planning: `todos`, `trips`, `trip_items`.
-- Community: `community_reviews`, `community_review_helpful`, `community_badges`, `community_challenges`, `community_challenge_progress`, `community_user_badges`.
+## Slide 8: Testing
 
-**Integrity Design:**
-- Foreign keys and cascade rules for user-owned data.
-- Unique constraints prevent duplicate emails, duplicate favourites, and duplicate imported trips.
-- Check constraints validate roles, statuses, day parts, ratings, goals, and challenge values.
-- Indexes support login lookup, directory filtering, saved places, carbon history, trip ordering, and community views.
+**Unit Tests:**
+- Auth.
+- Profile.
+- Directory.
+- Trips.
+- Carbon.
+- Community.
+- Analytics.
 
-**Suggested Visual:** Entity relationship diagram or simplified table relationship map.
+**Functional Tests:**
+- Register and login.
+- Profile update.
+- Search and favourites.
+- Trip create/edit/delete.
+- Recommendations and weather.
+- Carbon and analytics.
 
-## Slide 8: Unit and Functional Testing
+**API Tests:**
+- Signup.
+- Login.
+- Current user.
+- Favourites.
+- Carbon.
+- Analytics.
+- Weather.
+- Recommendations.
+- Community.
 
-**Unit Testing Coverage:**
-- General and authentication module.
-- Profile management hooks and mutations.
-- Eco-directory filters, cards, search, details, and favourites.
-- Green itinerary payload conversion and trip handling.
-- Carbon calculation utilities and emission logic.
-- Community hooks and helpful vote behavior.
-- Analytics trip impact calculations.
-
-**Functional Testing Coverage:**
-- Registration, login, logout, and validation.
-- Profile display, update, password change, and account deletion.
-- Directory cards, search filters, details, and recommendations.
-- Guest and authenticated favourites.
-- Trip creation, editing, deletion, and itinerary items.
-- Smart recommendations, weather forecast, carbon calculator, community features, and analytics reports.
+**Database Tests:**
+- CRUD behavior.
+- Duplicate prevention.
+- Validation rules.
+- Relationships.
+- Protected routes.
 
 **Key Result:**
-- 100 automated unit tests were executed successfully across frontend and backend workspaces.
+- 100 automated unit tests passed.
 
-**Suggested Visual:** Testing coverage matrix by module.
 
-## Slide 9: Integration, API, Database, and Route Testing
 
-**Integration Testing:**
-- Covered authentication/profile, eco-directory, favourites, community, analytics, and reporting.
-- Implemented paths exist for itinerary, recommendation, weather, carbon, route planning, and admin modules.
-- Future priority is to automate more implemented cross-layer scenarios.
+## Slide 9: Key Code Contributions
 
-**API Testing:**
-- Auth API: signup, duplicate signup, login, invalid login.
-- Current-user and profile APIs.
-- Favourites, carbon, analytics, weather, recommendations, and community routes.
-- Expected responses and actual results were validated as pass.
+**Express App Setup:**
+- `backend/src/app.ts`
+- CORS.
+- JSON parsing.
+- Cookies.
+- API routes.
+- Error handling.
 
-**Database and Integrity Testing:**
-- PostgreSQL testing used transaction isolation with savepoints and rollback.
-- Verified CRUD behavior, duplicate prevention, validation rules, schema constraints, and relationships.
-- Protected route testing confirmed guests and invalid sessions are blocked from restricted pages and APIs.
+**Authentication Middleware:**
+- `backend/src/middleware/auth.ts`
+- JWT check.
+- `req.user`.
+- `401` blocking.
 
-**Suggested Visual:** Pass-rate summary or layered test pyramid.
+**Database Helper:**
+- `backend/src/utils/db.ts`
+- Connection pool.
+- `query()` helper.
+- Parameterized SQL.
 
-## Slide 10: Screenshots, Demonstration Flow, and Conclusion
+**Trips CRUD:**
+- `backend/src/routes/trips.ts`
+- Protected routes.
+- Input validation.
+- User ownership.
+- Transactions.
+- Nested JSON.
 
-**Screenshots to Include:**
+**Smart Recommendations:**
+- `backend/src/routes/smart-recommendation.ts`
+- Weather context.
+- Search candidates.
+- Scoring.
+- Gemini validation.
+- Fallback logic.
+- Short cache.
+
+**Suggested Visual:** Five-column code map.
+
+## Slide 10: Demo and Conclusion
+
+**Demo Screenshots:**
 - Signup and login.
-- Dashboard overview.
-- Profile management.
-- Eco-directory search and place details.
-- Saved favourites.
-- Trip planner and smart recommendation.
-- Weather forecast.
-- Carbon calculator, history, insights, and offsets.
-- Community reviews/challenges.
-- Analytics dashboard and report generation.
+- Dashboard.
+- Profile.
+- Eco-directory.
+- Favourites.
+- Trip planner.
+- Smart recommendation.
+- Weather.
+- Carbon calculator.
+- Community.
+- Analytics report.
 
-**Suggested Demonstration Flow:**
-1. Register or log in.
-2. Search for sustainable places and save a favourite.
-3. Create a trip or generate a smart recommendation.
-4. Calculate carbon footprint and view insights.
-5. Check analytics/reporting and community impact features.
+**Demo Flow:**
+1. Log in.
+2. Search eco places.
+3. Save a favourite.
+4. Create a trip.
+5. Generate recommendation.
+6. Calculate carbon.
+7. View analytics.
 
 **Conclusion:**
-- TerraTrace delivers a full-stack sustainable travel planning platform.
-- The system combines modern frontend design, Express/PostgreSQL backend logic, relational data integrity, external API integrations, and broad testing coverage.
-- Main improvement area: expand automated integration tests for implemented itinerary, recommendation, weather, carbon, route, and admin flows.
+- TerraTrace is a full-stack green travel platform.
+- Backend powers auth, database, APIs, integrations, and protected workflows.
+- Future work: more automated integration tests.
 
-**Suggested Visual:** Final collage of key UI screenshots plus a short closing statement.

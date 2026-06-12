@@ -71,7 +71,7 @@ router.post('/signup', asyncHandler(async (req: Request, res: Response) => {
   const email = String(req.body?.email || '').trim().toLowerCase()
   const password = String(req.body?.password || '')
   const username = String(req.body?.username || '').trim() || null
-  const role = req.body?.role === 'admin' ? 'admin' : 'user'
+  const role = 'user'
 
   if (!email || !password) {
     return res.status(400).json({ error: { message: 'Email and password are required' } })

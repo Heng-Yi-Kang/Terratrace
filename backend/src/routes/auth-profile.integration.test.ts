@@ -145,6 +145,28 @@ describe('auth and profile integration', () => {
     expect(result.rows[0].password_hash).toMatch(/^\$2[aby]\$/)
   })
 
+  it('IT-AUTH-001A ignores submitted admin roles during signup', async () => {
+    const email = testEmail('signup-admin-role')
+    const response = await signupUser({
+      email,
+      password: 'password123',
+      username: 'role-test-user',
+      role: 'admin',
+    })
+
+    expect(response.body.data.user).toMatchObject({
+      email,
+      role: 'user',
+      username: 'role-test-user',
+    })
+
+    const result = await query<{ role: string }>(
+      'select role from users where id = $1',
+      [response.userId],
+    )
+    expect(result.rows[0].role).toBe('user')
+  })
+
   it('IT-AUTH-002 rejects duplicate signup emails case-insensitively', async () => {
     const email = testEmail('duplicate')
     await signupUser({ email, password: 'password123', username: 'first-user' })
@@ -165,7 +187,7 @@ describe('auth and profile integration', () => {
 
   it('IT-AUTH-003 logs in with valid credentials and rejects invalid credentials', async () => {
     const email = testEmail('login')
-    await signupUser({ email, password: 'password123', username: 'login-user', role: 'admin' })
+    await signupUser({ email, password: 'password123', username: 'login-user' })
 
     const invalid = await api('/api/auth/login', {
       method: 'POST',
@@ -179,7 +201,7 @@ describe('auth and profile integration', () => {
       body: JSON.stringify({ email, password: 'password123' }),
     })
     expect(valid.status).toBe(200)
-    expect(valid.body.data.user).toMatchObject({ email, role: 'admin', username: 'login-user' })
+    expect(valid.body.data.user).toMatchObject({ email, role: 'user', username: 'login-user' })
     expect(extractSessionCookie(valid.headers)).toMatch(/^terratrace_session=/)
   })
 

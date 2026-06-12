@@ -14,6 +14,7 @@ import tripsRoutes from './routes/trips'
 import userRoutes from './routes/user'
 import communityRoutes from './routes/community'
 import analyticsRoutes from './routes/analytics'
+import { auditCrudOperations } from './middleware/crudAudit'
 
 dotenv.config()
 
@@ -35,6 +36,7 @@ export function createApp(): Application {
   app.get('/api', (_req: Request, res: Response) => {
     res.json({ message: 'Welcome to Terratrace API' })
   })
+  app.use('/api', auditCrudOperations)
   app.use('/api/weather', weatherRoutes)
   app.use('/api/recommendations', smartRecommendationRoutes)
   app.use('/api/eco-route', ecoRouteRoutes)

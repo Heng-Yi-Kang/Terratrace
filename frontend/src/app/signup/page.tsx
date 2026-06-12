@@ -5,14 +5,13 @@ import Link from 'next/link'
 import { useQueryClient } from '@tanstack/react-query'
 import AuthForm from '@/components/auth/AuthForm'
 import { signUp, getRedirectPath } from '@/utils/supabase/auth'
-import { UserRole } from '@/utils/supabase/auth'
 
 export default function SignupPage() {
   const router = useRouter()
   const queryClient = useQueryClient()
 
-  const handleSignup = async (email: string, password: string, username?: string, role?: string) => {
-    const { data, error } = await signUp(email, password, username, role as UserRole || 'user')
+  const handleSignup = async (email: string, password: string, username?: string) => {
+    const { data, error } = await signUp(email, password, username)
     if (error) {
       throw new Error(error.message)
     }

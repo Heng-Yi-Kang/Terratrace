@@ -103,7 +103,7 @@ export const CarbonOffset = ({ result }: { result: CarbonResult | null }) => {
 
   if (!result) return null;
 
-  const trees = Math.round(result.total / 22);
+  const trees = result.total > 0 ? Math.max(1, Math.ceil(result.total / 22)) : 0;
   const estimatedCost = (result.total * 0.013 * 4.70).toFixed(2); // simple estimate
   const providerLabel = suggestionProvider === 'gemini' ? 'AI suggestions' : 'Standard suggestions'
 

@@ -36,6 +36,12 @@ describe('CarbonOffset', () => {
     expect(screen.getByText('Plant 5 trees to offset your emissions')).toBeInTheDocument()
   })
 
+  it('shows at least one tree for a positive carbon result', () => {
+    render(<CarbonOffset result={{ ...result, total: 1 }} />)
+
+    expect(screen.getByText('Plant 1 trees to offset your emissions')).toBeInTheDocument()
+  })
+
   it('renders carbon credit organization links', () => {
     render(<CarbonOffset result={result} />)
 

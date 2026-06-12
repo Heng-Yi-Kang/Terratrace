@@ -34,26 +34,25 @@ describe('SignupPage', () => {
     cleanup()
   })
 
-  it('creates an account and navigates to the role-aware redirect path', async () => {
+  it('creates a user account and navigates to the dashboard', async () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     const clearSpy = vi.spyOn(queryClient, 'clear')
-    const user = { id: 'user-2', email: 'admin@example.com', role: 'admin', user_metadata: { role: 'admin', username: 'adminuser' } }
+    const user = { id: 'user-2', email: 'traveler@example.com', role: 'user', user_metadata: { role: 'user', username: 'traveler' } }
     vi.mocked(auth.signUp).mockResolvedValue({ data: { user }, error: null })
-    vi.mocked(auth.getRedirectPath).mockResolvedValue('/admin/dashboard')
+    vi.mocked(auth.getRedirectPath).mockResolvedValue('/dashboard')
 
     renderWithQueryClient(<SignupPage />, queryClient)
-    await userEvent.type(screen.getByLabelText(/username/i), 'adminuser')
-    await userEvent.type(screen.getByLabelText(/email/i), 'admin@example.com')
+    await userEvent.type(screen.getByLabelText(/username/i), 'traveler')
+    await userEvent.type(screen.getByLabelText(/email/i), 'traveler@example.com')
     await userEvent.type(screen.getByLabelText(/^password$/i), 'password123')
     await userEvent.type(screen.getByLabelText(/confirm password/i), 'password123')
-    await userEvent.selectOptions(screen.getByLabelText(/account type/i), 'admin')
     await userEvent.click(screen.getByRole('button', { name: /sign up/i }))
 
     await waitFor(() => {
-      expect(auth.signUp).toHaveBeenCalledWith('admin@example.com', 'password123', 'adminuser', 'admin')
+      expect(auth.signUp).toHaveBeenCalledWith('traveler@example.com', 'password123', 'traveler')
       expect(clearSpy).toHaveBeenCalledOnce()
       expect(queryClient.getQueryData(['user'])).toEqual(user)
-      expect(mockPush).toHaveBeenCalledWith('/admin/dashboard')
+      expect(mockPush).toHaveBeenCalledWith('/dashboard')
       expect(mockRefresh).toHaveBeenCalled()
     })
   })

@@ -6,7 +6,7 @@ import PasswordField from '@/components/shared/PasswordField'
 
 interface AuthFormProps {
   mode: 'login' | 'signup'
-  onSubmit: (email: string, password: string, username?: string, role?: string) => Promise<void>
+  onSubmit: (email: string, password: string, username?: string) => Promise<void>
 }
 
 const fadeInUp = {
@@ -29,7 +29,6 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [username, setUsername] = useState('')
-  const [role, setRole] = useState('user')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -54,7 +53,7 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
 
     setLoading(true)
     try {
-      await onSubmit(email, password, username, role)
+      await onSubmit(email, password, username)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -126,20 +125,6 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
               />
             </motion.div>
 
-            <motion.div variants={fadeInUp}>
-              <label htmlFor="role" className="block text-sm font-medium text-text mb-2">
-                Account Type
-              </label>
-              <select
-                id="role"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-text/20 bg-white/80 text-text focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-200 cursor-pointer"
-              >
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
-              </select>
-            </motion.div>
           </>
         )}
 

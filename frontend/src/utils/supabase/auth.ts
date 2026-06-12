@@ -47,10 +47,10 @@ export async function signIn(email: string, password: string) {
   })
 }
 
-export async function signUp(email: string, password: string, username?: string, role: UserRole = 'user') {
+export async function signUp(email: string, password: string, username?: string) {
   return authFetch('/api/auth/signup', {
     method: 'POST',
-    body: JSON.stringify({ email, password, username, role }),
+    body: JSON.stringify({ email, password, username }),
   })
 }
 

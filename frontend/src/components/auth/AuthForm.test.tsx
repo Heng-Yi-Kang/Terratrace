@@ -43,7 +43,7 @@ describe('AuthForm', () => {
       await userEvent.type(screen.getByLabelText(/email/i), 'test@example.com')
       await userEvent.type(screen.getByLabelText(/password/i), 'password123')
       await userEvent.click(screen.getByRole('button', { name: /log in/i }))
-      expect(mockOnSubmit).toHaveBeenCalledWith('test@example.com', 'password123', '', 'user')
+      expect(mockOnSubmit).toHaveBeenCalledWith('test@example.com', 'password123', '')
     })
 
     it('displays error message when onSubmit throws', async () => {
@@ -72,7 +72,7 @@ describe('AuthForm', () => {
       render(<AuthForm mode="signup" onSubmit={mockOnSubmit} />)
       expect(screen.getByLabelText(/username/i)).toBeInTheDocument()
       expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument()
-      expect(screen.getByLabelText(/account type/i)).toBeInTheDocument()
+      expect(screen.queryByLabelText(/account type/i)).not.toBeInTheDocument()
     })
 
     it('prevents submission when passwords do not match', async () => {
@@ -86,16 +86,15 @@ describe('AuthForm', () => {
       expect(await screen.findByText(/passwords do not match/i)).toBeInTheDocument()
     })
 
-    it('calls onSubmit with username and role on valid signup', async () => {
+    it('calls onSubmit with username on valid signup', async () => {
       render(<AuthForm mode="signup" onSubmit={mockOnSubmit} />)
       await userEvent.type(screen.getByLabelText(/username/i), 'traveler')
       await userEvent.type(screen.getByLabelText(/email/i), 'new@example.com')
       await userEvent.type(screen.getByLabelText(/^password$/i), 'password123')
       await userEvent.type(screen.getByLabelText(/confirm password/i), 'password123')
-      await userEvent.selectOptions(screen.getByLabelText(/account type/i), 'admin')
       await userEvent.click(screen.getByRole('button', { name: /sign up/i }))
 
-      expect(mockOnSubmit).toHaveBeenCalledWith('new@example.com', 'password123', 'traveler', 'admin')
+      expect(mockOnSubmit).toHaveBeenCalledWith('new@example.com', 'password123', 'traveler')
     })
   })
 })
