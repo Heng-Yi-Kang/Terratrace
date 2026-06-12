@@ -14,6 +14,16 @@ create table if not exists users (
 
 create unique index if not exists users_email_lower_idx on users (lower(email));
 
+insert into users (id, email, password_hash, username)
+select
+  '00000000-0000-4000-8000-000000000001',
+  'traveler@terratrace.local',
+  '$2b$12$.fFBJuZMXorZqoMbXlouVeFPZTlf/OwJ0MloVRnkUxLM9gpSBmZ9y',
+  'Terratrace Traveler'
+where not exists (
+  select 1 from users where lower(email) = lower('traveler@terratrace.local')
+);
+
 create table if not exists locations (
   id uuid primary key default gen_random_uuid(),
   name text,

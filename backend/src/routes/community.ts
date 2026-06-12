@@ -390,35 +390,22 @@ router.get('/leaderboard', optionalAuth, async (req: OptionalAuthRequest, res: R
          from community_user_badges
          group by user_id
        ),
-       active_users as (
-         select user_id from challenge_scores
-         union
-         select user_id from badge_scores
-         union
-         select $1::uuid as user_id where $1::uuid is not null
-       ),
        scores as (
          select
            u.id,
            coalesce(nullif(u.username, ''), split_part(u.email, '@', 1)) as name,
            coalesce(cs.points, 0)::int as points,
            coalesce(bs.badges, 0)::int as badges
-         from active_users au
-         join users u on u.id = au.user_id
+         from users u
          left join challenge_scores cs on cs.user_id = u.id
          left join badge_scores bs on bs.user_id = u.id
        ),
        ranked as (
          select *, rank() over (order by points desc, badges desc, name asc) as rank
          from scores
-       ),
-       selected as (
-         select * from ranked where rank <= 10
-         union
-         select * from ranked where id = $1::uuid
        )
        select id, rank::int, name, points, badges, id = $1::uuid as you
-       from selected
+       from ranked
        order by rank asc, name asc`,
       [viewerId],
     )

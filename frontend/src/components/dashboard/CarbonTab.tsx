@@ -60,8 +60,7 @@ export function StatsCard({ title, value, unit, icon, iconBgClass }: StatsCardPr
     </div>
   )
 }
-function groupByPeriod(entries: CarbonEntry[], period: 'week' | 'month' | 'year') {
-  const now = new Date()
+export function groupByPeriod(entries: CarbonEntry[], period: 'week' | 'month' | 'year', now = new Date()) {
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
   const filtered = entries.filter((entry) => {
@@ -74,14 +73,23 @@ function groupByPeriod(entries: CarbonEntry[], period: 'week' | 'month' | 'year'
 
   })
 
-  const grouped: Record<string, number> = {}
+  const grouped: Record<string, { footprint: number; sortKey: number }> = {}
   filtered.forEach((entry) => {
     const entryDate = new Date(entry.created_at)
     const key = period === 'year' ? months[entryDate.getMonth()] : `${entryDate.getDate()} ${months[entryDate.getMonth()]}`
-    grouped[key] = (grouped[key] || 0) + entry.total_emissions
+    const sortKey = period === 'year'
+      ? entryDate.getMonth()
+      : new Date(entryDate.getFullYear(), entryDate.getMonth(), entryDate.getDate()).getTime()
+    grouped[key] = {
+      footprint: (grouped[key]?.footprint || 0) + entry.total_emissions,
+      sortKey,
+    }
   })
 
-  return Object.entries(grouped).map(([label, footprint]) => ({ label, footprint }))
+  return Object.entries(grouped)
+    .map(([label, { footprint, sortKey }]) => ({ label, footprint, sortKey }))
+    .sort((a, b) => a.sortKey - b.sortKey)
+    .map(({ label, footprint }) => ({ label, footprint }))
 
 }
 

@@ -213,6 +213,16 @@ bash db/migrate-from-supabase.sh
 
 The import copies app tables and converts `auth.users` into the app-owned `users` table, preserving bcrypt-compatible password hashes.
 
+## Default Login
+
+The local schema seeds one default account for new users:
+
+| Email | Password |
+|-------|----------|
+| `traveler@terratrace.local` | `Password123!` |
+
+Log in at http://localhost:3000/login after starting the frontend and backend. See [`docs/database-connection-and-login-credentials.md`](docs/database-connection-and-login-credentials.md) for the full database connection and credential details.
+
 ## API Endpoints
 
 | Method | Endpoint | Description |
@@ -229,4 +239,5 @@ The import copies app tables and converts `auth.users` into the app-owned `users
 ## Documentation
 
 - [`CLAUDE.md`](CLAUDE.md) — Claude Code development guidance
+- [`docs/database-connection-and-login-credentials.md`](docs/database-connection-and-login-credentials.md) — Local database connection and default login credentials
 - [`docs/state-management.md`](docs/state-management.md) — Frontend state management architecture
